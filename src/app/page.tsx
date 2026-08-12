@@ -1,69 +1,208 @@
-import Image from "next/image";
+import { AppShell } from "@/components/layout/AppShell";
+import { MessageCircle, Users } from "lucide-react";
+
+const discussions = [
+  {
+    community: "Artificial Intelligence",
+    initials: "AI",
+    time: "2h ago",
+    title: "What's the best architecture for a local AI assistant in 2026?",
+    description:
+      "I'm experimenting with a local-first assistant and would love to hear how others are approaching memory, tools, and model selection.",
+    tags: ["agents", "opensource", "llm", "2026"],
+    helpful: 184,
+    comments: 42,
+  },
+  {
+    community: "Photography",
+    initials: "PH",
+    time: "4h ago",
+    title: "What makes a photograph feel timeless?",
+    description:
+      "I've been studying photographs from different decades and noticed some images still feel incredibly modern.",
+    tags: ["photography", "composition", "discussion"],
+    helpful: 96,
+    comments: 28,
+  },
+  {
+    community: "Programming",
+    initials: "PR",
+    time: "6h ago",
+    title: "What programming concepts took you years to truly understand?",
+    description:
+      "Not syntax or frameworks. I'm interested in the fundamental concepts that eventually changed the way you think about software.",
+    tags: ["programming", "learning", "developers"],
+    helpful: 312,
+    comments: 73,
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <AppShell>
+      <div className="mx-auto max-w-[850px]">
+
+        {/* Welcome */}
+        <section className="mb-7">
+          <p className="text-sm font-medium text-brand-brown-600">
+            Your communities have 24 new discussions
           </p>
+
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-brand-brown-950">
+            Good morning, Najmus
+          </h1>
+        </section>
+
+        {/* Feed filters */}
+        <div className="mb-5 flex items-center gap-1 border-b">
+          {["For You", "Latest", "Rising", "Knowledge"].map(
+            (item, index) => (
+              <button
+                key={item}
+                className={`
+                  relative px-4 py-3 text-sm font-semibold
+                  ${index === 0
+                    ? "text-brand-brown-950"
+                    : "text-muted-foreground hover:text-brand-brown-950"
+                  }
+                `}
+              >
+                {item}
+
+                {index === 0 && (
+                  <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand-desert-dark" />
+                )}
+              </button>
+            ),
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Discussions */}
+        <div className="space-y-4">
+          {discussions.map((discussion) => (
+            <article
+              key={discussion.title}
+              className="
+                rounded-2xl border bg-white
+                p-5
+                transition-shadow
+                hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]
+              "
+            >
+              {/* Community */}
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="
+                    flex h-9 w-9 items-center justify-center
+                    rounded-xl bg-brand-desert-light
+                    text-xs font-bold text-brand-brown-800
+                  "
+                >
+                  {discussion.initials}
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold text-brand-brown-900">
+                    {discussion.community}
+                  </p>
+
+                  <p className="text-xs text-muted-foreground">
+                    {discussion.time}
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Content */}
+              <div className="mt-4">
+                <h2 className="text-[17px] font-bold leading-snug text-brand-brown-950">
+                  {discussion.title}
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-brand-brown-600">
+                  {discussion.description}
+                </p>
+              </div>
+
+              {/* Hashtags */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {discussion.tags.map((tag) => (
+                  <button
+                    key={tag}
+                    className="
+                      rounded-full bg-brand-sand
+                      px-2.5 py-1
+                      text-xs font-medium
+                      text-brand-brown-700
+                      transition-colors
+                      hover:bg-brand-desert-light
+                    "
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+
+              {/* Actions */}
+              <div className="mt-5 flex items-center gap-2 border-t pt-4">
+                <button
+                  className="
+      rounded-lg px-3 py-1.5
+      text-xs font-semibold
+      text-brand-brown-700
+      transition-colors
+      hover:bg-brand-sand
+      hover:text-brand-brown-950
+    "
+                >
+                  ↑ {discussion.helpful} Helpful
+                </button>
+
+                <button
+                  className="
+      flex items-center gap-1.5
+      rounded-lg px-3 py-1.5
+      text-xs font-semibold
+      text-brand-brown-700
+      hover:bg-brand-sand
+      hover:text-brand-brown-950
+    "
+                >
+                  <MessageCircle size={15} />
+                  {discussion.comments}
+                </button>
+
+                <div className="ml-auto flex items-center gap-1">
+                  <button
+                    className="
+        rounded-lg px-3 py-1.5
+        text-xs font-medium
+        text-muted-foreground
+        hover:bg-brand-sand
+        hover:text-brand-brown-950
+      "
+                  >
+                    Save
+                  </button>
+
+                  <button
+                    className="
+        rounded-lg px-3 py-1.5
+        text-xs font-medium
+        text-muted-foreground
+        hover:bg-brand-sand
+        hover:text-brand-brown-950
+      "
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }
