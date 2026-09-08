@@ -1,33 +1,37 @@
 "use client";
 
 import {
-  Bookmark,
   Compass,
   FileText,
+  Flame,
   Home,
-  Library,
   Plus,
   Settings,
-  Users,
+  User,
 } from "lucide-react";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-const communities = [
+const joinedCommunities = [
   {
     name: "Artificial Intelligence",
+    slug: "artificial-intelligence",
     short: "AI",
   },
   {
     name: "Programming",
+    slug: "programming",
     short: "PR",
   },
   {
     name: "Photography",
+    slug: "photography",
     short: "PH",
   },
   {
     name: "Entrepreneurship",
+    slug: "entrepreneurship",
     short: "EN",
   },
 ];
@@ -39,43 +43,59 @@ const mainNavigation = [
     href: "/home",
   },
   {
-    label: "Communities",
+    label: "Popular",
+    icon: Flame,
+    href: "/popular",
+  },
+  {
+    label: "Explore Communities",
     icon: Compass,
     href: "/communities",
   },
+];
+
+const accountNavigation = [
   {
-    label: "Knowledge",
-    icon: Library,
-    href: "/knowledge",
+    label: "My Posts",
+    icon: FileText,
+    href: "/profile/posts",
   },
   {
-    label: "Bookmarks",
-    icon: Bookmark,
-    href: "/bookmarks",
+    label: "Profile",
+    icon: User,
+    href: "/profile",
+  },
+  {
+    label: "Settings",
+    icon: Settings,
+    href: "/settings",
   },
 ];
 
 export function Sidebar() {
-  return (
-    <aside className="hidden w-[220px] shrink-0 lg:block">
-      <div className="sticky top-20">
+  const pathname = usePathname();
 
+  return (
+    <aside className="hidden w-[230px] shrink-0 lg:block">
+      <div className="sticky top-20 space-y-6">
+        {/* Main Feeds */}
         <nav className="space-y-1">
           {mainNavigation.map((item) => {
             const Icon = item.icon;
+            const isActive = pathname === item.href;
 
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className="
-                  flex h-10 items-center gap-3 rounded-xl
-                  px-3 text-sm font-medium
-                  text-brand-brown-700
+                className={`
+                  flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium
                   transition-colors
-                  hover:bg-brand-sand
-                  hover:text-brand-brown-950
-                "
+                  ${isActive
+                    ? "bg-brand-sand font-semibold text-brand-brown-950"
+                    : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
+                  }
+                `}
               >
                 <Icon size={18} strokeWidth={1.8} />
                 {item.label}
@@ -84,102 +104,94 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="my-5 h-px bg-border" />
+        <div className="h-px bg-border/60" />
 
-        {/* My communities */}
+        {/* Joined Communities */}
         <div>
           <div className="mb-2 flex items-center justify-between px-3">
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
               Your Communities
             </span>
 
-            <button
+            <Link
+              href="/communities/create"
               className="
                 rounded-md p-1
-                text-muted-foreground
-                hover:bg-brand-sand
-                hover:text-brand-brown-950
+                text-muted-foreground transition-colors
+                hover:bg-brand-sand hover:text-brand-brown-950
               "
-              aria-label="Add community"
+              title="Create a community"
+              aria-label="Create community"
             >
               <Plus size={15} />
-            </button>
+            </Link>
           </div>
 
           <div className="space-y-1">
-            {communities.map((community) => (
-              <Link
-                href="#"
-                key={community.name}
-                className="
-                  flex items-center gap-3 rounded-xl px-3 py-2
-                  transition-colors
-                  hover:bg-brand-sand
-                "
-              >
-                <div
-                  className="
-                    flex h-7 w-7 shrink-0 items-center justify-center
-                    rounded-lg
-                    bg-brand-desert-light
-                    text-[10px] font-bold
-                    text-brand-brown-800
-                  "
-                >
-                  {community.short}
-                </div>
+            {joinedCommunities.map((community) => {
+              const href = `/c/${community.slug}`;
+              const isActive = pathname === href;
 
-                <span className="truncate text-sm text-brand-brown-700">
-                  {community.name}
-                </span>
-              </Link>
-            ))}
+              return (
+                <Link
+                  key={community.slug}
+                  href={href}
+                  className={`
+                    flex items-center gap-3 rounded-xl px-3 py-2 transition-colors
+                    ${isActive
+                      ? "bg-brand-sand font-semibold text-brand-brown-950"
+                      : "hover:bg-brand-sand/60"
+                    }
+                  `}
+                >
+                  <div
+                    className="
+                      flex h-7 w-7 shrink-0 items-center justify-center
+                      rounded-lg bg-brand-desert-light
+                      text-[10px] font-bold text-brand-brown-800
+                    "
+                  >
+                    {community.short}
+                  </div>
+
+                  <span className="truncate text-sm text-brand-brown-800">
+                    {community.name}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
-        <div className="my-5 h-px bg-border" />
+        <div className="h-px bg-border/60" />
 
-        {/* Citizen */}
-        <div>
+        {/* User Account & Activity */}
+        <div className="space-y-1">
           <div className="mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Your Activity
+            Account
           </div>
 
-          <Link
-            href="#"
-            className="
-              flex h-10 items-center gap-3 rounded-xl px-3
-              text-sm font-medium text-brand-brown-700
-              hover:bg-brand-sand
-            "
-          >
-            <FileText size={18} strokeWidth={1.8} />
-            My Contributions
-          </Link>
+          {accountNavigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
 
-          <Link
-            href="#"
-            className="
-              flex h-10 items-center gap-3 rounded-xl px-3
-              text-sm font-medium text-brand-brown-700
-              hover:bg-brand-sand
-            "
-          >
-            <Users size={18} strokeWidth={1.8} />
-            My Citizenship
-          </Link>
-
-          <Link
-            href="#"
-            className="
-              flex h-10 items-center gap-3 rounded-xl px-3
-              text-sm font-medium text-brand-brown-700
-              hover:bg-brand-sand
-            "
-          >
-            <Settings size={18} strokeWidth={1.8} />
-            Settings
-          </Link>
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`
+                  flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors
+                  ${isActive
+                    ? "bg-brand-sand font-semibold text-brand-brown-950"
+                    : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
+                  }
+                `}
+              >
+                <Icon size={18} strokeWidth={1.8} />
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </aside>

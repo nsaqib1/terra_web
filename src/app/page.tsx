@@ -1,39 +1,38 @@
 import { AppShell } from "@/components/layout/AppShell";
-import { MessageCircle, Users } from "lucide-react";
+import { MessageCircle, ArrowUp, ArrowDown } from "lucide-react";
 
 const discussions = [
   {
+    id: 1,
     community: "Artificial Intelligence",
-    initials: "AI",
+    communityInitials: "AI",
+    author: {
+      name: "Alex Rivera",
+      username: "arivera",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+    },
     time: "2h ago",
-    title: "What's the best architecture for a local AI assistant in 2026?",
     description:
-      "I'm experimenting with a local-first assistant and would love to hear how others are approaching memory, tools, and model selection.",
+      "What's the best architecture for a local AI assistant in 2026? I'm experimenting with a local-first assistant and would love to hear how others are approaching memory, tools, and model selection.",
     tags: ["agents", "opensource", "llm", "2026"],
-    helpful: 184,
+    votes: 184,
     comments: 42,
   },
   {
+    id: 2,
     community: "Photography",
-    initials: "PH",
+    communityInitials: "PH",
+    author: {
+      name: "Elena Rostova",
+      username: "elena_r",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+    },
     time: "4h ago",
-    title: "What makes a photograph feel timeless?",
     description:
-      "I've been studying photographs from different decades and noticed some images still feel incredibly modern.",
+      "What makes a photograph feel timeless? I've been studying photographs from different decades and noticed some images still feel incredibly modern.",
     tags: ["photography", "composition", "discussion"],
-    helpful: 96,
+    votes: 96,
     comments: 28,
-  },
-  {
-    community: "Programming",
-    initials: "PR",
-    time: "6h ago",
-    title: "What programming concepts took you years to truly understand?",
-    description:
-      "Not syntax or frameworks. I'm interested in the fundamental concepts that eventually changed the way you think about software.",
-    tags: ["programming", "learning", "developers"],
-    helpful: 312,
-    comments: 73,
   },
 ];
 
@@ -41,47 +40,10 @@ export default function Home() {
   return (
     <AppShell>
       <div className="mx-auto max-w-[850px]">
-
-        {/* Welcome */}
-        <section className="mb-7">
-          <p className="text-sm font-medium text-brand-brown-600">
-            Your communities have 24 new discussions
-          </p>
-
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-brand-brown-950">
-            Good morning, Najmus
-          </h1>
-        </section>
-
-        {/* Feed filters */}
-        <div className="mb-5 flex items-center gap-1 border-b">
-          {["For You", "Latest", "Rising", "Knowledge"].map(
-            (item, index) => (
-              <button
-                key={item}
-                className={`
-                  relative px-4 py-3 text-sm font-semibold
-                  ${index === 0
-                    ? "text-brand-brown-950"
-                    : "text-muted-foreground hover:text-brand-brown-950"
-                  }
-                `}
-              >
-                {item}
-
-                {index === 0 && (
-                  <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand-desert-dark" />
-                )}
-              </button>
-            ),
-          )}
-        </div>
-
-        {/* Discussions */}
         <div className="space-y-4">
           {discussions.map((discussion) => (
             <article
-              key={discussion.title}
+              key={discussion.id}
               className="
                 rounded-2xl border bg-white
                 p-5
@@ -89,115 +51,113 @@ export default function Home() {
                 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]
               "
             >
-              {/* Community */}
-              <div className="flex items-center gap-3">
+              {/* Header: Community + Author Info & Tags */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  {/* Author Avatar with Community Badge */}
+                  <div className="relative">
+                    <img
+                      src={discussion.author.avatar}
+                      alt={discussion.author.name}
+                      className="h-10 w-10 rounded-full object-cover ring-2 ring-white"
+                    />
+                    <div
+                      title={discussion.community}
+                      className="
+                        absolute -bottom-1 -right-1
+                        flex h-5 w-5 items-center justify-center
+                        rounded-md bg-brand-desert-light text-[9px] font-bold text-brand-brown-800
+                        ring-2 ring-white
+                      "
+                    >
+                      {discussion.communityInitials}
+                    </div>
+                  </div>
 
-                <div
-                  className="
-                    flex h-9 w-9 items-center justify-center
-                    rounded-xl bg-brand-desert-light
-                    text-xs font-bold text-brand-brown-800
-                  "
-                >
-                  {discussion.initials}
+                  {/* Metadata Stack */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className="font-bold text-brand-brown-950 hover:underline cursor-pointer">
+                        {discussion.community}
+                      </span>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="text-muted-foreground">{discussion.time}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <span>Posted by</span>
+                      <span className="font-medium text-brand-brown-700 hover:underline cursor-pointer">
+                        @{discussion.author.username}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <p className="text-sm font-semibold text-brand-brown-900">
-                    {discussion.community}
-                  </p>
-
-                  <p className="text-xs text-muted-foreground">
-                    {discussion.time}
-                  </p>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5">
+                  {discussion.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="
+                        rounded-md bg-brand-sand/60
+                        px-2 py-0.5
+                        text-xs font-medium text-brand-brown-700
+                      "
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-
               </div>
 
-              {/* Content */}
-              <div className="mt-4">
-                <h2 className="text-[17px] font-bold leading-snug text-brand-brown-950">
-                  {discussion.title}
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-brand-brown-600">
+              {/* Body Text */}
+              <div className="mt-3">
+                <p className="text-sm leading-relaxed text-brand-brown-900">
                   {discussion.description}
                 </p>
               </div>
 
-              {/* Hashtags */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                {discussion.tags.map((tag) => (
+              {/* Actions */}
+              <div className="mt-4 flex items-center gap-3 border-t pt-3">
+                <div className="flex items-center rounded-xl bg-brand-sand/50 p-1">
                   <button
-                    key={tag}
+                    aria-label="Upvote"
                     className="
-                      rounded-full bg-brand-sand
-                      px-2.5 py-1
-                      text-xs font-medium
-                      text-brand-brown-700
+                      flex items-center justify-center rounded-lg p-1.5
+                      text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950
                       transition-colors
-                      hover:bg-brand-desert-light
                     "
                   >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <div className="mt-5 flex items-center gap-2 border-t pt-4">
-                <button
-                  className="
-      rounded-lg px-3 py-1.5
-      text-xs font-semibold
-      text-brand-brown-700
-      transition-colors
-      hover:bg-brand-sand
-      hover:text-brand-brown-950
-    "
-                >
-                  ↑ {discussion.helpful} Helpful
-                </button>
-
-                <button
-                  className="
-      flex items-center gap-1.5
-      rounded-lg px-3 py-1.5
-      text-xs font-semibold
-      text-brand-brown-700
-      hover:bg-brand-sand
-      hover:text-brand-brown-950
-    "
-                >
-                  <MessageCircle size={15} />
-                  {discussion.comments}
-                </button>
-
-                <div className="ml-auto flex items-center gap-1">
-                  <button
-                    className="
-        rounded-lg px-3 py-1.5
-        text-xs font-medium
-        text-muted-foreground
-        hover:bg-brand-sand
-        hover:text-brand-brown-950
-      "
-                  >
-                    Save
+                    <ArrowUp size={16} />
                   </button>
 
+                  <span className="px-2 text-xs font-bold text-brand-brown-900">
+                    {discussion.votes}
+                  </span>
+
                   <button
+                    aria-label="Downvote"
                     className="
-        rounded-lg px-3 py-1.5
-        text-xs font-medium
-        text-muted-foreground
-        hover:bg-brand-sand
-        hover:text-brand-brown-950
-      "
+                      flex items-center justify-center rounded-lg p-1.5
+                      text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950
+                      transition-colors
+                    "
                   >
-                    Share
+                    <ArrowDown size={16} />
                   </button>
                 </div>
+
+                <button
+                  className="
+                    flex items-center gap-1.5 rounded-xl bg-brand-sand/50 px-3 py-1.5
+                    text-xs font-semibold text-brand-brown-700
+                    hover:bg-brand-desert-light hover:text-brand-brown-950
+                    transition-colors
+                  "
+                >
+                  <MessageCircle size={16} />
+                  <span>{discussion.comments}</span>
+                </button>
               </div>
             </article>
           ))}

@@ -1,58 +1,55 @@
+"use client";
+
 import Link from "next/link";
 import {
   ArrowUpRight,
-  BookOpen,
-  ChevronRight,
+  Sparkles,
   TrendingUp,
-  Users,
+  Trophy,
 } from "lucide-react";
-
-const communities = [
-  {
-    name: "Artificial Intelligence",
-    citizens: "2.4M",
-    initials: "AI",
-  },
-  {
-    name: "Photography",
-    citizens: "1.8M",
-    initials: "PH",
-  },
-  {
-    name: "Gardening",
-    citizens: "680K",
-    initials: "GA",
-  },
-];
 
 const discussions = [
   {
-    title: "The future of AI agents",
-    contributions: "1.2K",
+    id: 1,
+    title: "What's the best architecture for a local AI assistant in 2026?",
+    contributions: "1.2K replies",
     community: "Artificial Intelligence",
+    slug: "local-ai-architecture-2026",
   },
   {
-    title: "What makes a photograph timeless?",
-    contributions: "842",
+    id: 2,
+    title: "What programming concepts took you years to truly understand?",
+    contributions: "842 replies",
+    community: "Programming",
+    slug: "concepts-that-took-years",
+  },
+  {
+    id: 3,
+    title: "What makes a photograph feel timeless?",
+    contributions: "618 replies",
     community: "Photography",
-  },
-  {
-    title: "What gardening skill took you years to learn?",
-    contributions: "618",
-    community: "Gardening",
+    slug: "timeless-photography",
   },
 ];
 
-const knowledge = [
+const topContributors = [
   {
-    title: "Understanding RAG",
-    community: "Artificial Intelligence",
-    updated: "2h ago",
+    name: "Sarah Chen",
+    username: "sarahc",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+    contributions: "342 posts",
   },
   {
-    title: "The fundamentals of composition",
-    community: "Photography",
-    updated: "5h ago",
+    name: "David K.",
+    username: "davidk",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+    contributions: "289 posts",
+  },
+  {
+    name: "Alex R.",
+    username: "arivera",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+    contributions: "215 posts",
   },
 ];
 
@@ -61,119 +58,37 @@ export function RightSidebar() {
     <aside className="hidden w-[280px] shrink-0 xl:block">
       <div className="sticky top-20 space-y-6">
 
-        {/* Discover Communities */}
-        <section>
-          <SectionHeader
-            icon={<Users size={16} />}
-            title="Discover Communities"
-            href="/communities"
-          />
-
-          <div className="mt-3 space-y-2">
-            {communities.map((community) => (
-              <Link
-                key={community.name}
-                href="#"
-                className="
-                  group flex items-center gap-3
-                  rounded-xl p-2.5
-                  transition-colors
-                  hover:bg-brand-sand
-                "
-              >
-                <div
-                  className="
-                    flex h-9 w-9 shrink-0 items-center justify-center
-                    rounded-xl
-                    bg-brand-desert-light
-                    text-[10px] font-bold
-                    text-brand-brown-800
-                  "
-                >
-                  {community.initials}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-brand-brown-900">
-                    {community.name}
-                  </p>
-
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {community.citizens} citizens
-                  </p>
-                </div>
-
-                <ChevronRight
-                  size={15}
-                  className="
-                    text-muted-foreground
-                    opacity-0
-                    transition-all
-                    group-hover:translate-x-0.5
-                    group-hover:opacity-100
-                  "
-                />
-              </Link>
-            ))}
-          </div>
-
-          <Link
-            href="/communities"
-            className="
-              mt-2 flex items-center justify-center gap-1
-              rounded-lg py-2
-              text-xs font-semibold
-              text-brand-brown-700
-              hover:bg-brand-sand
-            "
-          >
-            Explore all communities
-            <ArrowUpRight size={13} />
-          </Link>
-        </section>
-
         {/* Trending Discussions */}
-        <section>
+        <section className="rounded-2xl border bg-white p-4">
           <SectionHeader
             icon={<TrendingUp size={16} />}
             title="Trending Discussions"
           />
 
-          <div className="mt-3 space-y-1">
+          <div className="mt-3 space-y-3">
             {discussions.map((discussion, index) => (
               <Link
-                key={discussion.title}
-                href="#"
-                className="
-                  group block rounded-xl p-3
-                  transition-colors
-                  hover:bg-brand-sand
-                "
+                key={discussion.id}
+                href={`/post/${discussion.slug}`}
+                className="group block transition-colors"
               >
-                <div className="flex gap-3">
-                  <span
-                    className="
-                      pt-0.5 text-xs font-bold
-                      text-brand-desert-dark
-                    "
-                  >
+                <div className="flex gap-2.5">
+                  <span className="pt-0.5 text-xs font-bold text-brand-desert-dark">
                     0{index + 1}
                   </span>
 
-                  <div className="min-w-0">
-                    <p
-                      className="
-                        text-sm font-semibold leading-5
-                        text-brand-brown-900
-                        group-hover:text-brand-brown-950
-                      "
-                    >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold leading-snug text-brand-brown-900 transition-colors group-hover:text-brand-brown-950 group-hover:underline">
                       {discussion.title}
                     </p>
 
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {discussion.contributions} contributions
-                    </p>
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <span className="truncate font-medium text-brand-brown-700">
+                        {discussion.community}
+                      </span>
+                      <span>•</span>
+                      <span>{discussion.contributions}</span>
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -181,93 +96,70 @@ export function RightSidebar() {
           </div>
         </section>
 
-        {/* Community Knowledge */}
-        <section>
+        {/* Top Contributors of the Week */}
+        <section className="rounded-2xl border bg-white p-4">
           <SectionHeader
-            icon={<BookOpen size={16} />}
-            title="Community Knowledge"
-            href="/knowledge"
+            icon={<Trophy size={16} />}
+            title="Top Contributors"
           />
 
-          <div className="mt-3 space-y-2">
-            {knowledge.map((item) => (
-              <Link
-                key={item.title}
-                href="#"
-                className="
-                  block rounded-xl border bg-white p-3
-                  transition-all
-                  hover:border-brand-desert
-                  hover:shadow-sm
-                "
-              >
-                <p className="text-sm font-semibold text-brand-brown-900">
-                  {item.title}
-                </p>
-
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <span className="truncate text-[11px] text-muted-foreground">
-                    {item.community}
-                  </span>
-
-                  <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {item.updated}
-                  </span>
+          <div className="mt-3 space-y-3">
+            {topContributors.map((user) => (
+              <div key={user.username} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-brand-brown-900 hover:underline cursor-pointer">
+                      {user.name}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      @{user.username}
+                    </p>
+                  </div>
                 </div>
-              </Link>
+
+                <span className="shrink-0 text-[10px] font-semibold text-brand-brown-700 bg-brand-sand px-2 py-0.5 rounded-full">
+                  {user.contributions}
+                </span>
+              </div>
             ))}
           </div>
-
-          <Link
-            href="/knowledge"
-            className="
-              mt-2 flex items-center justify-center gap-1
-              rounded-lg py-2
-              text-xs font-semibold
-              text-brand-brown-700
-              hover:bg-brand-sand
-            "
-          >
-            Browse knowledge
-            <ArrowUpRight size={13} />
-          </Link>
         </section>
 
-        {/* Philosophy card */}
-        <section
-          className="
-            overflow-hidden rounded-2xl
-            border border-brand-desert-light
-            bg-brand-desert-light/40
-            p-4
-          "
-        >
-          <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-desert">
-            <span className="text-sm">🐪</span>
+        {/* Platform Guidelines / Info Widget */}
+        <section className="rounded-2xl border border-brand-desert-light bg-brand-desert-light/30 p-4">
+          <div className="flex items-center gap-2 text-brand-brown-950 font-bold text-xs">
+            <Sparkles size={14} className="text-brand-desert-dark" />
+            <span>Community Guidelines</span>
           </div>
 
-          <h3 className="text-sm font-bold text-brand-brown-950">
-            Every interest deserves a home.
-          </h3>
-
-          <p className="mt-1.5 text-xs leading-5 text-brand-brown-700">
-            Communities are shared institutions built by the people who
-            contribute to them.
+          <p className="mt-2 text-xs leading-relaxed text-brand-brown-700">
+            Be respectful, contribute thoughtfully, and help foster constructive conversations across all communities.
           </p>
 
           <Link
-            href="/about"
-            className="
-              mt-3 inline-flex items-center gap-1
-              text-xs font-bold
-              text-brand-brown-900
-              hover:underline
-            "
+            href="/rules"
+            className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-brand-brown-900 hover:underline"
           >
-            Learn about our vision
+            Read site rules
             <ArrowUpRight size={12} />
           </Link>
         </section>
+
+        {/* Footer Links */}
+        <footer className="px-2 text-[11px] text-muted-foreground">
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            <Link href="/about" className="hover:underline">About</Link>
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+            <Link href="/help" className="hover:underline">Help</Link>
+          </div>
+          <p className="mt-2">© 2026 Community Platform</p>
+        </footer>
 
       </div>
     </aside>
@@ -277,42 +169,16 @@ export function RightSidebar() {
 function SectionHeader({
   icon,
   title,
-  href,
 }: {
   icon: React.ReactNode;
   title: string;
-  href?: string;
 }) {
-  const content = (
-    <div className="flex items-center gap-2">
+  return (
+    <div className="flex items-center gap-2 border-b pb-2">
       <span className="text-brand-brown-700">{icon}</span>
-
-      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-brand-brown-700">
+      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-brand-brown-800">
         {title}
       </span>
     </div>
   );
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className="group flex items-center justify-between"
-      >
-        {content}
-
-        <ArrowUpRight
-          size={13}
-          className="
-            text-muted-foreground
-            transition-transform
-            group-hover:-translate-y-0.5
-            group-hover:translate-x-0.5
-          "
-        />
-      </Link>
-    );
-  }
-
-  return content;
 }
