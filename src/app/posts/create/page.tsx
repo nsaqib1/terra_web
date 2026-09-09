@@ -1,11 +1,11 @@
 import { AppShell } from "@/components/layout/AppShell";
-import { CreateDiscussionForm } from "@/components/discussion/create/CreateDiscussionForm";
+import { CreatePostForm } from "@/components/post/create/CreatePostForm";
 
-export default function CreateDiscussionPage() {
+export default function CreatePostPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-[1180px]">
-        <CreateDiscussionForm />
+        <CreatePostForm />
       </div>
     </AppShell>
   );

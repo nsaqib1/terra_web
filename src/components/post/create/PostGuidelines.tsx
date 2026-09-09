@@ -1,17 +1,14 @@
 import {
+  Bookmark,
   CheckCircle2,
-  Hash,
   Lightbulb,
   Search,
 } from "lucide-react";
 
-export function DiscussionGuidelines() {
+export function PostGuidelines() {
   return (
     <aside className="space-y-4">
-
-      {/* Tips */}
       <section className="rounded-2xl border bg-white p-5">
-
         <div className="flex items-center gap-2">
           <Lightbulb
             size={16}
@@ -19,35 +16,31 @@ export function DiscussionGuidelines() {
           />
 
           <h2 className="text-sm font-bold text-brand-brown-950">
-            Start a useful discussion
+            Write a useful post
           </h2>
         </div>
 
         <div className="mt-4 space-y-4">
-
           <Guideline
             icon={<Search size={14} />}
             title="Search first"
-            description="Check whether your question has already been discussed."
+            description="See whether this community already has a post on the same question."
           />
 
           <Guideline
-            icon={<Hash size={14} />}
-            title="Use meaningful contexts"
-            description="Use hashtags to describe the relevant context."
+            icon={<Bookmark size={14} />}
+            title="Mark the context"
+            description="Postmarks organize your post inside the community — they are a controlled vocabulary, not hashtags."
           />
 
           <Guideline
             icon={<CheckCircle2 size={14} />}
-            title="Add something useful"
-            description="Questions with enough context usually lead to better contributions."
+            title="Say enough"
+            description="Skip the title. Put the whole thought in the post so others can respond."
           />
-
         </div>
-
       </section>
 
-      {/* Community principle */}
       <section
         className="
           rounded-2xl
@@ -61,16 +54,15 @@ export function DiscussionGuidelines() {
         </div>
 
         <h2 className="mt-3 text-sm font-bold text-brand-brown-950">
-          Build the community's history
+          Build the community&apos;s history
         </h2>
 
         <p className="mt-2 text-[11px] leading-5 text-brand-brown-700">
-          Great discussions don't disappear into a feed. Useful
-          contributions can eventually become part of the community's
-          permanent knowledge.
+          Useful posts stay with the community. They become part of a
+          permanent home for this subject — not a post that vanishes in a
+          personal feed.
         </p>
       </section>
-
     </aside>
   );
 }
@@ -86,7 +78,6 @@ function Guideline({
 }) {
   return (
     <div className="flex gap-3">
-
       <div
         className="
           flex h-7 w-7 shrink-0
@@ -108,7 +99,6 @@ function Guideline({
           {description}
         </p>
       </div>
-
     </div>
   );
 }

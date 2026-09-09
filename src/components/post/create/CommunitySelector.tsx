@@ -64,14 +64,14 @@ export function CommunitySelector({
       </label>
 
       <p className="mt-1 text-[11px] text-muted-foreground">
-        Every discussion belongs to one canonical community.
+        Every post lives in one community.
       </p>
 
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
         className="
-          mt-2 flex h-14 w-full items-center gap-3
+          mt-2 flex h-12 w-full items-center gap-3
           rounded-xl border
           bg-white px-3
           text-left
@@ -82,7 +82,7 @@ export function CommunitySelector({
           <>
             <div
               className="
-                flex h-9 w-9 shrink-0 items-center justify-center
+                flex h-8 w-8 shrink-0 items-center justify-center
                 rounded-lg
                 bg-brand-desert-light
                 text-[10px] font-bold
@@ -174,7 +174,7 @@ export function CommunitySelector({
                 >
                   <div
                     className="
-                      flex h-9 w-9 shrink-0 items-center justify-center
+                      flex h-8 w-8 shrink-0 items-center justify-center
                       rounded-lg
                       bg-brand-desert-light
                       text-[10px] font-bold
