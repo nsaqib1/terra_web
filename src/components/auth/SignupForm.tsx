@@ -1,22 +1,34 @@
 "use client";
 
 import {
+  AlertCircle,
   ArrowRight,
+  AtSign,
+  CheckCircle2,
   Eye,
   EyeOff,
+  Loader2,
   Mail,
   User,
-  AtSign,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { extractErrorMessage } from "@/lib/api/errors";
 import { PasswordStrength } from "./PasswordStrength";
 
 export function SignupForm() {
+  const router = useRouter();
+  const { signup } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -30,18 +42,61 @@ export function SignupForm() {
     field: keyof typeof form,
     value: string | boolean,
   ) => {
+    // Clear error message when user starts making changes
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+
     setForm((current) => ({
       ...current,
       [field]: value,
     }));
   };
 
-  const canSubmit =
-    form.name.trim().length >= 2 &&
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  const isUsernameValid =
     form.username.trim().length >= 3 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) &&
-    form.password.length >= 8 &&
-    form.agree;
+    form.username.trim().length <= 30 &&
+    /^[a-zA-Z0-9_.-]+$/.test(form.username.trim());
+  const isNameValid =
+    form.name.trim().length >= 2 && form.name.trim().length <= 100;
+  const isPasswordValid =
+    form.password.length >= 8 && form.password.length <= 128;
+
+  const canSubmit =
+    isNameValid &&
+    isUsernameValid &&
+    isEmailValid &&
+    isPasswordValid &&
+    form.agree &&
+    !isSubmitting;
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canSubmit) return;
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      await signup({
+        displayName: form.name.trim(),
+        username: form.username.trim().toLowerCase(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+      });
+
+      setIsSuccess(true);
+      // Give the user a brief visual feedback then navigate to home
+      setTimeout(() => {
+        router.push("/");
+      }, 700);
+    } catch (err) {
+      const msg = extractErrorMessage(err, "Failed to create account. Please try again.");
+      setErrorMessage(msg);
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-[440px]">
@@ -107,15 +162,55 @@ export function SignupForm() {
         </p>
       </div>
 
+      {/* Status Messages */}
+      {errorMessage && (
+        <div
+          role="alert"
+          className="
+            mt-5
+            flex items-start gap-3
+            rounded-xl
+            border border-red-200
+            bg-red-50/90
+            p-3.5
+            text-sm
+            text-red-800
+            shadow-sm
+            animate-in fade-in slide-in-from-top-1
+          "
+        >
+          <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-600" />
+          <div className="flex-1 font-medium">{errorMessage}</div>
+        </div>
+      )}
+
+      {isSuccess && (
+        <div
+          role="status"
+          className="
+            mt-5
+            flex items-center gap-3
+            rounded-xl
+            border border-emerald-200
+            bg-emerald-50
+            p-3.5
+            text-sm
+            font-medium
+            text-emerald-800
+            shadow-sm
+            animate-in fade-in slide-in-from-top-1
+          "
+        >
+          <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+          <span>Account created successfully! Redirecting...</span>
+        </div>
+      )}
+
       {/* Form Area */}
       <form
         className="mt-7 space-y-4"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!canSubmit) return;
-
-          console.log("Signup payload:", form);
-        }}
+        onSubmit={handleSubmit}
+        noValidate
       >
         {/* Name Input */}
         <div>
@@ -139,9 +234,11 @@ export function SignupForm() {
             <input
               id="name"
               value={form.name}
+              disabled={isSubmitting || isSuccess}
               onChange={(event) => update("name", event.target.value)}
               placeholder="Alex Morgan"
               autoComplete="name"
+              maxLength={100}
               className="
                 h-11 w-full
                 rounded-xl
@@ -156,6 +253,8 @@ export function SignupForm() {
                 focus:border-brand-desert-dark
                 focus:ring-2
                 focus:ring-brand-desert-light/50
+                disabled:bg-brand-sand/30
+                disabled:cursor-not-allowed
               "
             />
           </div>
@@ -171,7 +270,7 @@ export function SignupForm() {
               Username
             </label>
             <span className="text-[10px] text-brand-brown-600/70">
-              Your unique handle
+              Your unique handle (3-30 chars)
             </span>
           </div>
 
@@ -188,6 +287,7 @@ export function SignupForm() {
             <input
               id="username"
               value={form.username}
+              disabled={isSubmitting || isSuccess}
               onChange={(event) =>
                 update(
                   "username",
@@ -196,6 +296,7 @@ export function SignupForm() {
               }
               placeholder="alexmorgan"
               autoComplete="username"
+              maxLength={30}
               className="
                 h-11 w-full
                 rounded-xl
@@ -210,6 +311,8 @@ export function SignupForm() {
                 focus:border-brand-desert-dark
                 focus:ring-2
                 focus:ring-brand-desert-light/50
+                disabled:bg-brand-sand/30
+                disabled:cursor-not-allowed
               "
             />
           </div>
@@ -238,9 +341,11 @@ export function SignupForm() {
               id="email"
               type="email"
               value={form.email}
+              disabled={isSubmitting || isSuccess}
               onChange={(event) => update("email", event.target.value)}
               placeholder="alex@example.com"
               autoComplete="email"
+              maxLength={255}
               className="
                 h-11 w-full
                 rounded-xl
@@ -255,6 +360,8 @@ export function SignupForm() {
                 focus:border-brand-desert-dark
                 focus:ring-2
                 focus:ring-brand-desert-light/50
+                disabled:bg-brand-sand/30
+                disabled:cursor-not-allowed
               "
             />
           </div>
@@ -274,9 +381,11 @@ export function SignupForm() {
               id="password"
               type={showPassword ? "text" : "password"}
               value={form.password}
+              disabled={isSubmitting || isSuccess}
               onChange={(event) => update("password", event.target.value)}
-              placeholder="Create a strong password"
+              placeholder="Create a strong password (min 8 chars)"
               autoComplete="new-password"
+              maxLength={128}
               className="
                 h-11 w-full
                 rounded-xl
@@ -291,11 +400,14 @@ export function SignupForm() {
                 focus:border-brand-desert-dark
                 focus:ring-2
                 focus:ring-brand-desert-light/50
+                disabled:bg-brand-sand/30
+                disabled:cursor-not-allowed
               "
             />
 
             <button
               type="button"
+              disabled={isSubmitting || isSuccess}
               onClick={() => setShowPassword((current) => !current)}
               className="
                 absolute right-3 top-1/2
@@ -304,6 +416,7 @@ export function SignupForm() {
                 text-brand-brown-600/60
                 hover:bg-brand-sand
                 hover:text-brand-brown-900
+                disabled:opacity-40
               "
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
@@ -319,6 +432,7 @@ export function SignupForm() {
           <input
             type="checkbox"
             checked={form.agree}
+            disabled={isSubmitting || isSuccess}
             onChange={(event) => update("agree", event.target.checked)}
             className="
               mt-0.5
@@ -326,6 +440,7 @@ export function SignupForm() {
               rounded
               border-brand-sand-dark
               accent-brand-brown-950
+              disabled:opacity-50
             "
           />
 
@@ -351,7 +466,7 @@ export function SignupForm() {
         {/* Submit Action */}
         <Button
           type="submit"
-          disabled={!canSubmit}
+          disabled={!canSubmit || isSubmitting || isSuccess}
           className="
             mt-2
             h-11 w-full
@@ -367,8 +482,22 @@ export function SignupForm() {
             disabled:opacity-40
           "
         >
-          Create Account
-          <ArrowRight size={16} />
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              <span>Creating account...</span>
+            </>
+          ) : isSuccess ? (
+            <>
+              <CheckCircle2 size={16} />
+              <span>Account Created!</span>
+            </>
+          ) : (
+            <>
+              <span>Create Account</span>
+              <ArrowRight size={16} />
+            </>
+          )}
         </Button>
       </form>
 

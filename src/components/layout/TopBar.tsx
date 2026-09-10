@@ -3,19 +3,34 @@
 import {
   Bell,
   ChevronDown,
+  LogOut,
   Search,
-  User,
+  User as UserIcon,
 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 import { Logo } from "@/components/brand/Logo";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 export function TopBar() {
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 border-b bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-full max-w-[1600px] items-center gap-4 px-4 lg:px-6">
-
         {/* Logo */}
         <div className="w-auto shrink-0 lg:w-[220px]">
           <div className="hidden sm:block">
@@ -59,43 +74,156 @@ export function TopBar() {
         </div>
 
         {/* Right */}
-        <div className="ml-auto flex items-center gap-1">
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-brand-brown-700 hover:bg-brand-sand"
-          >
-            <Bell size={19} />
-          </Button>
-
-          <div className="ml-1 hidden items-center gap-2 sm:flex">
-            <Avatar className="h-9 w-9 border border-brand-sand-dark">
-              <AvatarFallback className="bg-brand-desert text-brand-brown-950">
-                NS
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="hidden lg:block">
-              <p className="text-sm font-semibold leading-none">
-                Najmus
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                12,482 reputation
-              </p>
+        <div className="ml-auto flex items-center gap-2">
+          {!isLoading && !isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button
+                  variant="ghost"
+                  className="
+                    h-9
+                    rounded-xl
+                    px-3.5
+                    text-xs
+                    font-bold
+                    text-brand-brown-800
+                    hover:bg-brand-sand
+                  "
+                >
+                  Log in
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button
+                  className="
+                    h-9
+                    rounded-xl
+                    bg-brand-brown-950
+                    px-3.5
+                    text-xs
+                    font-bold
+                    text-white
+                    shadow-sm
+                    hover:bg-brand-brown-900
+                  "
+                >
+                  Sign up
+                </Button>
+              </Link>
             </div>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-brand-brown-700 hover:bg-brand-sand"
+              >
+                <Bell size={19} />
+              </Button>
 
-            <ChevronDown size={16} className="text-muted-foreground" />
-          </div>
+              {user ? (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="
+                      ml-1 flex items-center gap-2
+                      rounded-xl p-1
+                      text-left
+                      transition-colors
+                      hover:bg-brand-sand/60
+                    "
+                  >
+                    <Avatar className="h-9 w-9 border border-brand-sand-dark">
+                      {user.avatarUrl && (
+                        <AvatarImage
+                          src={user.avatarUrl}
+                          alt={user.displayName}
+                        />
+                      )}
+                      <AvatarFallback className="bg-brand-desert text-xs font-bold text-brand-brown-950">
+                        {getInitials(user.displayName || user.username)}
+                      </AvatarFallback>
+                    </Avatar>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="sm:hidden"
-          >
-            <User size={19} />
-          </Button>
+                    <div className="hidden text-left lg:block">
+                      <p className="text-sm font-semibold leading-none text-brand-brown-950">
+                        {user.displayName}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {user.points.toLocaleString()} points
+                      </p>
+                    </div>
 
+                    <ChevronDown
+                      size={16}
+                      className="hidden text-muted-foreground lg:block"
+                    />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {showDropdown && (
+                    <div
+                      className="
+                        absolute right-0 top-12
+                        w-48
+                        rounded-xl
+                        border border-brand-sand-dark
+                        bg-white
+                        p-1.5
+                        shadow-lg
+                        animate-in fade-in slide-in-from-top-2
+                      "
+                    >
+                      <div className="border-b border-brand-sand/60 px-3 py-2 lg:hidden">
+                        <p className="text-sm font-semibold text-brand-brown-950">
+                          {user.displayName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          @{user.username}
+                        </p>
+                      </div>
+
+                      <Link
+                        href="/profile"
+                        onClick={() => setShowDropdown(false)}
+                        className="
+                          flex items-center gap-2
+                          rounded-lg px-3 py-2
+                          text-xs font-semibold
+                          text-brand-brown-800
+                          hover:bg-brand-sand
+                        "
+                      >
+                        <UserIcon size={15} />
+                        Profile
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setShowDropdown(false);
+                          await logout();
+                        }}
+                        className="
+                          flex w-full items-center gap-2
+                          rounded-lg px-3 py-2
+                          text-xs font-semibold
+                          text-red-700
+                          hover:bg-red-50
+                        "
+                      >
+                        <LogOut size={15} />
+                        Log out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-9 w-9 animate-pulse rounded-full bg-brand-sand" />
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>
