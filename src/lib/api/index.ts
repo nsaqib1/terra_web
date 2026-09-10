@@ -6,4 +6,5 @@ export * from "./auth";
 export * from "./admin";
 export * from "./tags";
 export * from "./communities";
+export * from "./posts";
 

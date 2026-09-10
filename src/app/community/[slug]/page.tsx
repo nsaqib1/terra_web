@@ -1,113 +1,316 @@
-import { AppShell } from "@/components/layout/AppShell";
+"use client";
+
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
-  MessageCircle,
-  ArrowUp,
-  ArrowDown,
-  UserPlus,
   Users,
-  ShieldAlert,
-  Sparkles,
-  Layers,
   FileText,
+  UserPlus,
+  Check,
+  Layers,
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  PlusCircle,
+  X,
 } from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
+import { CommunityPostCard } from "@/components/community/CommunityPostCard";
+import { useAuth } from "@/context/AuthContext";
+import { communitiesApi } from "@/lib/api/communities";
+import { tagsApi } from "@/lib/api/tags";
+import { postsApi } from "@/lib/api/posts";
+import { CommunityDetail, PostItem, Tag } from "@/lib/api/types";
+import { extractErrorMessage } from "@/lib/api/errors";
 
-// Mock Community Data
-const communityData = {
-  name: "Artificial Intelligence",
-  slug: "artificial-intelligence",
-  memberCount: "2.4M",
-  postCount: "184K",
-  established: "2026",
-  about:
-    "The global hub for artificial intelligence, machine learning, intelligent systems, and the ideas shaping their future. Moderated by members to maintain high-signal discussions.",
-  tags: [
-    { name: "agents", count: "42.1K" },
-    { name: "opensource", count: "38.5K" },
-    { name: "llm", count: "29.4K" },
-    { name: "machinelearning", count: "18.2K" },
-    { name: "robotics", count: "12.8K" },
-    { name: "2026", count: "9.6K" },
-  ],
-};
+function getCommunityInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
 
-const posts = [
-  {
-    id: "1",
-    author: {
-      name: "Alex Morgan",
-      username: "alexmorgan",
-      avatar:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
-    },
-    time: "2 hours ago",
-    description:
-      "What's the best architecture for a local AI assistant in 2026? I'm experimenting with a local-first assistant and would love to hear how others are approaching memory, tools, model selection, and privacy.",
-    tags: ["agents", "opensource", "llm", "2026"],
-    votes: 184,
-    comments: 42,
-  },
-  {
-    id: "2",
-    author: {
-      name: "Sarah Chen",
-      username: "sarahc",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-    },
-    time: "4 hours ago",
-    description:
-      "Which open-source models are actually worth running locally? There are more models appearing every week. What have people actually tested and found useful for everyday development?",
-    tags: ["opensource", "llm"],
-    votes: 126,
-    comments: 38,
-  },
-  {
-    id: "3",
-    author: {
-      name: "Daniel Reed",
-      username: "dreed",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
-    },
-    time: "7 hours ago",
-    description:
-      "How should we evaluate AI agents? Benchmarks seem to tell only part of the story. I'm interested in practical evaluation methods for agents operating in real environments.",
-    tags: ["agents", "machinelearning"],
-    votes: 312,
-    comments: 73,
-  },
-];
+function formatCount(count?: number | null): string {
+  if (count === undefined || count === null) return "0";
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  }
+  return String(count);
+}
 
-export default async function PyramidPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+function formatMemberSince(dateString?: string | null): string {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+export default function CommunityPage() {
+  const params = useParams<{ slug: string }>();
+  const router = useRouter();
+  const slug = params?.slug as string;
+
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  // Data states
+  const [community, setCommunity] = useState<CommunityDetail | null>(null);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [posts, setPosts] = useState<PostItem[]>([]);
+  const [isMember, setIsMember] = useState<boolean>(false);
+  const [joinedAt, setJoinedAt] = useState<string | null>(null);
+  const [membersCount, setMembersCount] = useState<number>(0);
+
+  // Loading & error states
+  const [isLoadingCommunity, setIsLoadingCommunity] = useState<boolean>(true);
+  const [isLoadingPosts, setIsLoadingPosts] = useState<boolean>(true);
+  const [isMembershipLoading, setIsMembershipLoading] = useState<boolean>(false);
+  const [isActionPending, setIsActionPending] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // Filter state
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [isHoveringMemberButton, setIsHoveringMemberButton] = useState<boolean>(false);
+
+  // 1. Fetch community details and tags
+  const loadCommunityData = useCallback(async () => {
+    if (!slug) return;
+    setIsLoadingCommunity(true);
+    setErrorMessage(null);
+
+    try {
+      const communityData = await communitiesApi.getBySlug(slug);
+      setCommunity(communityData);
+      setMembersCount(communityData._count?.memberships ?? 0);
+
+      // Fetch tags for this community
+      try {
+        const tagsResponse = await tagsApi.list({
+          communityId: communityData.id,
+          limit: 50,
+        });
+        setTags(tagsResponse.data || []);
+      } catch (tagErr) {
+        console.error("Failed to load community tags:", tagErr);
+      }
+
+      // Fetch posts for this community
+      try {
+        setIsLoadingPosts(true);
+        const postsResponse = await postsApi.list({
+          communityId: communityData.id,
+          limit: 50,
+        });
+        setPosts(postsResponse.data || []);
+      } catch (postErr) {
+        console.error("Failed to load community posts:", postErr);
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    } catch (err: any) {
+      setErrorMessage(
+        extractErrorMessage(err) || "Failed to load community details."
+      );
+    } finally {
+      setIsLoadingCommunity(false);
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    loadCommunityData();
+  }, [loadCommunityData]);
+
+  // 2. Fetch membership status when auth is ready
+  const loadMembershipStatus = useCallback(async () => {
+    if (!slug || authLoading) return;
+
+    if (!isAuthenticated) {
+      setIsMember(false);
+      setJoinedAt(null);
+      return;
+    }
+
+    setIsMembershipLoading(true);
+    try {
+      const response = await communitiesApi.getMembership(slug);
+      setIsMember(Boolean(response.isMember));
+      setJoinedAt(response.membership?.joinedAt ?? null);
+    } catch (err) {
+      console.error("Failed to check membership:", err);
+      setIsMember(false);
+      setJoinedAt(null);
+    } finally {
+      setIsMembershipLoading(false);
+    }
+  }, [slug, isAuthenticated, authLoading]);
+
+  useEffect(() => {
+    loadMembershipStatus();
+  }, [loadMembershipStatus]);
+
+  // Handle Join / Leave
+  const handleToggleMembership = async () => {
+    if (authLoading || isActionPending) return;
+
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/community/${encodeURIComponent(slug)}`);
+      return;
+    }
+
+    setIsActionPending(true);
+    setActionError(null);
+
+    if (isMember) {
+      // Leave community
+      try {
+        await communitiesApi.leave(slug);
+        setIsMember(false);
+        setJoinedAt(null);
+        setMembersCount((prev) => Math.max(0, prev - 1));
+        window.dispatchEvent(new Event("community-membership-changed"));
+      } catch (err: any) {
+        setActionError(extractErrorMessage(err) || "Failed to leave community.");
+      } finally {
+        setIsActionPending(false);
+      }
+    } else {
+      // Join community
+      try {
+        const membership = await communitiesApi.join(slug);
+        setIsMember(true);
+        setJoinedAt(membership?.joinedAt || new Date().toISOString());
+        setMembersCount((prev) => prev + 1);
+        window.dispatchEvent(new Event("community-membership-changed"));
+      } catch (err: any) {
+        setActionError(extractErrorMessage(err) || "Failed to join community.");
+      } finally {
+        setIsActionPending(false);
+      }
+    }
+  };
+
+  // Filter posts by selected tag
+  const filteredPosts = useMemo(() => {
+    if (!selectedTag) return posts;
+    return posts.filter((post) =>
+      post.tags?.some(
+        (t) =>
+          t.name.toLowerCase() === selectedTag.toLowerCase() ||
+          t.slug.toLowerCase() === selectedTag.toLowerCase()
+      )
+    );
+  }, [posts, selectedTag]);
+
+  if (isLoadingCommunity) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-[1180px] space-y-6 animate-pulse">
+          {/* Header Skeleton */}
+          <div className="h-48 rounded-2xl border bg-white p-6">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-2xl bg-brand-sand/60" />
+              <div className="space-y-2">
+                <div className="h-7 w-56 rounded-lg bg-brand-sand/60" />
+                <div className="h-4 w-36 rounded bg-brand-sand/40" />
+              </div>
+            </div>
+          </div>
+          {/* Feed Skeleton */}
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="space-y-4">
+              <div className="h-40 rounded-2xl border bg-white p-5" />
+              <div className="h-40 rounded-2xl border bg-white p-5" />
+            </div>
+            <div className="h-60 rounded-2xl border bg-white p-5" />
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (errorMessage || !community) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-[1180px] py-12">
+          <div className="rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+              <AlertCircle size={28} />
+            </div>
+            <h1 className="mt-4 text-xl font-bold text-brand-brown-950">
+              Community Not Found
+            </h1>
+            <p className="mt-2 text-sm text-brand-brown-700">
+              {errorMessage || "The community you are looking for does not exist or may have been archived."}
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <Link
+                href="/communities"
+                className="rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                Explore Communities
+              </Link>
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  const initials = getCommunityInitials(community.name);
 
   return (
     <AppShell>
       <div className="mx-auto max-w-[1180px]">
+        {/* Action Error Alert */}
+        {actionError && (
+          <div className="mb-4 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0 text-rose-600" />
+              <span>{actionError}</span>
+            </div>
+            <button
+              onClick={() => setActionError(null)}
+              className="rounded p-1 hover:bg-rose-100"
+              aria-label="Dismiss error"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {/* Community Header Banner */}
         <div className="overflow-hidden rounded-2xl border bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            {/* Left: Avatar & Title */}
+            {/* Left: Avatar & Title & Stats */}
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand-desert-light text-xl font-black text-brand-brown-900 shadow-inner">
-                 {/* TODO: Add community intials, later will add avatar image */}
+                {initials}
               </div>
 
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-brand-brown-950">
-                  {communityData.name}
-                </h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl font-bold tracking-tight text-brand-brown-950">
+                    {community.name}
+                  </h1>
+                </div>
 
                 {/* Quick Stats */}
                 <div className="mt-2 flex items-center gap-4 text-xs font-medium text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Users size={14} className="text-brand-brown-700" />
                     <span className="font-semibold text-brand-brown-950">
-                      {communityData.memberCount}
+                      {formatCount(membersCount)}
                     </span>
                     <span>Members</span>
                   </div>
@@ -115,132 +318,199 @@ export default async function PyramidPage({
                   <div className="flex items-center gap-1">
                     <FileText size={14} className="text-brand-brown-700" />
                     <span className="font-semibold text-brand-brown-950">
-                      {communityData.postCount}
+                      {formatCount(community._count?.posts ?? posts.length)}
                     </span>
                     <span>Posts</span>
                   </div>
-
                 </div>
               </div>
             </div>
 
-            {/* Right: Primary Action */}
-            <div className="flex items-center gap-2 sm:self-center">
-              <button className="flex items-center gap-2 rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90">
-                <UserPlus size={15} />
-                <span>Become a Member</span>
-              </button>
+            {/* Right: Dynamic Primary Action (Become a Member / Member) */}
+            <div className="flex flex-col items-start sm:items-end gap-1.5 sm:self-center">
+              {isMember ? (
+                <>
+                  <button
+                    onClick={handleToggleMembership}
+                    disabled={isActionPending}
+                    onMouseEnter={() => setIsHoveringMemberButton(true)}
+                    onMouseLeave={() => setIsHoveringMemberButton(false)}
+                    className={`
+                      group flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold
+                      transition-all duration-150
+                      ${isHoveringMemberButton
+                        ? "border border-rose-200 bg-rose-50 text-rose-700 shadow-sm"
+                        : "border border-brand-sand-dark/60 bg-brand-sand/50 text-brand-brown-900"
+                      }
+                      disabled:opacity-60
+                    `}
+                    title="Click to leave community"
+                  >
+                    {isActionPending ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin text-brand-brown-800" />
+                        <span>Updating...</span>
+                      </>
+                    ) : isHoveringMemberButton ? (
+                      <>
+                        <X size={15} className="text-rose-600" />
+                        <span>Leave Community</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={15} className="text-emerald-700" />
+                        <span>Member</span>
+                      </>
+                    )}
+                  </button>
+                  {joinedAt && (
+                    <span className="text-[11px] text-muted-foreground px-1">
+                      Since {formatMemberSince(joinedAt)}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={handleToggleMembership}
+                  disabled={isActionPending}
+                  className="
+                    flex items-center gap-2 rounded-xl bg-brand-brown-950
+                    px-5 py-2.5 text-xs font-semibold text-white
+                    transition-opacity hover:opacity-90 disabled:opacity-60
+                  "
+                >
+                  {isActionPending ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      <span>Joining...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={15} />
+                      <span>Become a Member</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
           {/* Tag Vocabulary Navigation Bar */}
-          <div className="mt-6 border-t pt-4">
-            <div className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              <Layers size={14} className="text-brand-brown-700" />
-              <span>Tags</span>
-            </div>
+          {tags && tags.length > 0 && (
+            <div className="mt-6 border-t pt-4">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <Layers size={14} className="text-brand-brown-700" />
+                  <span>Tags</span>
+                </div>
+                {selectedTag && (
+                  <button
+                    onClick={() => setSelectedTag(null)}
+                    className="flex items-center gap-1 text-[11px] font-semibold text-brand-brown-700 hover:text-brand-brown-950"
+                  >
+                    <X size={12} />
+                    <span>Clear filter</span>
+                  </button>
+                )}
+              </div>
 
-            <div className="flex flex-wrap gap-2">
-              {communityData.tags.map((tag) => (
+              <div className="flex flex-wrap gap-2">
                 <button
-                  key={tag.name}
-                  className="
-                    group flex items-center gap-2 rounded-xl border bg-brand-sand/40
-                    px-3 py-1.5 text-xs font-semibold text-brand-brown-800
-                    transition-colors hover:border-brand-brown-700 hover:bg-brand-sand
-                  "
+                  onClick={() => setSelectedTag(null)}
+                  className={`
+                    group flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors
+                    ${selectedTag === null
+                      ? "border-brand-brown-950 bg-brand-brown-950 text-white"
+                      : "border-transparent bg-brand-sand/40 text-brand-brown-800 hover:border-brand-brown-700 hover:bg-brand-sand"
+                    }
+                  `}
                 >
-                  <span>{tag.name}</span>
-                  <span className="rounded-md bg-white/80 px-1.5 py-0.5 text-[10px] text-muted-foreground group-hover:text-brand-brown-950">
-                    {tag.count}
+                  <span>All</span>
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] ${selectedTag === null
+                      ? "bg-white/20 text-white"
+                      : "bg-white/80 text-muted-foreground group-hover:text-brand-brown-950"
+                      }`}
+                  >
+                    {posts.length}
                   </span>
                 </button>
-              ))}
+
+                {tags.map((tag) => {
+                  const isSelected =
+                    selectedTag?.toLowerCase() === tag.name.toLowerCase() ||
+                    selectedTag?.toLowerCase() === tag.slug.toLowerCase();
+
+                  return (
+                    <button
+                      key={tag.id || tag.slug}
+                      onClick={() => setSelectedTag(isSelected ? null : tag.name)}
+                      className={`
+                        group flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors
+                        ${isSelected
+                          ? "border-brand-brown-950 bg-brand-brown-950 text-white"
+                          : "border-transparent bg-brand-sand/40 text-brand-brown-800 hover:border-brand-brown-700 hover:bg-brand-sand"
+                        }
+                      `}
+                    >
+                      <span>{tag.name}</span>
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] ${isSelected
+                          ? "bg-white/20 text-white"
+                          : "bg-white/80 text-muted-foreground group-hover:text-brand-brown-950"
+                          }`}
+                      >
+                        {formatCount(tag.usageCount)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Main Feed + Community Context Sidebar */}
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           {/* Main Feed */}
           <main className="space-y-4">
-            {/* Posts List */}
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <article
-                  key={post.id}
-                  className="rounded-2xl border bg-white p-5 transition-shadow hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]"
-                >
-                  {/* Header: Author & Metadata */}
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={post.author.avatar}
-                        alt={post.author.name}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-white"
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-brand-brown-950 hover:underline cursor-pointer">
-                          {post.author.name}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          @{post.author.username} • {post.time}
-                        </span>
-                      </div>
-                    </div>
+            {isLoadingPosts ? (
+              <div className="space-y-4 animate-pulse">
+                <div className="h-36 rounded-2xl border bg-white p-5" />
+                <div className="h-36 rounded-2xl border bg-white p-5" />
+                <div className="h-36 rounded-2xl border bg-white p-5" />
+              </div>
+            ) : filteredPosts.length > 0 ? (
+              <div className="space-y-4">
+                {filteredPosts.map((post) => (
+                  <CommunityPostCard key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border bg-white p-10 text-center shadow-sm">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-desert-light text-brand-brown-800">
+                  <FileText size={24} />
+                </div>
+                <h3 className="mt-3 text-base font-bold text-brand-brown-950">
+                  {selectedTag ? `No posts tagged #${selectedTag}` : "No discussions yet"}
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
+                  {selectedTag
+                    ? "Try selecting another tag or clearing the filter to see all posts."
+                    : "Be the first citizen to start a conversation in this community."}
+                </p>
 
-                    {/* Post Tags */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-md bg-brand-sand/60 px-2 py-0.5 text-xs font-medium text-brand-brown-700"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Body Text */}
-                  <div className="mt-3">
-                    <p className="text-sm leading-relaxed text-brand-brown-900">
-                      {post.description}
-                    </p>
-                  </div>
-
-                  {/* Action Bar */}
-                  <div className="mt-4 flex items-center gap-3 border-t pt-3">
-                    {/* Voting */}
-                    <div className="flex items-center rounded-xl bg-brand-sand/50 p-1">
-                      <button
-                        aria-label="Upvote"
-                        className="flex items-center justify-center rounded-lg p-1.5 text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950 transition-colors"
-                      >
-                        <ArrowUp size={16} />
-                      </button>
-
-                      <span className="px-2 text-xs font-bold text-brand-brown-900">
-                        {post.votes}
-                      </span>
-
-                      <button
-                        aria-label="Downvote"
-                        className="flex items-center justify-center rounded-lg p-1.5 text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950 transition-colors"
-                      >
-                        <ArrowDown size={16} />
-                      </button>
-                    </div>
-
-                    {/* Comment Count */}
-                    <button className="flex items-center gap-1.5 rounded-xl bg-brand-sand/50 px-3 py-1.5 text-xs font-semibold text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950 transition-colors">
-                      <MessageCircle size={16} />
-                      <span>{post.comments} Comments</span>
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
+                <div className="mt-5">
+                  <Link
+                    href="/posts/create"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-brown-950 px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                  >
+                    <PlusCircle size={14} />
+                    <span>Create a Post</span>
+                  </Link>
+                </div>
+              </div>
+            )}
           </main>
 
           {/* Right Sidebar: About Community */}
@@ -253,25 +523,9 @@ export default async function PyramidPage({
 
               {/* Centralized Description */}
               <p className="mt-3 text-xs leading-relaxed text-brand-brown-700">
-                {communityData.about}
+                {community.description || "A dedicated digital space for discussions and knowledge sharing."}
               </p>
-
-              
             </div>
-
-            {/* Rules Block - Later will add community rules */}
-            {/* <div className="rounded-2xl border bg-white p-4">
-              <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
-                <ShieldAlert size={14} className="text-brand-brown-700" />
-                <span>Community Rules</span>
-              </div>
-
-              <ol className="mt-3 space-y-2 text-xs text-brand-brown-800 list-decimal list-inside">
-                <li>Be constructive and respectful.</li>
-                <li>No low-effort self-promotion.</li>
-                <li>Tag posts with appropriate Community tags.</li>
-              </ol>
-            </div> */}
           </aside>
         </div>
       </div>

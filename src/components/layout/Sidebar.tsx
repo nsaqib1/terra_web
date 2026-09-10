@@ -112,8 +112,15 @@ export function Sidebar() {
 
     void loadJoinedCommunities();
 
+    const handleMembershipChanged = () => {
+      void loadJoinedCommunities();
+    };
+
+    window.addEventListener("community-membership-changed", handleMembershipChanged);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("community-membership-changed", handleMembershipChanged);
     };
   }, [authLoading, isAuthenticated]);
 

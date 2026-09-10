@@ -202,5 +202,88 @@ export interface PaginatedResponse<T> {
     limit: number;
     total: number;
     totalPages: number;
+    hasNextPage?: boolean;
   };
 }
+
+export interface CommunityDetail {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  status: CommunityStatus;
+  maturity: CommunityMaturity;
+  governanceMode: GovernanceMode;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    memberships: number;
+    posts: number;
+  };
+}
+
+export interface CommunityMembershipRecord {
+  id: string;
+  role: CommunityMemberRole;
+  joinedAt: string;
+  leftAt?: string | null;
+  community?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
+
+export interface MembershipStatusResponse {
+  isMember: boolean;
+  membership: CommunityMembershipRecord | null;
+}
+
+export interface PostAuthor {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface PostTagItem {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface PostMediaItem {
+  id: string;
+  type: string;
+  storageKey: string;
+  mimeType: string;
+  width: number | null;
+  height: number | null;
+  size: number | null;
+  altText: string | null;
+}
+
+export interface PostItem {
+  id: string;
+  document: any;
+  community: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  author: PostAuthor;
+  tags: PostTagItem[];
+  media?: PostMediaItem[];
+  score: number;
+  commentCount: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetPostsQuery {
+  communityId: string;
+  page?: number;
+  limit?: number;
+}
+
