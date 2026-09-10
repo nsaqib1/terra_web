@@ -5,4 +5,5 @@ export * from "./client";
 export * from "./auth";
 export * from "./admin";
 export * from "./tags";
+export * from "./communities";
 

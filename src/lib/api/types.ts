@@ -87,6 +87,8 @@ export interface UpdateTagInput {
   status?: TagStatus;
 }
 
+export type CommunityMemberRole = "CITIZEN" | "MODERATOR";
+
 export interface Community {
   id: string;
   name: string;
@@ -102,6 +104,14 @@ export interface Community {
   postsCount?: number;
   tagsCount?: number;
   tags?: CommunityTag[];
+}
+
+export interface JoinedCommunity {
+  id: string;
+  name: string;
+  slug: string;
+  role: CommunityMemberRole;
+  joinedAt: string;
 }
 
 export interface AdminCommunityStats {

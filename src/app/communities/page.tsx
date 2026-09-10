@@ -11,7 +11,7 @@ const communitys = [
     members: "2.4M",
     posts: "184K",
     initials: "AI",
-    category: "Technology",
+    
     tags: ["agents", "opensource", "llm"],
   },
   {
@@ -22,7 +22,7 @@ const communitys = [
     members: "1.8M",
     posts: "126K",
     initials: "PH",
-    category: "Art & Design",
+    
     tags: ["street", "portraits", "film"],
   },
   {
@@ -33,7 +33,7 @@ const communitys = [
     members: "1.4M",
     posts: "214K",
     initials: "PR",
-    category: "Technology",
+    
     tags: ["web", "backend", "opensource"],
   },
   {
@@ -44,7 +44,7 @@ const communitys = [
     members: "48K",
     posts: "12K",
     initials: "UG",
-    category: "Lifestyle",
+   
     tags: ["hydroponics", "balcony", "organic"],
   },
   {
@@ -55,7 +55,7 @@ const communitys = [
     members: "31K",
     posts: "8.4K",
     initials: "MK",
-    category: "Technology",
+    
     tags: ["switches", "customs", "keycaps"],
   },
   {
@@ -66,12 +66,10 @@ const communitys = [
     members: "22K",
     posts: "5.1K",
     initials: "HC",
-    category: "Lifestyle",
+    
     tags: ["baking", "mealprep", "techniques"],
   },
 ];
-
-const categories = ["All", "Technology", "Art & Design", "Lifestyle", "Science", "Education"];
 
 export default function PyramidsPage() {
   return (
@@ -107,20 +105,8 @@ export default function PyramidsPage() {
             />
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
-            {categories.map((category, index) => (
-              <button
-                key={category}
-                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${index === 0
-                  ? "bg-brand-brown-950 text-white"
-                  : "bg-white border text-brand-brown-800 hover:bg-brand-sand"
-                  }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+          
+          
         </div>
 
         {/* Clean Community Grid */}
@@ -128,7 +114,7 @@ export default function PyramidsPage() {
           {communitys.map((community) => (
             <Link
               key={community.slug}
-              href={`/p/${community.slug}`}
+              href={`/community/${community.slug}`}
               className="group flex flex-col justify-between rounded-2xl border bg-white p-5 transition-all hover:border-brand-brown-700/40 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]"
             >
               <div>
@@ -142,9 +128,6 @@ export default function PyramidsPage() {
                       <h2 className="font-bold text-sm text-brand-brown-950 group-hover:underline">
                         {community.name}
                       </h2>
-                      <span className="text-[10px] font-semibold text-muted-foreground">
-                        {community.category}
-                      </span>
                     </div>
                   </div>
 
@@ -175,17 +158,7 @@ export default function PyramidsPage() {
                     </span>
                   </div>
 
-                  {/* Top Tag Preview */}
-                  <div className="flex gap-1">
-                    {community.tags.slice(0, 2).map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded bg-brand-sand/60 px-1.5 py-0.5 text-[10px] font-medium text-brand-brown-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                  
                 </div>
               </div>
             </Link>
