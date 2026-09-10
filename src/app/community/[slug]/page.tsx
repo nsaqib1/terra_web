@@ -11,8 +11,8 @@ import {
   FileText,
 } from "lucide-react";
 
-// Mock Pyramid Data
-const pyramidData = {
+// Mock Community Data
+const communityData = {
   name: "Artificial Intelligence",
   slug: "artificial-intelligence",
   initials: "AI",
@@ -89,18 +89,18 @@ export default async function PyramidPage({
   return (
     <AppShell>
       <div className="mx-auto max-w-[1180px]">
-        {/* Pyramid Header Banner */}
+        {/* Community Header Banner */}
         <div className="overflow-hidden rounded-2xl border bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             {/* Left: Avatar & Title */}
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand-desert-light text-xl font-black text-brand-brown-900 shadow-inner">
-                {pyramidData.initials}
+                {communityData.initials}
               </div>
 
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-brand-brown-950">
-                  {pyramidData.name}
+                  {communityData.name}
                 </h1>
 
                 {/* Quick Stats */}
@@ -108,7 +108,7 @@ export default async function PyramidPage({
                   <div className="flex items-center gap-1">
                     <Users size={14} className="text-brand-brown-700" />
                     <span className="font-semibold text-brand-brown-950">
-                      {pyramidData.memberCount}
+                      {communityData.memberCount}
                     </span>
                     <span>Members</span>
                   </div>
@@ -116,7 +116,7 @@ export default async function PyramidPage({
                   <div className="flex items-center gap-1">
                     <FileText size={14} className="text-brand-brown-700" />
                     <span className="font-semibold text-brand-brown-950">
-                      {pyramidData.postCount}
+                      {communityData.postCount}
                     </span>
                     <span>Posts</span>
                   </div>
@@ -142,7 +142,7 @@ export default async function PyramidPage({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {pyramidData.tags.map((tag) => (
+              {communityData.tags.map((tag) => (
                 <button
                   key={tag.name}
                   className="
@@ -161,7 +161,7 @@ export default async function PyramidPage({
           </div>
         </div>
 
-        {/* Main Feed + Pyramid Context Sidebar */}
+        {/* Main Feed + Community Context Sidebar */}
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           {/* Main Feed */}
           <main className="space-y-4">
@@ -244,23 +244,23 @@ export default async function PyramidPage({
             </div>
           </main>
 
-          {/* Right Sidebar: About Pyramid */}
+          {/* Right Sidebar: About Community */}
           <aside className="space-y-4">
             <div className="rounded-2xl border bg-white p-4">
               <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
                 <Sparkles size={14} className="text-brand-desert-dark" />
-                <span>About Pyramid</span>
+                <span>About Community</span>
               </div>
 
               {/* Centralized Description */}
               <p className="mt-3 text-xs leading-relaxed text-brand-brown-700">
-                {pyramidData.about}
+                {communityData.about}
               </p>
 
               <div className="mt-4 space-y-2 border-t pt-3 text-xs text-brand-brown-900">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Established</span>
-                  <span className="font-semibold">{pyramidData.established}</span>
+                  <span className="font-semibold">{communityData.established}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Access</span>
@@ -273,13 +273,13 @@ export default async function PyramidPage({
             <div className="rounded-2xl border bg-white p-4">
               <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
                 <ShieldAlert size={14} className="text-brand-brown-700" />
-                <span>Pyramid Rules</span>
+                <span>Community Rules</span>
               </div>
 
               <ol className="mt-3 space-y-2 text-xs text-brand-brown-800 list-decimal list-inside">
                 <li>Be constructive and respectful.</li>
                 <li>No low-effort self-promotion.</li>
-                <li>Tag posts with appropriate Pyramid tags.</li>
+                <li>Tag posts with appropriate Community tags.</li>
               </ol>
             </div>
           </aside>
