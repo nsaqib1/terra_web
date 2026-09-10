@@ -8,6 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth";
 import { tokenStorage } from "@/lib/api/token";
 import { LoginDto, RegisterDto, User } from "@/lib/api/types";
@@ -26,6 +27,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -89,8 +91,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       tokenStorage.clear();
       setUser(null);
+      router.push("/login");
     }
-  }, []);
+  }, [router]);
 
   const value = useMemo(
     () => ({
