@@ -53,6 +53,40 @@ export interface CommunityTag {
   usageCount: number;
 }
 
+export type TagStatus = "ACTIVE" | "ARCHIVED";
+
+export interface Tag {
+  id: string;
+  communityId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  usageCount: number;
+  status: TagStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListTagsQuery {
+  communityId: string;
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateTagInput {
+  communityId: string;
+  name: string;
+  description?: string;
+  slug?: string;
+}
+
+export interface UpdateTagInput {
+  name?: string;
+  description?: string;
+  status?: TagStatus;
+}
+
 export interface Community {
   id: string;
   name: string;

@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Shield,
+  Tag,
   Users,
   X,
 } from "lucide-react";
@@ -37,6 +38,11 @@ const adminNavItems = [
     href: "/admin/proposals",
     icon: FileCheck2,
   },
+  {
+    label: "Tags",
+    href: "/admin/tags",
+    icon: Tag,
+  },
 ];
 
 export default function AdminLayout({
@@ -61,6 +67,7 @@ export default function AdminLayout({
     if (pathname === "/admin") return "Overview";
     if (pathname.startsWith("/admin/communities")) return "Communities";
     if (pathname.startsWith("/admin/proposals")) return "Proposals";
+    if (pathname.startsWith("/admin/tags")) return "Tags";
     return "Admin Console";
   };
 
