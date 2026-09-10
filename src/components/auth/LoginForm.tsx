@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   ArrowRight,
+  CheckCircle2,
   Eye,
   EyeOff,
   Loader2,
@@ -24,16 +25,16 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const [form, setForm] = useState({
     identifier: "",
     password: "",
-    remember: false,
   });
 
   const update = (
     field: keyof typeof form,
-    value: string | boolean,
+    value: string,
   ) => {
     if (errorMessage) {
       setErrorMessage(null);
@@ -45,10 +46,10 @@ export function LoginForm() {
     }));
   };
 
-  const canSubmit =
-    form.identifier.trim().length >= 3 &&
-    form.password.length >= 8 &&
-    !isSubmitting;
+  const isIdentifierValid = form.identifier.trim().length >= 3;
+  const isPasswordValid = form.password.length >= 8;
+
+  const canSubmit = isIdentifierValid && isPasswordValid && !isSubmitting && !isSuccess;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -66,7 +67,10 @@ export function LoginForm() {
         password: form.password,
       });
 
-      router.push("/");
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.push("/");
+      }, 600);
     } catch (err) {
       const msg = extractErrorMessage(err, "Invalid credentials. Please try again.");
       setErrorMessage(msg);
@@ -116,7 +120,7 @@ export function LoginForm() {
             text-brand-brown-950
           "
         >
-          Welcome back, Citizen
+          Welcome back
         </h1>
 
         <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-brand-brown-600">
@@ -125,7 +129,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* Error Message */}
+      {/* Status Messages */}
       {errorMessage && (
         <div
           role="alert"
@@ -144,6 +148,28 @@ export function LoginForm() {
         >
           <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-600" />
           <div className="flex-1 font-medium">{errorMessage}</div>
+        </div>
+      )}
+
+      {isSuccess && (
+        <div
+          role="status"
+          className="
+            mt-6
+            flex items-center gap-3
+            rounded-xl
+            border border-emerald-200
+            bg-emerald-50
+            p-3.5
+            text-sm
+            font-medium
+            text-emerald-800
+            shadow-sm
+            animate-in fade-in slide-in-from-top-1
+          "
+        >
+          <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+          <span>Logged in successfully! Redirecting...</span>
         </div>
       )}
 
@@ -177,7 +203,7 @@ export function LoginForm() {
                 id="identifier"
                 type="text"
                 value={form.identifier}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isSuccess}
                 onChange={(event) =>
                   update("identifier", event.target.value)
                 }
@@ -242,7 +268,7 @@ export function LoginForm() {
                 id="login-password"
                 type={showPassword ? "text" : "password"}
                 value={form.password}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isSuccess}
                 onChange={(event) =>
                   update("password", event.target.value)
                 }
@@ -268,7 +294,7 @@ export function LoginForm() {
 
               <button
                 type="button"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isSuccess}
                 onClick={() =>
                   setShowPassword((current) => !current)
                 }
@@ -296,33 +322,10 @@ export function LoginForm() {
             </div>
           </div>
 
-          {/* Remember */}
-          <label className="flex cursor-pointer items-center gap-2.5">
-            <input
-              type="checkbox"
-              checked={form.remember}
-              disabled={isSubmitting}
-              onChange={(event) =>
-                update("remember", event.target.checked)
-              }
-              className="
-                h-4 w-4
-                rounded
-                border-brand-sand-dark
-                accent-brand-brown-950
-                disabled:opacity-50
-              "
-            />
-
-            <span className="text-[11px] text-muted-foreground">
-              Keep me signed in
-            </span>
-          </label>
-
           {/* Submit */}
           <Button
             type="submit"
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || isSubmitting || isSuccess}
             className="
               h-12 w-full
               gap-2
@@ -341,6 +344,11 @@ export function LoginForm() {
                 <Loader2 size={16} className="animate-spin" />
                 <span>Logging in...</span>
               </>
+            ) : isSuccess ? (
+              <>
+                <CheckCircle2 size={16} />
+                <span>Logged in!</span>
+              </>
             ) : (
               <>
                 <span>Log in</span>
@@ -349,40 +357,12 @@ export function LoginForm() {
             )}
           </Button>
         </form>
-
-        {/* Divider */}
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-brand-sand-dark" />
-          <span className="text-[10px] text-muted-foreground">
-            or
-          </span>
-          <div className="h-px flex-1 bg-brand-sand-dark" />
-        </div>
-
-        {/* Google */}
-        <button
-          type="button"
-          className="
-            flex h-11 w-full
-            items-center justify-center gap-2.5
-            rounded-xl
-            border
-            bg-white
-            text-xs font-semibold
-            text-brand-brown-800
-            transition-colors
-            hover:bg-brand-cream
-          "
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
       </div>
 
       {/* Signup */}
       <div className="mt-6 text-center">
         <span className="text-xs text-muted-foreground">
-          New to Commons?
+          Don't have any account?
         </span>{" "}
         <Link
           href="/signup"
@@ -394,56 +374,9 @@ export function LoginForm() {
             hover:underline
           "
         >
-          Become a Citizen
-        </Link>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-8 flex justify-center gap-4">
-        <Link
-          href="/privacy"
-          className="text-[10px] text-muted-foreground hover:text-brand-brown-900"
-        >
-          Privacy
-        </Link>
-        <span className="text-[10px] text-brand-sand-dark">
-          •
-        </span>
-        <Link
-          href="/terms"
-          className="text-[10px] text-muted-foreground hover:text-brand-brown-900"
-        >
-          Terms
+          Signup
         </Link>
       </div>
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg
-      width="17"
-      height="17"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        fill="#4285F4"
-        d="M21.35 12.27c0-.71-.06-1.39-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.21Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.44c-.87.58-1.98.93-3.31.93-2.54 0-4.7-1.72-5.47-4.03H3.29v2.52A9.75 9.75 0 0 0 12 21.75Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M6.53 13.85A5.86 5.86 0 0 1 6.22 12c0-.64.11-1.27.31-1.85V7.63H3.29A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.04 4.37l3.24-2.52Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 6.12c1.43 0 2.71.49 3.72 1.46l2.79-2.79C16.84 3.18 14.63 2.25 12 2.25a9.75 9.75 0 0 0-8.71 5.38l3.24 2.52C7.3 7.84 9.46 6.12 12 6.12Z"
-      />
-    </svg>
   );
 }
