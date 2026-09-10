@@ -1,60 +1,87 @@
+"use client";
+
+import { CheckCircle2, Globe2, Layers, ShieldCheck, Sparkles, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+
+const FEATURED_TOPICS = [
+  "Architecture",
+  "AI Ethics",
+  "Generative Tech",
+  "Climate Tech",
+  "Philosophy",
+  "Indie Hacking",
+  "Solarpunk",
+  "Design Systems",
+];
 
 export function AuthBrandPanel() {
+  const [activeTopic, setActiveTopic] = useState("AI Ethics");
+
   return (
     <section
       className="
         relative hidden
+        w-[48%] min-h-screen
         overflow-hidden
-        lg:flex lg:w-[46%]
-        lg:flex-col
-        lg:justify-between
         bg-brand-brown-950
-        p-10
-        xl:p-14
+        lg:flex lg:flex-col lg:justify-between
+        p-10 xl:p-14
       "
     >
-      {/* Decorative circles */}
-      <div
-        className="
-          pointer-events-none absolute
-          -right-32 -top-32
-          h-96 w-96
-          rounded-full
-          bg-brand-desert/10
-        "
-      />
+      {/* Background Radial Glows & Grid Pattern */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        {/* Subtle SVG Grid Background */}
+        <div
+          className="
+            absolute inset-0 opacity-[0.03]
+            [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)]
+            [background-size:24px_24px]
+          "
+        />
 
-      <div
-        className="
-          pointer-events-none absolute
-          -bottom-40 -left-40
-          h-[28rem] w-[28rem]
-          rounded-full
-          border border-brand-desert/10
-        "
-      />
+        {/* Ambient Desert Light Glow */}
+        <div
+          className="
+            absolute -top-24 -right-24
+            h-[30rem] w-[30rem]
+            rounded-full
+            bg-brand-desert/15
+            blur-[120px]
+          "
+        />
+        <div
+          className="
+            absolute -bottom-32 -left-32
+            h-[28rem] w-[28rem]
+            rounded-full
+            bg-brand-desert/10
+            blur-[100px]
+          "
+        />
+      </div>
 
-      {/* Brand */}
-      <div className="relative">
-
+      {/* Header / Logo */}
+      <div className="relative z-10 flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-3"
+          className="group inline-flex items-center gap-3 transition-transform hover:scale-[1.02]"
         >
           <div
             className="
               flex h-11 w-11
               items-center justify-center
               overflow-hidden
-              rounded-xl
-              bg-brand-desert
+              rounded-2xl
+              bg-gradient-to-br from-brand-desert to-brand-desert-dark
+              shadow-lg shadow-brand-desert/20
+              ring-1 ring-white/20
             "
           >
             <Image
               src="/logo.png"
-              alt="Platform"
+              alt="Commons Logo"
               width={44}
               height={44}
               className="h-11 w-11 object-contain"
@@ -62,119 +89,76 @@ export function AuthBrandPanel() {
             />
           </div>
 
-          <span className="text-lg font-bold tracking-tight text-white">
-            Commons
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xl font-extrabold tracking-tight text-white">
+              Commons
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-desert/80">
+              one community per interest
+            </span>
+          </div>
         </Link>
+
 
       </div>
 
-      {/* Main message */}
-      <div className="relative max-w-lg">
-
-        <p
-          className="
-            text-[10px]
-            font-bold
-            uppercase
-            tracking-[0.18em]
-            text-brand-desert
-          "
-        >
-          A home for every interest
-        </p>
+      {/* Value Proposition & Interactive Hook */}
+      <div className="relative z-10 my-auto py-8 max-w-lg">
 
         <h1
           className="
-            mt-5
+            mt-6
             text-4xl
-            font-bold
-            leading-[1.08]
-            tracking-[-0.04em]
+            font-black
+            leading-[1.12]
+            tracking-tight
             text-white
             xl:text-5xl
           "
         >
-          Join the people
-          <br />
-          building something
-          <br />
-          that lasts.
+          Where common <br />
+
+          <span className="bg-gradient-to-r from-brand-desert via-amber-200 to-brand-desert bg-clip-text text-transparent">
+            interests collide
+          </span>
         </h1>
 
-        <p
-          className="
-            mt-6
-            max-w-md
-            text-sm
-            leading-7
-            text-white/60
-          "
-        >
-          Discover communities, exchange ideas, contribute knowledge,
-          and help shape the digital institutions that belong to everyone.
+        <p className="mt-5 text-base leading-relaxed text-white/70">
+          A place where people can come together to learn, discuss, ask questions, share experiences, contribute knowledge, and help one another.
         </p>
 
-        {/* Principles */}
-        <div className="mt-9 space-y-4">
-
-          <Principle
-            number="01"
-            title="One home"
-            description="Every enduring interest has one canonical community."
-          />
-
-          <Principle
-            number="02"
-            title="Shared ownership"
-            description="Communities belong to the people who contribute to them."
-          />
-
-          <Principle
-            number="03"
-            title="Knowledge that lasts"
-            description="Great contributions can become part of a community's history."
-          />
-
+        {/* Dynamic Interest Selector Tag Cloud */}
+        <div className="mt-8">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/40">
+            Explore Communities
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {FEATURED_TOPICS.map((topic) => {
+              const isSelected = activeTopic === topic;
+              return (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => setActiveTopic(topic)}
+                  className={`
+                    rounded-lg px-3 py-1.5 text-xs font-medium transition-all
+                    ${isSelected
+                      ? "bg-brand-desert text-brand-brown-950 font-bold shadow-md shadow-brand-desert/20 scale-105"
+                      : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/5"
+                    }
+                  `}
+                >
+                  {topic}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
+
       </div>
 
-      {/* Footer */}
-      <p className="relative text-[10px] text-white/35">
-        Every interest deserves a home.
-      </p>
 
     </section>
-  );
-}
-
-function Principle({
-  number,
-  title,
-  description,
-}: {
-  number: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex gap-4">
-
-      <span className="pt-0.5 text-[10px] font-bold text-brand-desert">
-        {number}
-      </span>
-
-      <div>
-        <h3 className="text-xs font-bold text-white">
-          {title}
-        </h3>
-
-        <p className="mt-0.5 text-[11px] leading-5 text-white/45">
-          {description}
-        </p>
-      </div>
-
-    </div>
   );
 }

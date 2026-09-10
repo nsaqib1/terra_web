@@ -6,12 +6,13 @@ import {
   EyeOff,
   Mail,
   User,
+  AtSign,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-
 import { PasswordStrength } from "./PasswordStrength";
 
 export function SignupForm() {
@@ -43,10 +44,9 @@ export function SignupForm() {
     form.agree;
 
   return (
-    <div className="w-full max-w-[460px]">
-
-      {/* Mobile logo */}
-      <div className="mb-10 lg:hidden">
+    <div className="w-full max-w-[440px]">
+      {/* Mobile Branding (Clean & Consistent with Brand Panel) */}
+      <div className="mb-8 lg:hidden">
         <Link
           href="/"
           className="inline-flex items-center gap-2.5"
@@ -58,136 +58,132 @@ export function SignupForm() {
               overflow-hidden
               rounded-xl
               bg-brand-desert
+              shadow-sm
             "
           >
-            <span className="text-lg">🐪</span>
+            <Image
+              src="/logo.png"
+              alt="Commons Logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain"
+            />
           </div>
 
-          <span className="text-lg font-bold text-brand-brown-950">
+          <span className="text-xl font-bold tracking-tight text-brand-brown-950">
             Commons
           </span>
         </Link>
       </div>
 
-      {/* Heading */}
+      {/* Header Copy */}
       <div>
         <p
           className="
-            text-[10px]
+            text-[11px]
             font-bold
             uppercase
-            tracking-[0.16em]
+            tracking-[0.18em]
             text-brand-desert-dark
           "
         >
-          Join the community
+          Get Started
         </p>
 
         <h1
           className="
-            mt-2
+            mt-1.5
             text-3xl
-            font-bold
-            tracking-[-0.035em]
+            font-extrabold
+            tracking-tight
             text-brand-brown-950
           "
         >
-          Become a Citizen
+          Create your account
         </h1>
 
-        <p className="mt-2 text-sm leading-6 text-brand-brown-600">
-          Create your identity and join communities built around the
-          things you care about.
+        <p className="mt-2 text-sm leading-relaxed text-brand-brown-600">
+          Claim your unique handle and join vibrant, purpose-driven communities.
         </p>
       </div>
 
-      {/* Form */}
+      {/* Form Area */}
       <form
-        className="mt-8 space-y-5"
+        className="mt-7 space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
+          if (!canSubmit) return;
 
-          if (!canSubmit) {
-            return;
-          }
-
-          // Authentication API will be connected later.
-          console.log("Signup", form);
+          console.log("Signup payload:", form);
         }}
       >
-
-        {/* Name */}
+        {/* Name Input */}
         <div>
           <label
             htmlFor="name"
-            className="text-xs font-semibold text-brand-brown-900"
+            className="block text-xs font-semibold text-brand-brown-900"
           >
-            Your name
+            Full Name
           </label>
 
-          <div className="relative mt-2">
-
+          <div className="relative mt-1.5">
             <User
               size={16}
               className="
                 absolute left-3.5 top-1/2
                 -translate-y-1/2
-                text-muted-foreground
+                text-brand-brown-600/50
               "
             />
 
             <input
               id="name"
               value={form.name}
-              onChange={(event) =>
-                update("name", event.target.value)
-              }
+              onChange={(event) => update("name", event.target.value)}
               placeholder="Alex Morgan"
               autoComplete="name"
               className="
-                h-12 w-full
+                h-11 w-full
                 rounded-xl
-                border
+                border border-brand-sand-dark/60
                 bg-white
                 pl-10 pr-4
                 text-sm
                 text-brand-brown-950
                 outline-none
+                transition-all
                 placeholder:text-brand-brown-600/40
                 focus:border-brand-desert-dark
-                focus:ring-4
+                focus:ring-2
                 focus:ring-brand-desert-light/50
               "
             />
-
           </div>
         </div>
 
-        {/* Username */}
+        {/* Username Input */}
         <div>
-          <label
-            htmlFor="username"
-            className="text-xs font-semibold text-brand-brown-900"
-          >
-            Username
-          </label>
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="username"
+              className="text-xs font-semibold text-brand-brown-900"
+            >
+              Username
+            </label>
+            <span className="text-[10px] text-brand-brown-600/70">
+              Your unique handle
+            </span>
+          </div>
 
-          <p className="mt-1 text-[10px] text-muted-foreground">
-            This is how other citizens will identify you.
-          </p>
-
-          <div className="relative mt-2">
-
-            <span
+          <div className="relative mt-1.5">
+            <AtSign
+              size={15}
               className="
                 absolute left-3.5 top-1/2
                 -translate-y-1/2
-                text-sm font-medium
-                text-muted-foreground
+                text-brand-brown-600/50
               "
-            >
-              @
-            </span>
+            />
 
             <input
               id="username"
@@ -195,49 +191,46 @@ export function SignupForm() {
               onChange={(event) =>
                 update(
                   "username",
-                  event.target.value
-                    .replace(/\s/g, "")
-                    .toLowerCase(),
+                  event.target.value.replace(/\s/g, "").toLowerCase(),
                 )
               }
               placeholder="alexmorgan"
               autoComplete="username"
               className="
-                h-12 w-full
+                h-11 w-full
                 rounded-xl
-                border
+                border border-brand-sand-dark/60
                 bg-white
-                pl-9 pr-4
+                pl-10 pr-4
                 text-sm
                 text-brand-brown-950
                 outline-none
+                transition-all
                 placeholder:text-brand-brown-600/40
                 focus:border-brand-desert-dark
-                focus:ring-4
+                focus:ring-2
                 focus:ring-brand-desert-light/50
               "
             />
-
           </div>
         </div>
 
-        {/* Email */}
+        {/* Email Input */}
         <div>
           <label
             htmlFor="email"
-            className="text-xs font-semibold text-brand-brown-900"
+            className="block text-xs font-semibold text-brand-brown-900"
           >
-            Email address
+            Email Address
           </label>
 
-          <div className="relative mt-2">
-
+          <div className="relative mt-1.5">
             <Mail
               size={16}
               className="
                 absolute left-3.5 top-1/2
                 -translate-y-1/2
-                text-muted-foreground
+                text-brand-brown-600/50
               "
             />
 
@@ -245,106 +238,88 @@ export function SignupForm() {
               id="email"
               type="email"
               value={form.email}
-              onChange={(event) =>
-                update("email", event.target.value)
-              }
-              placeholder="you@example.com"
+              onChange={(event) => update("email", event.target.value)}
+              placeholder="alex@example.com"
               autoComplete="email"
               className="
-                h-12 w-full
+                h-11 w-full
                 rounded-xl
-                border
+                border border-brand-sand-dark/60
                 bg-white
                 pl-10 pr-4
                 text-sm
                 text-brand-brown-950
                 outline-none
+                transition-all
                 placeholder:text-brand-brown-600/40
                 focus:border-brand-desert-dark
-                focus:ring-4
+                focus:ring-2
                 focus:ring-brand-desert-light/50
               "
             />
-
           </div>
         </div>
 
-        {/* Password */}
+        {/* Password Input */}
         <div>
           <label
             htmlFor="password"
-            className="text-xs font-semibold text-brand-brown-900"
+            className="block text-xs font-semibold text-brand-brown-900"
           >
             Password
           </label>
 
-          <div className="relative mt-2">
-
+          <div className="relative mt-1.5">
             <input
               id="password"
               type={showPassword ? "text" : "password"}
               value={form.password}
-              onChange={(event) =>
-                update("password", event.target.value)
-              }
-              placeholder="Create a secure password"
+              onChange={(event) => update("password", event.target.value)}
+              placeholder="Create a strong password"
               autoComplete="new-password"
               className="
-                h-12 w-full
+                h-11 w-full
                 rounded-xl
-                border
+                border border-brand-sand-dark/60
                 bg-white
-                px-4 pr-11
+                pl-4 pr-11
                 text-sm
                 text-brand-brown-950
                 outline-none
+                transition-all
                 placeholder:text-brand-brown-600/40
                 focus:border-brand-desert-dark
-                focus:ring-4
+                focus:ring-2
                 focus:ring-brand-desert-light/50
               "
             />
 
             <button
               type="button"
-              onClick={() =>
-                setShowPassword((current) => !current)
-              }
+              onClick={() => setShowPassword((current) => !current)}
               className="
-                absolute right-3.5 top-1/2
+                absolute right-3 top-1/2
                 -translate-y-1/2
-                rounded-lg p-1
-                text-muted-foreground
+                rounded-md p-1
+                text-brand-brown-600/60
                 hover:bg-brand-sand
                 hover:text-brand-brown-900
               "
-              aria-label={
-                showPassword
-                  ? "Hide password"
-                  : "Show password"
-              }
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? (
-                <EyeOff size={16} />
-              ) : (
-                <Eye size={16} />
-              )}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
-
           </div>
 
           <PasswordStrength password={form.password} />
         </div>
 
-        {/* Terms */}
-        <label className="flex cursor-pointer items-start gap-3">
-
+        {/* Terms Checkbox */}
+        <label className="flex cursor-pointer items-start gap-2.5 pt-1">
           <input
             type="checkbox"
             checked={form.agree}
-            onChange={(event) =>
-              update("agree", event.target.checked)
-            }
+            onChange={(event) => update("agree", event.target.checked)}
             className="
               mt-0.5
               h-4 w-4
@@ -354,72 +329,67 @@ export function SignupForm() {
             "
           />
 
-          <span className="text-[11px] leading-5 text-muted-foreground">
+          <span className="text-xs leading-normal text-brand-brown-600">
             I agree to the{" "}
             <Link
               href="/terms"
-              className="font-semibold text-brand-brown-800 hover:underline"
+              className="font-semibold text-brand-brown-900 underline-offset-2 hover:underline"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
               href="/privacy"
-              className="font-semibold text-brand-brown-800 hover:underline"
+              className="font-semibold text-brand-brown-900 underline-offset-2 hover:underline"
             >
               Privacy Policy
             </Link>
             .
           </span>
-
         </label>
 
-        {/* Submit */}
+        {/* Submit Action */}
         <Button
           type="submit"
           disabled={!canSubmit}
           className="
-            h-12 w-full
+            mt-2
+            h-11 w-full
             gap-2
             rounded-xl
             bg-brand-brown-950
             font-semibold
             text-white
-            shadow-none
+            shadow-sm
             transition-all
-            hover:bg-brand-brown-800
+            hover:bg-brand-brown-900
             disabled:cursor-not-allowed
             disabled:opacity-40
           "
         >
-          Become a Citizen
+          Create Account
           <ArrowRight size={16} />
         </Button>
-
       </form>
 
-      {/* Login */}
-      <div className="mt-7 text-center">
-
-        <span className="text-xs text-muted-foreground">
-          Already a citizen?
+      {/* Login Switcher */}
+      <div className="mt-6 text-center">
+        <span className="text-xs text-brand-brown-600">
+          Already have an account?
         </span>{" "}
-
         <Link
           href="/login"
           className="
             text-xs
             font-bold
-            text-brand-brown-900
+            text-brand-brown-950
             hover:text-brand-desert-dark
             hover:underline
           "
         >
           Log in
         </Link>
-
       </div>
-
     </div>
   );
 }
