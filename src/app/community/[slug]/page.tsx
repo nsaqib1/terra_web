@@ -15,7 +15,6 @@ import {
 const communityData = {
   name: "Artificial Intelligence",
   slug: "artificial-intelligence",
-  initials: "AI",
   memberCount: "2.4M",
   postCount: "184K",
   established: "2026",
@@ -95,7 +94,7 @@ export default async function PyramidPage({
             {/* Left: Avatar & Title */}
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand-desert-light text-xl font-black text-brand-brown-900 shadow-inner">
-                {communityData.initials}
+                 {/* TODO: Add community intials, later will add avatar image */}
               </div>
 
               <div>
@@ -138,7 +137,7 @@ export default async function PyramidPage({
           <div className="mt-6 border-t pt-4">
             <div className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               <Layers size={14} className="text-brand-brown-700" />
-              <span>Postmarks</span>
+              <span>Tags</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -257,20 +256,11 @@ export default async function PyramidPage({
                 {communityData.about}
               </p>
 
-              <div className="mt-4 space-y-2 border-t pt-3 text-xs text-brand-brown-900">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Established</span>
-                  <span className="font-semibold">{communityData.established}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Access</span>
-                  <span className="font-semibold">Public</span>
-                </div>
-              </div>
+              
             </div>
 
-            {/* Rules Block */}
-            <div className="rounded-2xl border bg-white p-4">
+            {/* Rules Block - Later will add community rules */}
+            {/* <div className="rounded-2xl border bg-white p-4">
               <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
                 <ShieldAlert size={14} className="text-brand-brown-700" />
                 <span>Community Rules</span>
@@ -281,7 +271,7 @@ export default async function PyramidPage({
                 <li>No low-effort self-promotion.</li>
                 <li>Tag posts with appropriate Community tags.</li>
               </ol>
-            </div>
+            </div> */}
           </aside>
         </div>
       </div>
