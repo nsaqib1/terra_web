@@ -5,6 +5,7 @@ import {
   ChevronDown,
   LogOut,
   Search,
+  Shield,
   User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -147,9 +148,16 @@ export function TopBar() {
                     </Avatar>
 
                     <div className="hidden text-left lg:block">
-                      <p className="text-sm font-semibold leading-none text-brand-brown-950">
-                        {user.displayName}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-semibold leading-none text-brand-brown-950">
+                          {user.displayName}
+                        </p>
+                        {user.role === "ADMIN" && (
+                          <span className="rounded-xs bg-amber-100 px-1 py-0.2 text-[8px] font-bold uppercase text-amber-800 leading-none">
+                            Admin
+                          </span>
+                        )}
+                      </div>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {user.points.toLocaleString()} points
                       </p>
@@ -173,16 +181,42 @@ export function TopBar() {
                         p-1.5
                         shadow-lg
                         animate-in fade-in slide-in-from-top-2
+                        z-50
                       "
                     >
                       <div className="border-b border-brand-sand/60 px-3 py-2 lg:hidden">
-                        <p className="text-sm font-semibold text-brand-brown-950">
-                          {user.displayName}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-brand-brown-950">
+                            {user.displayName}
+                          </p>
+                          {user.role === "ADMIN" && (
+                            <span className="rounded-xs bg-amber-100 px-1 py-0.2 text-[8px] font-bold uppercase text-amber-800 leading-none">
+                              Admin
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           @{user.username}
                         </p>
                       </div>
+
+                      {user.role === "ADMIN" && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setShowDropdown(false)}
+                          className="
+                            flex items-center gap-2
+                            rounded-lg px-3 py-2
+                            text-xs font-bold
+                            text-amber-900 bg-amber-50/70
+                            hover:bg-amber-100/70
+                            mb-1
+                          "
+                        >
+                          <Shield size={15} className="text-amber-700" />
+                          Admin Console
+                        </Link>
+                      )}
 
                       <Link
                         href="/profile"
