@@ -30,7 +30,7 @@ export function PostGuidelines() {
           <Guideline
             icon={<Bookmark size={14} />}
             title="Mark the context"
-            description="Postmarks organize your post inside the community — they are a controlled vocabulary, not hashtags."
+            description="Tags organize your post inside the community — they are a controlled vocabulary, not hashtags."
           />
 
           <Guideline

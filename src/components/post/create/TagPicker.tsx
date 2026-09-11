@@ -2,17 +2,17 @@
 
 import { Bookmark } from "lucide-react";
 
-interface PostmarkPickerProps {
+interface TagPickerProps {
   options: string[];
   selected: string[];
-  onToggle: (postmark: string) => void;
+  onToggle: (tag: string) => void;
 }
 
-export function PostmarkPicker({
+export function TagPicker({
   options,
   selected,
   onToggle,
-}: PostmarkPickerProps) {
+}: TagPickerProps) {
   return (
     <div>
       <div className="flex items-center gap-2">
@@ -21,7 +21,7 @@ export function PostmarkPicker({
           className="text-brand-desert-dark"
         />
         <label className="text-sm font-semibold text-brand-brown-900">
-          Postmarks
+          Tags
         </label>
         <span className="text-[10px] font-medium text-muted-foreground">
           Optional
@@ -30,7 +30,7 @@ export function PostmarkPicker({
 
       <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
         Choose from this community&apos;s vocabulary so others can find
-        your post. Postmarks are not free-form hashtags.
+        your post. Tags are not free-form hashtags.
       </p>
 
       {selected.length > 0 && (
@@ -40,14 +40,14 @@ export function PostmarkPicker({
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {options.map((postmark) => {
-          const active = selected.includes(postmark);
+        {options.map((tag) => {
+          const active = selected.includes(tag);
 
           return (
             <button
-              key={postmark}
+              key={tag}
               type="button"
-              onClick={() => onToggle(postmark)}
+              onClick={() => onToggle(tag)}
               aria-pressed={active}
               className={`
                 rounded-full
@@ -61,7 +61,7 @@ export function PostmarkPicker({
                 }
               `}
             >
-              {postmark}
+              {tag}
             </button>
           );
         })}

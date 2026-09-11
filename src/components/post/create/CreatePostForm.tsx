@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { CommunitySelector } from "./CommunitySelector";
 import { PostEditor } from "./PostEditor";
 import { PostGuidelines } from "./PostGuidelines";
-import { PostmarkPicker } from "./PostmarkPicker";
+import { TagPicker } from "./TagPicker";
 
-const communityPostmarks: Record<string, string[]> = {
+const communityTags: Record<string, string[]> = {
   "artificial-intelligence": [
     "Machine Learning",
     "Deep Learning",
@@ -51,21 +51,21 @@ const communityPostmarks: Record<string, string[]> = {
 export function CreatePostForm() {
   const [community, setCommunity] = useState("artificial-intelligence");
   const [content, setContent] = useState("");
-  const [postmarks, setPostmarks] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
-  const options = communityPostmarks[community] ?? [];
+  const options = communityTags[community] ?? [];
   const canPublish = Boolean(community) && content.trim().length > 0;
 
   function handleCommunityChange(slug: string) {
     setCommunity(slug);
-    setPostmarks([]);
+    setTags([]);
   }
 
-  function togglePostmark(postmark: string) {
-    setPostmarks((current) =>
-      current.includes(postmark)
-        ? current.filter((item) => item !== postmark)
-        : [...current, postmark],
+  function toggleTag(tag: string) {
+    setTags((current) =>
+      current.includes(tag)
+        ? current.filter((item) => item !== tag)
+        : [...current, tag],
     );
   }
 
@@ -111,10 +111,10 @@ export function CreatePostForm() {
                 onChange={setContent}
               />
 
-              <PostmarkPicker
+              <TagPicker
                 options={options}
-                selected={postmarks}
-                onToggle={togglePostmark}
+                selected={tags}
+                onToggle={toggleTag}
               />
 
               <div className="border-t pt-5">
