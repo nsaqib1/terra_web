@@ -7,9 +7,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import { CommunitySelector } from "./CommunitySelector";
-import { PostEditor } from "./PostEditor";
+// import { PostEditor } from "./PostEditor";
 import { PostGuidelines } from "./PostGuidelines";
 import { TagPicker } from "./TagPicker";
+import { PostEditor } from "./editor/PostEditor";
+import type { PostDocument } from "./editor/editor-types";
 
 const communityTags: Record<string, string[]> = {
   "artificial-intelligence": [
@@ -50,11 +52,19 @@ const communityTags: Record<string, string[]> = {
 
 export function CreatePostForm() {
   const [community, setCommunity] = useState("artificial-intelligence");
-  const [content, setContent] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [document, setDocument] = useState<PostDocument | null>(null);
+
 
   const options = communityTags[community] ?? [];
-  const canPublish = Boolean(community) && content.trim().length > 0;
+  const hasContent =
+    document !== null &&
+    document.content.length > 0;
+
+  const canPublish =
+    Boolean(community) && hasContent;
+
+
 
   function handleCommunityChange(slug: string) {
     setCommunity(slug);
@@ -107,8 +117,8 @@ export function CreatePostForm() {
               />
 
               <PostEditor
-                value={content}
-                onChange={setContent}
+                value={document}
+                onChange={setDocument}
               />
 
               <TagPicker
