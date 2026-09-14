@@ -39,6 +39,10 @@ export const postEditorExtensions = [
     dropcursor: {
       color: "currentColor",
     },
+
+    link: false,
+
+    underline: false,
   }),
 
   Underline,
