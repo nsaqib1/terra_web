@@ -1,82 +1,69 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { extractErrorMessage } from "@/lib/api/errors";
+import { postsApi } from "@/lib/api/posts";
 
 import { CommunitySelector } from "./CommunitySelector";
-// import { PostEditor } from "./PostEditor";
 import { PostGuidelines } from "./PostGuidelines";
 import { TagPicker } from "./TagPicker";
 import { PostEditor } from "./editor/PostEditor";
 import type { PostDocument } from "./editor/editor-types";
 
-const communityTags: Record<string, string[]> = {
-  "artificial-intelligence": [
-    "Machine Learning",
-    "Deep Learning",
-    "LLM",
-    "RAG",
-    "Computer Vision",
-    "AI Research",
-    "Beginner",
-    "2026",
-  ],
-  photography: [
-    "Composition",
-    "Equipment",
-    "Street",
-    "Landscape",
-    "Portrait",
-    "Beginner",
-  ],
-  programming: [
-    "Web",
-    "Systems",
-    "Open Source",
-    "Architecture",
-    "Beginner",
-    "2026",
-  ],
-  gardening: [
-    "Vegetables",
-    "Indoor Plants",
-    "Hydroponics",
-    "Composting",
-    "Pest Control",
-    "Beginner",
-  ],
-};
-
 export function CreatePostForm() {
-  const [community, setCommunity] = useState("artificial-intelligence");
-  const [tags, setTags] = useState<string[]>([]);
+  const router = useRouter();
+
+  const [communityId, setCommunityId] = useState<string>("");
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [document, setDocument] = useState<PostDocument | null>(null);
 
+  const [isPending, setIsPending] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const options = communityTags[community] ?? [];
+  // A post has content when it contains at least one non-empty node
   const hasContent =
     document !== null &&
     document.content.length > 0;
 
-  const canPublish =
-    Boolean(community) && hasContent;
+  const canPublish = Boolean(communityId) && hasContent && !isPending;
 
-
-
-  function handleCommunityChange(slug: string) {
-    setCommunity(slug);
-    setTags([]);
+  function handleCommunityChange(id: string) {
+    setCommunityId(id);
+    // Clear tag selection whenever community changes
+    setTagIds([]);
   }
 
-  function toggleTag(tag: string) {
-    setTags((current) =>
-      current.includes(tag)
-        ? current.filter((item) => item !== tag)
-        : [...current, tag],
+  function toggleTag(tagId: string) {
+    setTagIds((current) =>
+      current.includes(tagId)
+        ? current.filter((id) => id !== tagId)
+        : [...current, tagId],
     );
+  }
+
+  async function handlePublish() {
+    if (!canPublish || !document) return;
+
+    setIsPending(true);
+    setSubmitError(null);
+
+    try {
+      await postsApi.create({
+        communityId,
+        document,
+        tagIds,
+      });
+
+      router.push("/home");
+    } catch (err) {
+      setSubmitError(extractErrorMessage(err));
+      setIsPending(false);
+    }
   }
 
   return (
@@ -112,7 +99,7 @@ export function CreatePostForm() {
           <div className="rounded-2xl border bg-white p-5 sm:p-6">
             <div className="space-y-6">
               <CommunitySelector
-                value={community}
+                value={communityId}
                 onChange={handleCommunityChange}
               />
 
@@ -122,20 +109,29 @@ export function CreatePostForm() {
               />
 
               <TagPicker
-                options={options}
-                selected={tags}
+                communityId={communityId}
+                selected={tagIds}
                 onToggle={toggleTag}
               />
 
               <div className="border-t pt-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-[11px] leading-5 text-muted-foreground">
-                    Citizens of this community will see your post as soon
-                    as you publish.
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-[11px] leading-5 text-muted-foreground">
+                      Citizens of this community will see your post as soon
+                      as you publish.
+                    </p>
+
+                    {submitError && (
+                      <p className="text-[11px] font-medium text-red-500">
+                        {submitError}
+                      </p>
+                    )}
+                  </div>
 
                   <Button
                     disabled={!canPublish}
+                    onClick={handlePublish}
                     className="
                       gap-2
                       rounded-xl
@@ -145,10 +141,20 @@ export function CreatePostForm() {
                       text-white
                       shadow-none
                       hover:bg-brand-brown-800
+                      disabled:opacity-50
                     "
                   >
-                    Publish
-                    <ArrowRight size={15} />
+                    {isPending ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin" />
+                        Publishing…
+                      </>
+                    ) : (
+                      <>
+                        Publish
+                        <ArrowRight size={15} />
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>

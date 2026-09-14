@@ -1,46 +1,25 @@
 "use client";
 
 import { Check, ChevronDown, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-interface Community {
-  slug: string;
-  name: string;
-  initials: string;
-  citizens: string;
-}
+import { communitiesApi } from "@/lib/api/communities";
+import { JoinedCommunity } from "@/lib/api/types";
 
 interface CommunitySelectorProps {
+  /** Community id (UUID) — empty string means nothing selected. */
   value: string;
-  onChange: (slug: string) => void;
+  onChange: (id: string) => void;
 }
 
-const communities: Community[] = [
-  {
-    slug: "artificial-intelligence",
-    name: "Artificial Intelligence",
-    initials: "AI",
-    citizens: "2.4M",
-  },
-  {
-    slug: "photography",
-    name: "Photography",
-    initials: "PH",
-    citizens: "1.8M",
-  },
-  {
-    slug: "programming",
-    name: "Programming",
-    initials: "PR",
-    citizens: "1.4M",
-  },
-  {
-    slug: "gardening",
-    name: "Gardening",
-    initials: "GA",
-    citizens: "680K",
-  },
-];
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
 
 export function CommunitySelector({
   value,
@@ -48,13 +27,32 @@ export function CommunitySelector({
 }: CommunitySelectorProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [communities, setCommunities] = useState<JoinedCommunity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const selected = communities.find(
-    (community) => community.slug === value,
-  );
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+    communitiesApi.listJoined().then((data) => {
+      if (!cancelled) {
+        setCommunities(data);
+        setIsLoading(false);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setError("Could not load communities.");
+        setIsLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
-  const filtered = communities.filter((community) =>
-    community.name.toLowerCase().includes(search.toLowerCase()),
+  const selected = communities.find((c) => c.id === value);
+
+  const filtered = communities.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -64,11 +62,12 @@ export function CommunitySelector({
       </label>
 
       <p className="mt-1 text-[11px] text-muted-foreground">
-        Every post lives in one community.
+        Only communities you&apos;ve joined appear here.
       </p>
 
       <button
         type="button"
+        disabled={isLoading}
         onClick={() => setOpen((current) => !current)}
         className="
           mt-2 flex h-12 w-full items-center gap-3
@@ -76,9 +75,15 @@ export function CommunitySelector({
           bg-white px-3
           text-left
           hover:border-brand-desert
+          disabled:cursor-not-allowed disabled:opacity-60
         "
       >
-        {selected ? (
+        {isLoading ? (
+          <div className="flex flex-1 items-center gap-3">
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-brand-sand" />
+            <div className="h-3 w-32 animate-pulse rounded bg-brand-sand" />
+          </div>
+        ) : selected ? (
           <>
             <div
               className="
@@ -89,7 +94,7 @@ export function CommunitySelector({
                 text-brand-brown-800
               "
             >
-              {selected.initials}
+              {initials(selected.name)}
             </div>
 
             <div className="min-w-0 flex-1">
@@ -97,8 +102,8 @@ export function CommunitySelector({
                 {selected.name}
               </p>
 
-              <p className="text-[10px] text-muted-foreground">
-                {selected.citizens} citizens
+              <p className="text-[10px] capitalize text-muted-foreground">
+                {selected.role.toLowerCase()}
               </p>
             </div>
           </>
@@ -113,6 +118,10 @@ export function CommunitySelector({
           className="shrink-0 text-muted-foreground"
         />
       </button>
+
+      {error && (
+        <p className="mt-1.5 text-[11px] text-red-500">{error}</p>
+      )}
 
       {open && (
         <div
@@ -154,14 +163,14 @@ export function CommunitySelector({
 
           <div className="max-h-64 overflow-y-auto p-2">
             {filtered.map((community) => {
-              const active = community.slug === value;
+              const active = community.id === value;
 
               return (
                 <button
-                  key={community.slug}
+                  key={community.id}
                   type="button"
                   onClick={() => {
-                    onChange(community.slug);
+                    onChange(community.id);
                     setOpen(false);
                     setSearch("");
                   }}
@@ -181,7 +190,7 @@ export function CommunitySelector({
                       text-brand-brown-800
                     "
                   >
-                    {community.initials}
+                    {initials(community.name)}
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -189,8 +198,8 @@ export function CommunitySelector({
                       {community.name}
                     </p>
 
-                    <p className="text-[10px] text-muted-foreground">
-                      {community.citizens} citizens
+                    <p className="text-[10px] capitalize text-muted-foreground">
+                      {community.role.toLowerCase()}
                     </p>
                   </div>
 
@@ -204,9 +213,11 @@ export function CommunitySelector({
               );
             })}
 
-            {filtered.length === 0 && (
+            {filtered.length === 0 && !isLoading && (
               <p className="p-4 text-center text-xs text-muted-foreground">
-                No communities found.
+                {search
+                  ? "No communities match your search."
+                  : "You haven't joined any communities yet."}
               </p>
             )}
           </div>

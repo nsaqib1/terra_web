@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { GetPostsQuery, PaginatedResponse, PostItem } from "./types";
+import { CreatePostInput, GetPostsQuery, PaginatedResponse, PostItem } from "./types";
 
 export const postsApi = {
   /**
@@ -20,5 +20,12 @@ export const postsApi = {
    */
   async getById(id: string): Promise<PostItem> {
     return apiClient.get<PostItem>(`/posts/${id}`);
+  },
+
+  /**
+   * Create a new post.
+   */
+  async create(data: CreatePostInput): Promise<PostItem> {
+    return apiClient.post<PostItem>("/posts", data);
   },
 };

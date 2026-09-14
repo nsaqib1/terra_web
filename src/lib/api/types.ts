@@ -287,3 +287,8 @@ export interface GetPostsQuery {
   limit?: number;
 }
 
+export interface CreatePostInput {
+  communityId: string;
+  document: unknown;
+  tagIds: string[];
+}
