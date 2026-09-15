@@ -12,6 +12,7 @@ import {
   LogOut,
   MapPin,
   MessageSquare,
+  Pyramid,
   Shield,
   ThumbsUp,
   TrendingUp,
@@ -288,7 +289,7 @@ function ProfileInfoTab({
         />
 
         <StatCard
-          icon={<Award size={16} />}
+          icon={<Pyramid size={16} />}
           label="Communities"
           value="6"
         />

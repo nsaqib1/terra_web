@@ -157,7 +157,7 @@ export function Sidebar() {
         <div>
           <div className="mb-2 flex items-center justify-between px-3">
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Your Communities
+              My Communities
             </span>
 
             <Link
