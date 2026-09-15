@@ -59,7 +59,7 @@ export function CreatePostForm() {
         tagIds,
       });
 
-      router.push("/home");
+      router.push("/");
     } catch (err) {
       setSubmitError(extractErrorMessage(err));
       setIsPending(false);
@@ -70,7 +70,7 @@ export function CreatePostForm() {
     <div>
       <div className="flex items-center justify-between">
         <Link
-          href="/home"
+          href="/"
           className="
             inline-flex items-center gap-1.5
             text-xs font-semibold

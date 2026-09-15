@@ -81,7 +81,7 @@ export function ProposalComplete({
         </Link>
 
         <Link
-          href="/home"
+          href="/"
           className="
             rounded-xl
             border

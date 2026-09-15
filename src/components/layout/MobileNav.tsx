@@ -13,7 +13,7 @@ const items = [
   {
     label: "Home",
     icon: Home,
-    href: "/home",
+    href: "/",
   },
   {
     label: "Communities",

@@ -22,7 +22,7 @@ const mainNavigation = [
   {
     label: "Home",
     icon: Home,
-    href: "/home",
+    href: "/",
   },
   {
     label: "Popular",
