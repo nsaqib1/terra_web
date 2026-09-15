@@ -5,6 +5,7 @@ import {
   FileText,
   Flame,
   Home,
+  Pen,
   Plus,
   Settings,
   User,
@@ -25,32 +26,14 @@ const mainNavigation = [
     href: "/",
   },
   {
-    label: "Popular",
-    icon: Flame,
-    href: "/popular",
+    label: "Create Post",
+    icon: Pen,
+    href: "/posts/create",
   },
   {
     label: "Explore Communities",
     icon: Compass,
     href: "/communities",
-  },
-];
-
-const accountNavigation = [
-  {
-    label: "My Posts",
-    icon: FileText,
-    href: "/profile/posts",
-  },
-  {
-    label: "Profile",
-    icon: User,
-    href: "/profile",
-  },
-  {
-    label: "Settings",
-    icon: Settings,
-    href: "/settings",
   },
 ];
 
@@ -248,35 +231,6 @@ export function Sidebar() {
           </div>
         </div>
 
-        <div className="h-px bg-border/60" />
-
-        <div className="space-y-1">
-          <div className="mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Account
-          </div>
-
-          {accountNavigation.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`
-                  flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors
-                  ${isActive
-                    ? "bg-brand-sand font-semibold text-brand-brown-950"
-                    : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
-                  }
-                `}
-              >
-                <Icon size={18} strokeWidth={1.8} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
       </div>
     </aside>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Search,
@@ -114,14 +113,6 @@ export function TopBar() {
             </div>
           ) : (
             <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-brand-brown-700 hover:bg-brand-sand"
-              >
-                <Bell size={19} />
-              </Button>
-
               {user ? (
                 <div className="relative">
                   <button
