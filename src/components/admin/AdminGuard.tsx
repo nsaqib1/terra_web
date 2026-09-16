@@ -2,12 +2,20 @@
 
 import { AlertTriangle, ArrowLeft, Loader2, Lock } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/signup");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
@@ -20,7 +28,11 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated || user?.role !== "ADMIN") {
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (user?.role !== "ADMIN") {
     return (
       <div className="flex min-h-[80vh] items-center justify-center p-4">
         <div className="w-full max-w-md rounded-2xl border border-brand-sand-dark bg-white p-8 text-center shadow-lg">
