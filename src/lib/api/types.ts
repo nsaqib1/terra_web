@@ -7,10 +7,61 @@ export interface User {
   email: string;
   avatarUrl: string | null;
   bio?: string | null;
+  location?: string | null;
+  website?: string | null;
   points: number;
   role?: UserRole;
   status?: string;
   createdAt: string;
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  location: string | null;
+  website: string | null;
+  points: number;
+  createdAt: string;
+}
+
+export interface UserStats {
+  posts: number;
+  upvotes: number;
+  communities: number;
+}
+
+export interface UserProfileResponse {
+  user: UserProfile;
+  stats: UserStats;
+}
+
+export interface UpdateProfileInput {
+  displayName?: string;
+  username?: string;
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
+}
+
+export interface UserCommunityItem {
+  id: string;
+  name: string;
+  slug: string;
+  role: CommunityMemberRole;
+  joinedAt: string;
+}
+
+export interface UserPostsQuery {
+  page?: number;
+  limit?: number;
+}
+
+export interface UserCommunitiesQuery {
+  page?: number;
+  limit?: number;
 }
 
 export interface RegisterDto {

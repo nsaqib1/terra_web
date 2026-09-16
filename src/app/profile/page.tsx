@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Globe,
   Key,
+  Loader2,
   LogOut,
   MapPin,
   MessageSquare,
@@ -20,12 +21,14 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { usersApi } from "@/lib/api/users";
+import { UserProfileResponse, UserStats } from "@/lib/api/types";
 
 type NavTab = "profile" | "security" | "privacy";
 
@@ -98,7 +101,7 @@ function EditableProfileHeader({
                 )}
 
                 <AvatarFallback className="rounded-full bg-brand-desert text-2xl font-bold text-brand-brown-950">
-                  {getInitials(displayName)}
+                  {getInitials(displayName || "User")}
                 </AvatarFallback>
               </Avatar>
 
@@ -154,7 +157,7 @@ function EditableProfileHeader({
                   />
 
                   <a
-                    href={website}
+                    href={website.startsWith("http") ? website : `https://${website}`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 font-semibold text-brand-brown-900 hover:underline"
@@ -256,14 +259,20 @@ type FormState = {
 function ProfileInfoTab({
   form,
   setForm,
+  points,
+  stats,
   isSaved,
   isUpdating,
+  errorMessage,
   onSave,
 }: {
   form: FormState;
   setForm: React.Dispatch<React.SetStateAction<FormState>>;
+  points: number;
+  stats: UserStats | null;
   isSaved: boolean;
   isUpdating: boolean;
+  errorMessage: string | null;
   onSave: (e: React.FormEvent) => void;
 }) {
   return (
@@ -273,25 +282,25 @@ function ProfileInfoTab({
         <StatCard
           icon={<Zap size={18} />}
           label="Points"
-          value="1,240"
+          value={points.toLocaleString()}
         />
 
         <StatCard
           icon={<MessageSquare size={16} />}
           label="Posts"
-          value="38"
+          value={stats?.posts ?? 0}
         />
 
         <StatCard
           icon={<ThumbsUp size={16} />}
           label="Upvotes"
-          value="412"
+          value={stats?.upvotes ?? 0}
         />
 
         <StatCard
           icon={<Pyramid size={16} />}
           label="Communities"
-          value="6"
+          value={stats?.communities ?? 0}
         />
       </div>
 
@@ -301,6 +310,12 @@ function ProfileInfoTab({
           title="Profile Information"
           description="Update the information shown on your public profile."
         />
+
+        {errorMessage && (
+          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-800">
+            {errorMessage}
+          </div>
+        )}
 
         <form onSubmit={onSave} className="space-y-5">
           <div className="grid gap-5 sm:grid-cols-2">
@@ -439,50 +454,7 @@ function ProfileInfoTab({
   );
 }
 
-const ACTIVITY_ITEMS = [
-  {
-    tag: "Proposal",
-    tagColor: "bg-amber-100 text-amber-800",
-    title: "Supported Proposal #42",
-    desc: "Approved scope definition for local transit improvements.",
-    time: "2h ago",
-    icon: <TrendingUp size={14} />,
-  },
-  {
-    tag: "Discussion",
-    tagColor: "bg-sky-100 text-sky-700",
-    title: 'Posted in "Civic Tech"',
-    desc: "How do we best structure open datasets for community maintenance?",
-    time: "1d ago",
-    icon: <MessageSquare size={14} />,
-  },
-  {
-    tag: "Achievement",
-    tagColor: "bg-emerald-100 text-emerald-700",
-    title: "Earned Citizen Grade II",
-    desc: "Reached 1,000 reputation points through community contributions.",
-    time: "3d ago",
-    icon: <Award size={14} />,
-  },
-  {
-    tag: "Discussion",
-    tagColor: "bg-sky-100 text-sky-700",
-    title: 'Replied in "Open Infrastructure"',
-    desc: "Shared a breakdown of the Austin water network proposal.",
-    time: "5d ago",
-    icon: <MessageSquare size={14} />,
-  },
-  {
-    tag: "Proposal",
-    tagColor: "bg-amber-100 text-amber-800",
-    title: "Submitted Community Proposal",
-    desc: 'Proposed "Sustainable Mobility" as a new community space.',
-    time: "1w ago",
-    icon: <TrendingUp size={14} />,
-  },
-];
-
-function SecurityTab() {
+function SecurityTab({ email }: { email?: string }) {
   const [activeForm, setActiveForm] = useState<
     "email" | "password" | null
   >(null);
@@ -508,7 +480,7 @@ function SecurityTab() {
               </p>
 
               <p className="mt-3 text-xs font-semibold text-brand-brown-800">
-                jane.doe@example.com
+                {email || "Not available"}
               </p>
             </div>
           </div>
@@ -526,18 +498,20 @@ function SecurityTab() {
             <span>Change</span>
             <ChevronRight
               size={14}
-              className={`transition-transform duration-300 ${activeForm === "email" ? "rotate-90" : "rotate-0"
-                }`}
+              className={`transition-transform duration-300 ${
+                activeForm === "email" ? "rotate-90" : "rotate-0"
+              }`}
             />
           </Button>
         </div>
 
-        {/* Expand/Collapse Container with Smooth CSS Grid Height & Opacity Transition */}
+        {/* Expand/Collapse Container */}
         <div
-          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${activeForm === "email"
-            ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0 pointer-events-none"
-            }`}
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+            activeForm === "email"
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
         >
           <div className="overflow-hidden">
             <div className="mt-6 border-t border-brand-sand-dark pt-6">
@@ -602,7 +576,7 @@ function SecurityTab() {
               </p>
 
               <p className="mt-3 text-xs font-medium text-muted-foreground">
-                Last changed 3 months ago.
+                Managed via account security settings.
               </p>
             </div>
           </div>
@@ -612,9 +586,7 @@ function SecurityTab() {
             variant="outline"
             onClick={() =>
               setActiveForm(
-                activeForm === "password"
-                  ? null
-                  : "password"
+                activeForm === "password" ? null : "password"
               )
             }
             className="h-9 shrink-0 rounded-xl border-brand-sand-dark text-xs font-semibold gap-1.5 transition-all"
@@ -622,18 +594,20 @@ function SecurityTab() {
             <span>Change</span>
             <ChevronRight
               size={14}
-              className={`transition-transform duration-300 ${activeForm === "password" ? "rotate-90" : "rotate-0"
-                }`}
+              className={`transition-transform duration-300 ${
+                activeForm === "password" ? "rotate-90" : "rotate-0"
+              }`}
             />
           </Button>
         </div>
 
-        {/* Expand/Collapse Container with Smooth CSS Grid Height & Opacity Transition */}
+        {/* Expand/Collapse Container */}
         <div
-          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${activeForm === "password"
-            ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0 pointer-events-none"
-            }`}
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+            activeForm === "password"
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+          }`}
         >
           <div className="overflow-hidden">
             <div className="mt-6 border-t border-brand-sand-dark pt-6">
@@ -688,8 +662,7 @@ function SecurityTab() {
   );
 }
 
-function PrivacyAccountTab({
-}) {
+function PrivacyAccountTab() {
   return (
     <div className="space-y-5">
       {/* Disable account */}
@@ -746,50 +719,123 @@ const NAV_TABS: {
   label: string;
   icon: React.ReactNode;
 }[] = [
-    {
-      id: "profile",
-      label: "Profile Info",
-      icon: <User size={15} />,
-    },
-    {
-      id: "security",
-      label: "Security",
-      icon: <Key size={15} />,
-    },
-    {
-      id: "privacy",
-      label: "Privacy & Account",
-      icon: <Shield size={15} />,
-    },
-  ];
+  {
+    id: "profile",
+    label: "Profile Info",
+    icon: <User size={15} />,
+  },
+  {
+    id: "security",
+    label: "Security",
+    icon: <Key size={15} />,
+  },
+  {
+    id: "privacy",
+    label: "Privacy & Account",
+    icon: <Shield size={15} />,
+  },
+];
 
 /* ─────────────────────────────────────────────────────────── page */
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>("profile");
   const [isSaved, setIsSaved] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);
 
   const [form, setForm] = useState<FormState>({
-    displayName: "Jane Doe",
-    username: "janedoe",
-    bio: "Passionate about open-source communities, civic tech, and sustainable local infrastructure.",
-    location: "Austin, TX",
-    website: "https://janedoe.dev",
+    displayName: "",
+    username: "",
+    bio: "",
+    location: "",
+    website: "",
   });
 
-  const displayName = user?.displayName ?? form.displayName;
-  const username = user?.username ?? form.username;
-  const avatarUrl = user?.avatarUrl ?? null;
+  useEffect(() => {
+    async function loadProfile() {
+      if (!user?.id) return;
+      try {
+        setIsLoadingProfile(true);
+        const data = await usersApi.getProfile(user.id);
+        setProfileData(data);
+        setForm({
+          displayName: data.user.displayName || "",
+          username: data.user.username || "",
+          bio: data.user.bio || "",
+          location: data.user.location || "",
+          website: data.user.website || "",
+        });
+      } catch (err) {
+        // Fallback to auth user state
+        setForm({
+          displayName: user.displayName || "",
+          username: user.username || "",
+          bio: user.bio || "",
+          location: user.location || "",
+          website: user.website || "",
+        });
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
 
-  const handleSave = (e: React.FormEvent) => {
+    loadProfile();
+  }, [user?.id]);
+
+  const displayName = form.displayName || profileData?.user.displayName || user?.displayName || "";
+  const username = form.username || profileData?.user.username || user?.username || "";
+  const avatarUrl = profileData?.user.avatarUrl || user?.avatarUrl || null;
+  const bio = form.bio || profileData?.user.bio || user?.bio || "";
+  const location = form.location || profileData?.user.location || user?.location || "";
+  const website = form.website || profileData?.user.website || user?.website || "";
+  const points = profileData?.user.points ?? user?.points ?? 0;
+  const createdAt = profileData?.user.createdAt || user?.createdAt;
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdating(true);
-    setTimeout(() => {
-      setIsUpdating(false);
+    setErrorMessage(null);
+
+    try {
+      const res = await usersApi.updateProfile({
+        displayName: form.displayName,
+        username: form.username,
+        bio: form.bio || null,
+        location: form.location || null,
+        website: form.website || null,
+      });
+
+      setProfileData((prev) => (prev ? { ...prev, user: res.user } : null));
+
+      // Update auth context state to reflect changes across the application
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              displayName: res.user.displayName,
+              username: res.user.username,
+              avatarUrl: res.user.avatarUrl,
+              bio: res.user.bio,
+              location: res.user.location,
+              website: res.user.website,
+              points: res.user.points,
+            }
+          : null
+      );
+
       setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 2500);
-    }, 600);
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (err: any) {
+      setErrorMessage(
+        err?.message || "Failed to update profile. Please try again."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -802,16 +848,16 @@ export default function ProfilePage() {
           displayName={displayName}
           username={username}
           avatarUrl={avatarUrl}
-          bio={user?.bio ?? form.bio}
-          location={form.location}
-          website={form.website}
+          bio={bio}
+          location={location}
+          website={website}
           joinedDate={
-            user?.createdAt
-              ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })
-              : "March 2024"
+            createdAt
+              ? new Date(createdAt).toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })
+              : "Recent"
           }
         />
 
@@ -825,17 +871,18 @@ export default function ProfilePage() {
               <ProfileInfoTab
                 form={form}
                 setForm={setForm}
+                points={points}
+                stats={profileData?.stats ?? null}
                 isSaved={isSaved}
                 isUpdating={isUpdating}
+                errorMessage={errorMessage}
                 onSave={handleSave}
               />
             )}
 
-            {activeTab === "security" && <SecurityTab />}
+            {activeTab === "security" && <SecurityTab email={user?.email} />}
 
-            {activeTab === "privacy" && (
-              <PrivacyAccountTab />
-            )}
+            {activeTab === "privacy" && <PrivacyAccountTab />}
           </main>
 
           {/* Right navigation */}
@@ -848,10 +895,11 @@ export default function ProfilePage() {
                     id={`profile-tab-${id}`}
                     type="button"
                     onClick={() => setActiveTab(id)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${activeTab === id
-                      ? "bg-brand-brown-950 text-white shadow-sm"
-                      : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
-                      }`}
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                      activeTab === id
+                        ? "bg-brand-brown-950 text-white shadow-sm"
+                        : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
+                    }`}
                   >
                     <span className="flex items-center gap-2.5">
                       {icon}
@@ -861,9 +909,7 @@ export default function ProfilePage() {
                     <ChevronRight
                       size={13}
                       className={
-                        activeTab === id
-                          ? "opacity-70"
-                          : "opacity-30"
+                        activeTab === id ? "opacity-70" : "opacity-30"
                       }
                     />
                   </button>
