@@ -292,3 +292,55 @@ export interface CreatePostInput {
   document: unknown;
   tagIds: string[];
 }
+
+export type VoteValue = "UP" | "DOWN";
+export type VoteAction = "created" | "removed" | "changed";
+
+export interface VoteResponse {
+  action: VoteAction;
+  value: VoteValue | null;
+  scoreChange: number;
+}
+
+export interface VoteInput {
+  postId?: string;
+  commentId?: string;
+  value: VoteValue;
+}
+
+export interface PostVotesResponse {
+  postVote: VoteValue | null;
+  commentVotes: Record<string, VoteValue>;
+}
+
+export interface CommentItem {
+  id: string;
+  postId: string;
+  authorId: string;
+  parentId: string | null;
+  body: string;
+  score: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  author: PostAuthor & { points?: number };
+  replies?: CommentItem[];
+}
+
+export interface ListCommentsQuery {
+  postId: string;
+  page?: number;
+  limit?: number;
+  sort?: "newest" | "top" | "oldest";
+}
+
+export interface CreateCommentInput {
+  postId: string;
+  parentId?: string;
+  body: string;
+}
+
+export interface UpdateCommentInput {
+  body: string;
+}
+

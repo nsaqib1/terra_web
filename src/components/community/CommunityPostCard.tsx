@@ -1,7 +1,8 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
-import { ArrowUp, ArrowDown, MessageCircle } from "lucide-react";
+import { ArrowUp, MessageCircle } from "lucide-react";
 import { PostItem } from "@/lib/api/types";
 
 function getPostPreviewText(document: any): string {
@@ -91,6 +92,8 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
   const authorUsername = post.author?.username || "unknown";
   const relativeTime = formatRelativeTime(post.createdAt);
   const initials = getAuthorInitials(authorName);
+  const score = post.score ?? 0;
+  const commentCount = post.commentCount ?? 0;
 
   return (
     <article className="group relative rounded-2xl border bg-white p-5 transition-all duration-200 hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]">
@@ -148,39 +151,18 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
         </p>
       </div>
 
-      {/* Action Bar: Non-interactive numbers */}
+      {/* Action Bar: Vote & Comment Counters */}
       <div className="relative z-10 mt-4 flex items-center gap-3 border-t pt-3">
-        {/* Voting display only (non-interactive) */}
-        <div
-          title="Votes"
-          className="flex items-center rounded-xl bg-brand-sand/50 p-1 select-none pointer-events-none"
-        >
-          <div
-            aria-label="Upvote"
-            className="flex items-center justify-center rounded-lg p-1.5 text-brand-brown-700/80"
-          >
-            <ArrowUp size={16} />
-          </div>
-
-          <span className="px-2 text-xs font-bold text-brand-brown-900">
-            {post.score ?? 0}
-          </span>
-
-          <div
-            aria-label="Downvote"
-            className="flex items-center justify-center rounded-lg p-1.5 text-brand-brown-700/80"
-          >
-            <ArrowDown size={16} />
-          </div>
+        {/* Vote Count */}
+        <div className="flex items-center gap-1.5 rounded-xl bg-brand-sand/50 px-3 py-1.5 text-xs font-semibold text-brand-brown-700">
+          <ArrowUp size={15} />
+          <span>{score} {Math.abs(score) === 1 ? "Vote" : "Votes"}</span>
         </div>
 
-        {/* Comment Count display only (non-interactive) */}
-        <div
-          title="Comments"
-          className="flex items-center gap-1.5 rounded-xl bg-brand-sand/50 px-3 py-1.5 text-xs font-semibold text-brand-brown-700 select-none pointer-events-none"
-        >
-          <MessageCircle size={16} />
-          <span>{post.commentCount ?? 0} Comments</span>
+        {/* Comment Count */}
+        <div className="flex items-center gap-1.5 rounded-xl bg-brand-sand/50 px-3 py-1.5 text-xs font-semibold text-brand-brown-700">
+          <MessageCircle size={15} />
+          <span>{commentCount} {commentCount === 1 ? "Comment" : "Comments"}</span>
         </div>
       </div>
     </article>
