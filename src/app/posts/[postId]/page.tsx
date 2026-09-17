@@ -543,7 +543,7 @@ export default function PostPage() {
         postId,
         sort: commentSort,
         page: 1,
-        limit: 100,
+        limit: 50,
       });
       setComments(res.data || []);
     } catch (err: unknown) {
