@@ -2,6 +2,7 @@
 
 import {
   ChevronDown,
+  LayoutList,
   LogOut,
   Search,
   Shield,
@@ -208,6 +209,21 @@ export function TopBar() {
                           Admin Console
                         </Link>
                       )}
+
+                      <Link
+                        href="/posts/manage"
+                        onClick={() => setShowDropdown(false)}
+                        className="
+                          flex items-center gap-2
+                          rounded-lg px-3 py-2
+                          text-xs font-semibold
+                          text-brand-brown-800
+                          hover:bg-brand-sand
+                        "
+                      >
+                        <LayoutList size={15} />
+                        Manage Posts
+                      </Link>
 
                       <Link
                         href="/profile"

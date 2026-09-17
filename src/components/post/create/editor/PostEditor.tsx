@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   EditorContent,
   useEditor,
@@ -79,7 +79,7 @@ export function PostEditor({
     editor.commands.setContent(nextContent, {
       emitUpdate: false,
     });
-  }, [editor]);
+  }, [editor, value]);
 
   if (!editor) {
     return (
@@ -141,6 +141,12 @@ export function PostEditor({
     </>
   );
 }
+
+const API_BASE =
+  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1").replace(
+    /\/+$/,
+    "",
+  );
 
 function convertPostDocumentToTiptap(
   document: PostDocument,
@@ -224,7 +230,7 @@ function convertPostDocumentToTiptap(
             attrs: {
               mediaId: node.mediaId,
               alt: node.altText ?? null,
-              src: null,
+              src: node.mediaId ? `${API_BASE}/media/${node.mediaId}` : null,
             },
           };
 

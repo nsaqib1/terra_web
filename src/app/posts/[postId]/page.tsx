@@ -19,6 +19,7 @@ import {
   LogIn,
   X,
   Sparkles,
+  Edit3,
 } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -27,11 +28,7 @@ import { useAuth } from "@/context/AuthContext";
 import { postsApi } from "@/lib/api/posts";
 import { commentsApi } from "@/lib/api/comments";
 import { votesApi } from "@/lib/api/votes";
-import {
-  PostItem,
-  CommentItem,
-  VoteValue,
-} from "@/lib/api/types";
+import { PostItem, CommentItem, VoteValue } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
 import type { PostDocument } from "@/components/post/create/editor/editor-types";
 
@@ -130,7 +127,8 @@ function CommentNode({
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const authorName = comment.author?.displayName || comment.author?.username || "Anonymous";
+  const authorName =
+    comment.author?.displayName || comment.author?.username || "Anonymous";
   const authorUsername = comment.author?.username || "unknown";
   const isAuthor = currentUserId && comment.author?.id === currentUserId;
 
@@ -148,7 +146,8 @@ function CommentNode({
 
   const handleDelete = async () => {
     if (isDeleting) return;
-    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    if (!window.confirm("Are you sure you want to delete this comment?"))
+      return;
     setIsDeleting(true);
     try {
       await onDelete(comment.id, comment.parentId);
@@ -226,7 +225,10 @@ function CommentNode({
                 : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
             }`}
           >
-            <ArrowUp size={13} strokeWidth={currentUserVote === "UP" ? 2.5 : 2} />
+            <ArrowUp
+              size={13}
+              strokeWidth={currentUserVote === "UP" ? 2.5 : 2}
+            />
           </button>
 
           <span
@@ -234,8 +236,8 @@ function CommentNode({
               currentUserVote === "UP"
                 ? "text-emerald-700"
                 : currentUserVote === "DOWN"
-                ? "text-rose-700"
-                : "text-brand-brown-900"
+                  ? "text-rose-700"
+                  : "text-brand-brown-900"
             }`}
           >
             {comment.score}
@@ -250,7 +252,10 @@ function CommentNode({
                 : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
             }`}
           >
-            <ArrowDown size={13} strokeWidth={currentUserVote === "DOWN" ? 2.5 : 2} />
+            <ArrowDown
+              size={13}
+              strokeWidth={currentUserVote === "DOWN" ? 2.5 : 2}
+            />
           </button>
         </div>
 
@@ -339,10 +344,14 @@ function CommentNode({
       {comment.replies && comment.replies.length > 0 && (
         <div className="mt-3.5 space-y-2.5 border-l-2 border-brand-sand pl-3 ml-2">
           {comment.replies.map((reply) => {
-            const replyAuthorName = reply.author?.displayName || reply.author?.username || "Anonymous";
+            const replyAuthorName =
+              reply.author?.displayName ||
+              reply.author?.username ||
+              "Anonymous";
             const replyAuthorUsername = reply.author?.username || "unknown";
             const replyUserVote = commentVotes[reply.id] ?? null;
-            const isReplyAuthor = currentUserId && reply.author?.id === currentUserId;
+            const isReplyAuthor =
+              currentUserId && reply.author?.id === currentUserId;
 
             return (
               <div
@@ -403,15 +412,18 @@ function CommentNode({
                           : "text-brand-brown-700 hover:bg-brand-sand"
                       }`}
                     >
-                      <ArrowUp size={12} strokeWidth={replyUserVote === "UP" ? 2.5 : 2} />
+                      <ArrowUp
+                        size={12}
+                        strokeWidth={replyUserVote === "UP" ? 2.5 : 2}
+                      />
                     </button>
                     <span
                       className={`px-1 text-[10px] font-bold ${
                         replyUserVote === "UP"
                           ? "text-emerald-700"
                           : replyUserVote === "DOWN"
-                          ? "text-rose-700"
-                          : "text-brand-brown-900"
+                            ? "text-rose-700"
+                            : "text-brand-brown-900"
                       }`}
                     >
                       {reply.score}
@@ -425,7 +437,10 @@ function CommentNode({
                           : "text-brand-brown-700 hover:bg-brand-sand"
                       }`}
                     >
-                      <ArrowDown size={12} strokeWidth={replyUserVote === "DOWN" ? 2.5 : 2} />
+                      <ArrowDown
+                        size={12}
+                        strokeWidth={replyUserVote === "DOWN" ? 2.5 : 2}
+                      />
                     </button>
                   </div>
                 </div>
@@ -462,22 +477,54 @@ export default function PostPage() {
   // Comments state
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
-  const [commentSort, setCommentSort] = useState<"newest" | "top" | "oldest">("top");
+  const [commentSort, setCommentSort] = useState<"newest" | "top" | "oldest">(
+    "top",
+  );
   const [newCommentText, setNewCommentText] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   // Comment votes map: commentId -> 'UP' | 'DOWN'
-  const [commentVotes, setCommentVotes] = useState<Record<string, VoteValue>>({});
+  const [commentVotes, setCommentVotes] = useState<Record<string, VoteValue>>(
+    {},
+  );
+
+  // Author actions state
+  const [showDeletePostModal, setShowDeletePostModal] = useState(false);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
+
+  const isAuthor = Boolean(user && post && user.id === post.author?.id);
 
   // Toast notification
-  const [toast, setToast] = useState<{ message: string; type: "error" | "success" | "info" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
 
-  const showToast = useCallback((message: string, type: "error" | "success" | "info" = "info") => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 4000);
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: "error" | "success" | "info" = "info") => {
+      setToast({ message, type });
+      setTimeout(() => {
+        setToast(null);
+      }, 4000);
+    },
+    [],
+  );
+
+  const handleDeletePost = async () => {
+    if (!post || !isAuthor) return;
+    setIsDeletingPost(true);
+    try {
+      await postsApi.remove(post.id);
+      showToast("Post was deleted successfully", "success");
+      setTimeout(() => {
+        router.push("/posts/manage");
+      }, 1000);
+    } catch (err) {
+      showToast(extractErrorMessage(err), "error");
+      setIsDeletingPost(false);
+      setShowDeletePostModal(false);
+    }
+  };
 
   // 1. Fetch Post Data
   useEffect(() => {
@@ -697,7 +744,10 @@ export default function PostPage() {
         }
         return next;
       });
-      showToast(extractErrorMessage(err) || "Failed to vote on comment", "error");
+      showToast(
+        extractErrorMessage(err) || "Failed to vote on comment",
+        "error",
+      );
     }
   };
 
@@ -724,7 +774,9 @@ export default function PostPage() {
       setNewCommentText("");
 
       // Update post comment count
-      setPost((prev) => (prev ? { ...prev, commentCount: (prev.commentCount || 0) + 1 } : null));
+      setPost((prev) =>
+        prev ? { ...prev, commentCount: (prev.commentCount || 0) + 1 } : null,
+      );
       showToast("Comment posted successfully!", "success");
     } catch (err: unknown) {
       showToast(extractErrorMessage(err) || "Failed to post comment", "error");
@@ -761,11 +813,13 @@ export default function PostPage() {
             };
           }
           return c;
-        })
+        }),
       );
 
       // Increment post comment count
-      setPost((prev) => (prev ? { ...prev, commentCount: (prev.commentCount || 0) + 1 } : null));
+      setPost((prev) =>
+        prev ? { ...prev, commentCount: (prev.commentCount || 0) + 1 } : null,
+      );
       showToast("Reply posted successfully!", "success");
     } catch (err: unknown) {
       showToast(extractErrorMessage(err) || "Failed to post reply", "error");
@@ -777,7 +831,10 @@ export default function PostPage() {
   // Delete Comment Handler
   // ---------------------------------------------------------------------------
 
-  const handleDeleteComment = async (commentId: string, parentId?: string | null) => {
+  const handleDeleteComment = async (
+    commentId: string,
+    parentId?: string | null,
+  ) => {
     try {
       await commentsApi.remove(commentId);
 
@@ -792,17 +849,24 @@ export default function PostPage() {
               };
             }
             return c;
-          })
+          }),
         );
       } else {
         // Remove top-level comment
         setComments((prev) => prev.filter((c) => c.id !== commentId));
       }
 
-      setPost((prev) => (prev ? { ...prev, commentCount: Math.max(0, (prev.commentCount || 1) - 1) } : null));
+      setPost((prev) =>
+        prev
+          ? { ...prev, commentCount: Math.max(0, (prev.commentCount || 1) - 1) }
+          : null,
+      );
       showToast("Comment deleted", "info");
     } catch (err: unknown) {
-      showToast(extractErrorMessage(err) || "Failed to delete comment", "error");
+      showToast(
+        extractErrorMessage(err) || "Failed to delete comment",
+        "error",
+      );
       throw err;
     }
   };
@@ -832,12 +896,16 @@ export default function PostPage() {
               toast.type === "error"
                 ? "border border-red-200 bg-red-50/95 text-red-900"
                 : toast.type === "success"
-                ? "border border-emerald-200 bg-emerald-50/95 text-emerald-900"
-                : "border border-brand-sand bg-brand-brown-950 text-white"
+                  ? "border border-emerald-200 bg-emerald-50/95 text-emerald-900"
+                  : "border border-brand-sand bg-brand-brown-950 text-white"
             }`}
           >
-            {toast.type === "error" && <AlertCircle size={15} className="text-red-500 shrink-0" />}
-            {toast.type === "success" && <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />}
+            {toast.type === "error" && (
+              <AlertCircle size={15} className="text-red-500 shrink-0" />
+            )}
+            {toast.type === "success" && (
+              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+            )}
             <span>{toast.message}</span>
             <button
               onClick={() => setToast(null)}
@@ -873,7 +941,9 @@ export default function PostPage() {
                         />
                       ) : (
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-sand text-xs font-bold text-brand-brown-800 ring-2 ring-white">
-                          {initials(post.author?.displayName || post.author?.username)}
+                          {initials(
+                            post.author?.displayName || post.author?.username,
+                          )}
                         </div>
                       )}
                       <div
@@ -932,66 +1002,88 @@ export default function PostPage() {
                   <div className="flex items-center gap-3">
                     {/* Vote group */}
                     <div className="flex items-center rounded-xl bg-brand-sand/50 p-1">
+                      {" "}
                       <button
                         onClick={() => handlePostVote("UP")}
                         disabled={isVotingPost}
                         aria-label="Upvote post"
-                        className={`flex items-center justify-center rounded-lg p-1.5 transition-all ${
-                          postVote === "UP"
-                            ? "bg-emerald-600 text-white shadow-xs"
-                            : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
-                        }`}
+                        className={`flex items-center justify-center rounded-lg p-1.5 transition-all ${postVote === "UP" ? "bg-brand-brown-800 text-white shadow-xs" : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"}`}
                       >
-                        <ArrowUp size={16} strokeWidth={postVote === "UP" ? 2.5 : 2} />
-                      </button>
-
+                        {" "}
+                        <ArrowUp
+                          size={16}
+                          strokeWidth={postVote === "UP" ? 2.5 : 2}
+                        />{" "}
+                      </button>{" "}
                       <span
-                        className={`px-2.5 text-xs font-bold transition-colors ${
-                          postVote === "UP"
-                            ? "text-emerald-700"
-                            : postVote === "DOWN"
-                            ? "text-rose-700"
-                            : "text-brand-brown-900"
-                        }`}
+                        className={`px-2.5 text-xs font-bold transition-colors ${postVote === "UP" ? "text-brand-brown-800" : postVote === "DOWN" ? "text-rose-700" : "text-brand-brown-900"}`}
                       >
-                        {postScore}
-                      </span>
-
+                        {" "}
+                        {postScore}{" "}
+                      </span>{" "}
                       <button
                         onClick={() => handlePostVote("DOWN")}
                         disabled={isVotingPost}
                         aria-label="Downvote post"
-                        className={`flex items-center justify-center rounded-lg p-1.5 transition-all ${
-                          postVote === "DOWN"
-                            ? "bg-rose-600 text-white shadow-xs"
-                            : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
-                        }`}
+                        className={`flex items-center justify-center rounded-lg p-1.5 transition-all ${postVote === "DOWN" ? "bg-rose-600 text-white shadow-xs" : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"}`}
                       >
-                        <ArrowDown size={16} strokeWidth={postVote === "DOWN" ? 2.5 : 2} />
-                      </button>
+                        {" "}
+                        <ArrowDown
+                          size={16}
+                          strokeWidth={postVote === "DOWN" ? 2.5 : 2}
+                        />{" "}
+                      </button>{" "}
                     </div>
 
                     {/* Comment count */}
                     <div className="flex items-center gap-1.5 rounded-xl bg-brand-sand/50 px-3 py-1.5 text-xs font-semibold text-brand-brown-700">
                       <MessageCircle size={15} />
-                      <span>{post.commentCount ?? comments.length} Comments</span>
+                      <span>
+                        {post.commentCount ?? comments.length} Comments
+                      </span>
                     </div>
                   </div>
 
-                  {/* Share button */}
-                  <button
-                    onClick={() => {
-                      if (navigator.clipboard) {
-                        navigator.clipboard.writeText(window.location.href);
-                        showToast("Post link copied to clipboard!", "success");
-                      }
-                    }}
-                    title="Copy share link"
-                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-brown-700 hover:bg-brand-sand/50 transition-colors"
-                  >
-                    <Share2 size={14} />
-                    <span className="hidden sm:inline">Share</span>
-                  </button>
+                  {/* Action buttons (Author Controls & Share) */}
+                  <div className="flex items-center gap-1.5">
+                    {isAuthor && (
+                      <>
+                        <Link
+                          href={`/posts/${post.id}/edit`}
+                          className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-brand-brown-800 bg-brand-sand/50 hover:bg-brand-sand transition-colors"
+                          title="Edit your post"
+                        >
+                          <Edit3 size={13} />
+                          <span>Edit</span>
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => setShowDeletePostModal(true)}
+                          className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-red-700 bg-red-50/70 hover:bg-red-100/80 transition-colors"
+                          title="Delete your post"
+                        >
+                          <Trash2 size={13} />
+                          <span>Delete</span>
+                        </button>
+                      </>
+                    )}
+
+                    {/* Share button */}
+                    <button
+                      onClick={() => {
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(window.location.href);
+                          showToast("Post link copied to clipboard!", "success");
+                        }
+                      }}
+                      title="Copy share link"
+                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-brown-700 hover:bg-brand-sand/50 transition-colors"
+                    >
+                      <Share2 size={14} />
+                      <span className="hidden sm:inline">Share</span>
+                    </button>
+                  </div>
                 </div>
               </article>
             ) : null}
@@ -1079,11 +1171,15 @@ export default function PostPage() {
               {/* Header & Sort */}
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-sm font-bold text-brand-brown-950">
-                  {post ? `${post.commentCount ?? comments.length} Comments` : "Comments"}
+                  {post
+                    ? `${post.commentCount ?? comments.length} Comments`
+                    : "Comments"}
                 </h2>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-muted-foreground hidden sm:inline">Sort by:</span>
+                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                    Sort by:
+                  </span>
                   <select
                     value={commentSort}
                     onChange={(e) => setCommentSort(e.target.value as any)}
@@ -1127,7 +1223,8 @@ export default function PostPage() {
                     No comments yet
                   </h3>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    Be the first to share your thoughts, answer questions, or add context!
+                    Be the first to share your thoughts, answer questions, or
+                    add context!
                   </p>
                 </div>
               ) : (
@@ -1193,6 +1290,63 @@ export default function PostPage() {
           </aside>
         </div>
       </div>
+
+      {/* Delete Post Modal */}
+      {showDeletePostModal && post && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-brand-sand-dark bg-white p-6 shadow-2xl animate-in zoom-in-95">
+            <div className="flex items-center justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                <Trash2 size={20} />
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDeletePostModal(false)}
+                disabled={isDeletingPost}
+                className="rounded-lg p-1 text-muted-foreground hover:bg-brand-sand hover:text-brand-brown-950"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <h3 className="text-lg font-bold text-brand-brown-950">
+                Delete this post?
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-brand-brown-600">
+                Are you sure you want to delete this post? This will remove the post and its discussions permanently. This cannot be undone.
+              </p>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={isDeletingPost}
+                onClick={() => setShowDeletePostModal(false)}
+                className="rounded-xl border border-brand-sand-dark px-4 py-2 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand/60 transition-colors"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeletingPost}
+                onClick={handleDeletePost}
+                className="flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {isDeletingPost ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Deleting…</span>
+                  </>
+                ) : (
+                  <span>Delete Permanently</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

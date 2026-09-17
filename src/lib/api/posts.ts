@@ -1,5 +1,11 @@
 import { apiClient } from "./client";
-import { CreatePostInput, GetPostsQuery, PaginatedResponse, PostItem } from "./types";
+import {
+  CreatePostInput,
+  GetPostsQuery,
+  PaginatedResponse,
+  PostItem,
+  UpdatePostInput,
+} from "./types";
 
 export const postsApi = {
   /**
@@ -28,4 +34,19 @@ export const postsApi = {
   async create(data: CreatePostInput): Promise<PostItem> {
     return apiClient.post<PostItem>("/posts", data);
   },
+
+  /**
+   * Update an existing post.
+   */
+  async update(id: string, data: UpdatePostInput): Promise<PostItem> {
+    return apiClient.patch<PostItem>(`/posts/${id}`, data);
+  },
+
+  /**
+   * Remove / delete a post.
+   */
+  async remove(id: string): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>(`/posts/${id}`);
+  },
 };
+

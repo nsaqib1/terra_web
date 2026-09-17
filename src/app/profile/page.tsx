@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Globe,
   Key,
+  LayoutList,
   Loader2,
   LogOut,
   MapPin,
@@ -189,13 +190,15 @@ function StatCard({
   icon,
   label,
   value,
+  href,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | number;
+  href?: string;
 }) {
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-2xl border border-brand-sand-dark bg-white p-4 text-center">
+  const inner = (
+    <>
       <span className="mb-1 text-brand-brown-600">
         {icon}
       </span>
@@ -207,6 +210,23 @@ function StatCard({
       <span className="text-[11px] font-medium text-brand-brown-600">
         {label}
       </span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="flex flex-col items-center gap-1 rounded-2xl border border-brand-sand-dark bg-white p-4 text-center transition-all hover:border-brand-desert-dark hover:shadow-xs"
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-2xl border border-brand-sand-dark bg-white p-4 text-center">
+      {inner}
     </div>
   );
 }
@@ -289,6 +309,7 @@ function ProfileInfoTab({
           icon={<MessageSquare size={16} />}
           label="Posts"
           value={stats?.posts ?? 0}
+          href="/posts/manage"
         />
 
         <StatCard
@@ -914,6 +935,19 @@ export default function ProfilePage() {
                     />
                   </button>
                 ))}
+                <div className="mx-2 my-1.5 h-px bg-brand-sand-dark/60" />
+
+                <Link
+                  href="/posts/manage"
+                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950 transition-all"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <LayoutList size={15} />
+                    Manage My Posts
+                  </span>
+                  <ChevronRight size={13} className="opacity-30" />
+                </Link>
+
                 <div className="mx-2 my-1.5 h-px bg-brand-sand-dark/60" />
 
                 <button

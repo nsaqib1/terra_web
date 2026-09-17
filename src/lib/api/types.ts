@@ -344,6 +344,11 @@ export interface CreatePostInput {
   tagIds: string[];
 }
 
+export interface UpdatePostInput {
+  document?: unknown;
+  tagIds?: string[];
+}
+
 export type VoteValue = "UP" | "DOWN";
 export type VoteAction = "created" | "removed" | "changed";
 
