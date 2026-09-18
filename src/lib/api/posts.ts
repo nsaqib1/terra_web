@@ -9,14 +9,15 @@ import {
 
 export const postsApi = {
   /**
-   * List posts for a community with pagination.
+   * List posts with pagination, optional community filter, and sorting.
    */
-  async list(query: GetPostsQuery): Promise<PaginatedResponse<PostItem>> {
+  async list(query?: GetPostsQuery): Promise<PaginatedResponse<PostItem>> {
     return apiClient.get<PaginatedResponse<PostItem>>("/posts", {
       params: {
-        communityId: query.communityId,
-        page: query.page,
-        limit: query.limit,
+        communityId: query?.communityId,
+        page: query?.page,
+        limit: query?.limit,
+        sort: query?.sort,
       },
     });
   },

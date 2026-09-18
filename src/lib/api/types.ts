@@ -332,10 +332,13 @@ export interface PostItem {
   updatedAt: string;
 }
 
+export type PostSortOption = "newest" | "top" | "comments" | "oldest";
+
 export interface GetPostsQuery {
-  communityId: string;
+  communityId?: string;
   page?: number;
   limit?: number;
+  sort?: PostSortOption;
 }
 
 export interface CreatePostInput {
