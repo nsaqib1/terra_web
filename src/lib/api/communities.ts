@@ -2,9 +2,17 @@ import { apiClient } from "./client";
 import {
   CommunityDetail,
   CommunityMembershipRecord,
+  CommunityProposal,
   JoinedCommunity,
   MembershipStatusResponse,
 } from "./types";
+
+export interface CreateProposalInput {
+  name: string;
+  slug: string;
+  description: string;
+  reason: string;
+}
 
 export const communitiesApi = {
   /**
@@ -53,6 +61,13 @@ export const communitiesApi = {
     return apiClient.delete<{ message: string }>(
       `/communities/${encodeURIComponent(slug)}/leave`
     );
+  },
+
+  /**
+   * Submit a new community proposal.
+   */
+  async createProposal(data: CreateProposalInput): Promise<CommunityProposal> {
+    return apiClient.post<CommunityProposal>("/communities/proposals", data);
   },
 };
 
