@@ -6,12 +6,13 @@ import {
   ArrowUpRight,
   Flame,
   Sparkles,
-  Trophy,
   TrendingUp,
   ArrowUp,
   MessageCircle,
   RefreshCw,
   AlertCircle,
+  Star,
+  Zap,
 } from "lucide-react";
 import { postsApi } from "@/lib/api/posts";
 import { TrendingPost } from "@/lib/api/types";
@@ -191,26 +192,262 @@ function TrendingDiscussions() {
   );
 }
 
-const topContributors = [
-  {
-    name: "Sarah Chen",
-    username: "sarahc",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-    contributions: "342 posts",
-  },
-  {
-    name: "David K.",
-    username: "davidk",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
-    contributions: "289 posts",
-  },
-  {
-    name: "Alex R.",
-    username: "arivera",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-    contributions: "215 posts",
-  },
-];
+// ── Rising Star Algorithm ──────────────────────────────────────────────────
+// Aggregates per-author momentum from the trending post window.
+// Score = Σ trendingScore for each post by that author + bonus for post count.
+// A "velocity" bar shows relative momentum vs. the top star.
+
+interface RisingStarEntry {
+  authorId: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  risingScore: number;   // raw aggregated score
+  postCount: number;     // # trending posts in window
+  totalScore: number;    // sum of post scores (upvotes)
+}
+
+function computeRisingStars(posts: TrendingPost[], topN = 3): RisingStarEntry[] {
+  const map = new Map<string, RisingStarEntry>();
+
+  for (const post of posts) {
+    const { author, trendingScore, score } = post;
+    const existing = map.get(author.id);
+    if (existing) {
+      existing.risingScore += trendingScore;
+      existing.postCount += 1;
+      existing.totalScore += score;
+    } else {
+      map.set(author.id, {
+        authorId: author.id,
+        username: author.username,
+        displayName: author.displayName,
+        avatarUrl: author.avatarUrl,
+        risingScore: trendingScore,
+        postCount: 1,
+        totalScore: score,
+      });
+    }
+  }
+
+  // Apply a post-count multiplier so authors with multiple hot posts rank higher
+  const entries = Array.from(map.values()).map((e) => ({
+    ...e,
+    risingScore: e.risingScore * (1 + 0.15 * (e.postCount - 1)),
+  }));
+
+  return entries
+    .sort((a, b) => b.risingScore - a.risingScore)
+    .slice(0, topN);
+}
+
+function RisingStarBadge({ rank }: { rank: number }) {
+  if (rank === 0)
+    return (
+      <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">
+        <Zap size={8} className="text-amber-500" />
+        HOT
+      </span>
+    );
+  if (rank === 1)
+    return (
+      <span className="inline-flex items-center gap-0.5 rounded-full bg-orange-50 px-1.5 py-0.5 text-[9px] font-bold text-orange-600">
+        <Flame size={8} />
+        RISING
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-0.5 rounded-full bg-brand-sand px-1.5 py-0.5 text-[9px] font-bold text-brand-brown-600">
+      <Star size={8} />
+      NEW
+    </span>
+  );
+}
+
+function RisingStar() {
+  const [stars, setStars] = useState<RisingStarEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const load = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
+    try {
+      // Pull a larger window (7 days) to get enough author diversity
+      const data = await postsApi.getTrending(25, 168);
+      setStars(computeRisingStars(data, 4));
+    } catch {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const maxScore = stars[0]?.risingScore ?? 1;
+
+  return (
+    <section className="rounded-2xl border bg-white p-4 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b pb-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="flex h-5 w-5 items-center justify-center rounded-full"
+            style={{
+              background: "linear-gradient(135deg,#f59e0b 0%,#ef4444 100%)",
+            }}
+          >
+            <Flame size={11} className="text-white" />
+          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-brand-brown-800">
+            Rising Star
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={load}
+          disabled={isLoading}
+          title="Refresh rising stars"
+          className="flex h-6 w-6 items-center justify-center rounded-lg text-brand-brown-600 transition-colors hover:bg-brand-sand hover:text-brand-brown-900 disabled:opacity-40"
+        >
+          <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      {/* Subtitle */}
+      <p className="mt-2 text-[10px] text-muted-foreground leading-snug">
+        Users whose posts have been gaining momentum lately.
+      </p>
+
+      <div className="mt-3 space-y-3">
+        {isLoading ? (
+          [1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center gap-2.5 animate-pulse">
+              <div className="h-9 w-9 rounded-full bg-brand-sand shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 bg-brand-sand rounded w-3/4" />
+                <div className="h-2 bg-brand-sand/60 rounded w-full" />
+              </div>
+            </div>
+          ))
+        ) : hasError ? (
+          <div className="flex flex-col items-center gap-1.5 py-4 text-center">
+            <AlertCircle size={18} className="text-brand-brown-600" />
+            <p className="text-[11px] text-muted-foreground">Couldn&apos;t load stars</p>
+            <button
+              type="button"
+              onClick={load}
+              className="text-[11px] font-semibold text-brand-brown-700 hover:underline"
+            >
+              Retry
+            </button>
+          </div>
+        ) : stars.length === 0 ? (
+          <div className="py-4 text-center">
+            <Star size={20} className="mx-auto text-brand-sand-dark mb-1" />
+            <p className="text-[11px] text-muted-foreground">No stars yet.</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Keep posting!</p>
+          </div>
+        ) : (
+          stars.map((star, index) => {
+            const velPct = Math.round((star.risingScore / maxScore) * 100);
+            const initials = star.displayName
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2);
+
+            return (
+              <Link
+                key={star.authorId}
+                href={`/profile/${star.authorId}`}
+                className="group block"
+              >
+                <div className="flex items-center gap-2.5">
+                  {/* Avatar */}
+                  {star.avatarUrl ? (
+                    <img
+                      src={star.avatarUrl}
+                      alt={star.displayName}
+                      className={
+                        "h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-offset-1 transition-all group-hover:ring-amber-400 " +
+                        (index === 0
+                          ? "ring-amber-400"
+                          : index === 1
+                          ? "ring-orange-300"
+                          : "ring-brand-sand-dark")
+                      }
+                    />
+                  ) : (
+                    <div
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ring-2 ring-offset-1"
+                      style={{
+                        background:
+                          index === 0
+                            ? "linear-gradient(135deg,#f59e0b,#ef4444)"
+                            : index === 1
+                            ? "linear-gradient(135deg,#fb923c,#f59e0b)"
+                            : "linear-gradient(135deg,#a78bfa,#60a5fa)",
+                      }}
+                    >
+                      {initials}
+                    </div>
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="truncate text-xs font-bold text-brand-brown-900 group-hover:text-brand-brown-700 group-hover:underline">
+                        {star.displayName}
+                      </p>
+                      <RisingStarBadge rank={index} />
+                    </div>
+
+                    <p className="text-[10px] text-muted-foreground">@{star.username}</p>
+
+                    {/* Velocity bar */}
+                    <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-brand-sand/60">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${velPct}%`,
+                          background:
+                            index === 0
+                              ? "linear-gradient(90deg,#f59e0b,#ef4444)"
+                              : index === 1
+                              ? "linear-gradient(90deg,#fb923c,#f59e0b)"
+                              : "linear-gradient(90deg,#a78bfa,#60a5fa)",
+                        }}
+                      />
+                    </div>
+
+                    <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-0.5">
+                        <ArrowUp size={9} />
+                        {formatCount(star.totalScore)}
+                      </span>
+                      <span className="flex items-center gap-0.5">
+                        <MessageCircle size={9} />
+                        {star.postCount} {star.postCount === 1 ? "post" : "posts"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {!isLoading && !hasError && stars.length > 0 && (
+        <p className="mt-3 border-t pt-2.5 text-[10px] text-muted-foreground">
+          Based on post momentum over the last 7 days.
+        </p>
+      )}
+    </section>
+  );
+}
 
 export function RightSidebar() {
   return (
@@ -220,39 +457,8 @@ export function RightSidebar() {
         {/* Trending Discussions — Live */}
         <TrendingDiscussions />
 
-        {/* Top Contributors of the Week */}
-        <section className="rounded-2xl border bg-white p-4">
-          <SectionHeader
-            icon={<Trophy size={15} />}
-            title="Top Contributors"
-          />
-
-          <div className="mt-3 space-y-3">
-            {topContributors.map((user) => (
-              <div key={user.username} className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-xs font-bold text-brand-brown-900 hover:underline cursor-pointer">
-                      {user.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      @{user.username}
-                    </p>
-                  </div>
-                </div>
-
-                <span className="shrink-0 text-[10px] font-semibold text-brand-brown-700 bg-brand-sand px-2 py-0.5 rounded-full">
-                  {user.contributions}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Rising Star */}
+        <RisingStar />
 
         {/* Platform Guidelines / Info Widget */}
         <section className="rounded-2xl border border-brand-desert-light bg-brand-desert-light/30 p-4">
