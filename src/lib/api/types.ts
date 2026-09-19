@@ -44,6 +44,7 @@ export interface UpdateProfileInput {
   bio?: string | null;
   location?: string | null;
   website?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface UserCommunityItem {

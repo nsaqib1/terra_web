@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { usersApi } from "@/lib/api/users";
 import { UserProfileResponse, UserStats } from "@/lib/api/types";
+import { AvatarUploadModal } from "@/components/profile/AvatarUploadModal";
 
 type NavTab = "profile" | "security" | "privacy";
 
@@ -51,6 +52,7 @@ function EditableProfileHeader({
   location,
   website,
   joinedDate,
+  onOpenAvatarModal,
 }: {
   displayName: string;
   username: string;
@@ -59,6 +61,7 @@ function EditableProfileHeader({
   location: string;
   website: string;
   joinedDate: string;
+  onOpenAvatarModal?: () => void;
 }) {
   return (
     <section className="overflow-hidden rounded-3xl border border-brand-sand-dark bg-white shadow-xs">
@@ -90,31 +93,53 @@ function EditableProfileHeader({
       <div className="relative px-5 pb-6 sm:px-8">
         <div className="-mt-14 sm:-mt-16">
           <div className="flex flex-col sm:flex-row sm:items-end gap-5">
-            {/* Avatar */}
-            <div className="relative shrink-0">
-              <Avatar className="h-28 w-28 sm:h-32 sm:w-32 rounded-full border-4 border-white bg-white shadow-md">
-                {avatarUrl && (
-                  <AvatarImage
-                    src={avatarUrl}
-                    alt={displayName}
-                    className="rounded-full object-cover"
-                  />
-                )}
+            {/* Avatar with click & hover to edit */}
+            <div className="relative shrink-0 group">
+              <div
+                onClick={onOpenAvatarModal}
+                className="relative cursor-pointer rounded-full overflow-hidden"
+                role="button"
+                tabIndex={0}
+                aria-label="Edit profile picture"
+                title="Click to edit profile picture"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onOpenAvatarModal?.();
+                  }
+                }}
+              >
+                <Avatar className="h-28 w-28 sm:h-32 sm:w-32 rounded-full border-4 border-white bg-white shadow-md transition-transform duration-200 group-hover:scale-[1.02]">
+                  {avatarUrl && (
+                    <AvatarImage
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="rounded-full object-cover"
+                    />
+                  )}
 
-                <AvatarFallback className="rounded-full bg-brand-desert text-2xl font-bold text-brand-brown-950">
-                  {getInitials(displayName || "User")}
-                </AvatarFallback>
-              </Avatar>
+                  <AvatarFallback className="rounded-full bg-brand-desert text-2xl font-bold text-brand-brown-950">
+                    {getInitials(displayName || "User")}
+                  </AvatarFallback>
+                </Avatar>
 
-              {/* Change profile picture */}
+                {/* Hover overlay with camera icon */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 backdrop-blur-2xs">
+                  <Camera size={22} className="text-white drop-shadow-xs" />
+                  <span className="text-[10px] font-semibold mt-1">Edit Photo</span>
+                </div>
+              </div>
+
+              {/* Change profile picture button badge */}
               <button
                 id="profile-change-avatar"
                 type="button"
-                className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-brand-brown-950 text-white shadow-md transition-opacity hover:opacity-90"
+                onClick={onOpenAvatarModal}
+                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-brand-brown-950 text-white shadow-md transition-all hover:bg-brand-desert-dark hover:scale-110 active:scale-95"
                 aria-label="Change profile picture"
-                title="Change profile picture"
+                title="Change profile picture (Crop, Rotate, Enhance)"
               >
-                <Camera size={13} />
+                <Camera size={14} />
               </button>
             </div>
 
@@ -281,19 +306,25 @@ function ProfileInfoTab({
   setForm,
   points,
   stats,
+  avatarUrl,
+  displayName,
   isSaved,
   isUpdating,
   errorMessage,
   onSave,
+  onOpenAvatarModal,
 }: {
   form: FormState;
   setForm: React.Dispatch<React.SetStateAction<FormState>>;
   points: number;
   stats: UserStats | null;
+  avatarUrl: string | null;
+  displayName: string;
   isSaved: boolean;
   isUpdating: boolean;
   errorMessage: string | null;
   onSave: (e: React.FormEvent) => void;
+  onOpenAvatarModal?: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -331,6 +362,42 @@ function ProfileInfoTab({
           title="Profile Information"
           description="Update the information shown on your public profile."
         />
+
+        {/* Profile Picture Management Card */}
+        <div className="my-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-brand-sand-dark/70 bg-brand-cream/30 p-4 sm:p-5">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16 rounded-full border-2 border-white bg-white shadow-xs">
+              {avatarUrl && (
+                <AvatarImage
+                  src={avatarUrl}
+                  alt={displayName}
+                  className="rounded-full object-cover"
+                />
+              )}
+              <AvatarFallback className="rounded-full bg-brand-desert text-lg font-bold text-brand-brown-950">
+                {getInitials(displayName || "User")}
+              </AvatarFallback>
+            </Avatar>
+
+            <div>
+              <h4 className="text-sm font-bold text-brand-brown-950">
+                Profile Photo
+              </h4>
+              <p className="text-xs text-brand-brown-600 mt-0.5">
+                Crop, rotate, zoom, and apply custom lighting filters.
+              </p>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            onClick={onOpenAvatarModal}
+            className="h-9 rounded-xl bg-brand-brown-950 px-4 text-xs font-bold text-white hover:bg-brand-brown-800 transition-all gap-1.5 shadow-2xs"
+          >
+            <Camera size={14} />
+            Change Photo
+          </Button>
+        </div>
 
         {errorMessage && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-800">
@@ -765,6 +832,7 @@ export default function ProfilePage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);
 
@@ -815,6 +883,20 @@ export default function ProfilePage() {
   const website = form.website || profileData?.user.website || user?.website || "";
   const points = profileData?.user.points ?? user?.points ?? 0;
   const createdAt = profileData?.user.createdAt || user?.createdAt;
+
+  const handleAvatarUpdated = (newAvatarUrl: string | null) => {
+    setProfileData((prev) =>
+      prev
+        ? {
+            ...prev,
+            user: {
+              ...prev.user,
+              avatarUrl: newAvatarUrl,
+            },
+          }
+        : null
+    );
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -872,6 +954,7 @@ export default function ProfilePage() {
           bio={bio}
           location={location}
           website={website}
+          onOpenAvatarModal={() => setIsAvatarModalOpen(true)}
           joinedDate={
             createdAt
               ? new Date(createdAt).toLocaleDateString("en-US", {
@@ -894,10 +977,13 @@ export default function ProfilePage() {
                 setForm={setForm}
                 points={points}
                 stats={profileData?.stats ?? null}
+                avatarUrl={avatarUrl}
+                displayName={displayName}
                 isSaved={isSaved}
                 isUpdating={isUpdating}
                 errorMessage={errorMessage}
                 onSave={handleSave}
+                onOpenAvatarModal={() => setIsAvatarModalOpen(true)}
               />
             )}
 
@@ -964,6 +1050,15 @@ export default function ProfilePage() {
           </aside>
         </div>
       </div>
+
+      {/* Avatar upload & crop modal */}
+      <AvatarUploadModal
+        isOpen={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+        currentAvatarUrl={avatarUrl}
+        onAvatarUpdated={handleAvatarUpdated}
+        userDisplayName={displayName}
+      />
     </AppShell>
   );
 }
