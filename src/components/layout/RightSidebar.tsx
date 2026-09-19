@@ -1,36 +1,195 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
+  Flame,
   Sparkles,
-  TrendingUp,
   Trophy,
+  TrendingUp,
+  ArrowUp,
+  MessageCircle,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
+import { postsApi } from "@/lib/api/posts";
+import { TrendingPost } from "@/lib/api/types";
 
-const discussions = [
-  {
-    id: 1,
-    title: "What's the best architecture for a local AI assistant in 2026?",
-    contributions: "1.2K replies",
-    community: "Artificial Intelligence",
-    slug: "local-ai-architecture-2026",
-  },
-  {
-    id: 2,
-    title: "What programming concepts took you years to truly understand?",
-    contributions: "842 replies",
-    community: "Programming",
-    slug: "concepts-that-took-years",
-  },
-  {
-    id: 3,
-    title: "What makes a photograph feel timeless?",
-    contributions: "618 replies",
-    community: "Photography",
-    slug: "timeless-photography",
-  },
-];
+function getPostTitle(document: any): string {
+  if (!document) return "Untitled discussion";
+  if (typeof document === "string") return document.slice(0, 100);
+
+  if (document.content && Array.isArray(document.content)) {
+    for (const node of document.content) {
+      if (node.type === "heading" && Array.isArray(node.content)) {
+        const text = node.content.map((t: any) => t?.text || "").join("").trim();
+        if (text) return text;
+      }
+    }
+    for (const node of document.content) {
+      if (node.type === "paragraph" && Array.isArray(node.content)) {
+        const text = node.content.map((t: any) => t?.text || "").join("").trim();
+        if (text) return text;
+      }
+    }
+  }
+
+  return "Untitled discussion";
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return String(n);
+}
+
+function TrendingDiscussions() {
+  const [posts, setPosts] = useState<TrendingPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const load = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
+    try {
+      const data = await postsApi.getTrending(5, 72);
+      setPosts(data);
+    } catch {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <section className="rounded-2xl border bg-white p-4">
+      <div className="flex items-center justify-between border-b pb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-brand-brown-700">
+            <Flame size={15} className="text-brand-desert-dark" />
+          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-brand-brown-800">
+            Trending
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={load}
+          disabled={isLoading}
+          title="Refresh trending"
+          className="flex h-6 w-6 items-center justify-center rounded-lg text-brand-brown-600 transition-colors hover:bg-brand-sand hover:text-brand-brown-900 disabled:opacity-40"
+        >
+          <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} />
+        </button>
+      </div>
+
+      <div className="mt-3 space-y-3">
+        {isLoading ? (
+          // Skeleton
+          [1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex gap-2.5 animate-pulse">
+              <div className="pt-0.5 w-4 h-3 rounded bg-brand-sand shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 bg-brand-sand rounded w-full" />
+                <div className="h-3 bg-brand-sand/60 rounded w-3/4" />
+                <div className="h-2.5 bg-brand-sand/40 rounded w-1/2" />
+              </div>
+            </div>
+          ))
+        ) : hasError ? (
+          <div className="flex flex-col items-center gap-1.5 py-4 text-center">
+            <AlertCircle size={18} className="text-brand-brown-600" />
+            <p className="text-[11px] text-muted-foreground">Couldn't load trending</p>
+            <button
+              type="button"
+              onClick={load}
+              className="text-[11px] font-semibold text-brand-brown-700 hover:underline"
+            >
+              Retry
+            </button>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="py-4 text-center">
+            <TrendingUp size={20} className="mx-auto text-brand-sand-dark mb-1" />
+            <p className="text-[11px] text-muted-foreground">No trending posts yet.</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Check back soon!</p>
+          </div>
+        ) : (
+          posts.map((post, index) => {
+            const title = getPostTitle(post.document);
+
+            return (
+              <Link
+                key={post.id}
+                href={`/posts/${post.id}`}
+                className="group block transition-colors"
+              >
+                <div className="flex gap-2.5">
+                  {/* Rank badge */}
+                  <span
+                    className={`pt-0.5 text-xs font-bold shrink-0 ${
+                      index === 0
+                        ? "text-brand-desert-dark"
+                        : index === 1
+                        ? "text-brand-brown-700"
+                        : "text-brand-brown-600/60"
+                    }`}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    {/* Title */}
+                    <p className="text-xs font-semibold leading-snug text-brand-brown-900 line-clamp-2 transition-colors group-hover:text-brand-brown-700 group-hover:underline">
+                      {title}
+                    </p>
+
+                    {/* Community & stats */}
+                    <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                      {post.community?.slug && (
+                        <span
+                          className="truncate text-[10px] font-semibold text-brand-brown-700 max-w-[90px]"
+                          title={post.community.name}
+                        >
+                          {post.community.name}
+                        </span>
+                      )}
+
+                      <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                        <ArrowUp size={10} />
+                        {formatCount(post.score)}
+                      </span>
+
+                      <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                        <MessageCircle size={10} />
+                        {formatCount(post.commentCount)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* "See all" link */}
+      {!isLoading && !hasError && posts.length > 0 && (
+        <Link
+          href="/?sort=top"
+          className="mt-3 flex items-center gap-1 border-t pt-2.5 text-[11px] font-bold text-brand-brown-700 hover:text-brand-brown-950 hover:underline transition-colors"
+        >
+          See top posts
+          <ArrowUpRight size={11} />
+        </Link>
+      )}
+    </section>
+  );
+}
 
 const topContributors = [
   {
@@ -56,50 +215,15 @@ const topContributors = [
 export function RightSidebar() {
   return (
     <aside className="hidden w-[280px] shrink-0 xl:block">
-      <div className="sticky top-20 space-y-6">
+      <div className="sticky top-20 space-y-5">
 
-        {/* Trending Discussions */}
-        <section className="rounded-2xl border bg-white p-4">
-          <SectionHeader
-            icon={<TrendingUp size={16} />}
-            title="Trending Discussions"
-          />
-
-          <div className="mt-3 space-y-3">
-            {discussions.map((discussion, index) => (
-              <Link
-                key={discussion.id}
-                href={`/post/${discussion.slug}`}
-                className="group block transition-colors"
-              >
-                <div className="flex gap-2.5">
-                  <span className="pt-0.5 text-xs font-bold text-brand-desert-dark">
-                    0{index + 1}
-                  </span>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold leading-snug text-brand-brown-900 transition-colors group-hover:text-brand-brown-950 group-hover:underline">
-                      {discussion.title}
-                    </p>
-
-                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <span className="truncate font-medium text-brand-brown-700">
-                        {discussion.community}
-                      </span>
-                      <span>•</span>
-                      <span>{discussion.contributions}</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {/* Trending Discussions — Live */}
+        <TrendingDiscussions />
 
         {/* Top Contributors of the Week */}
         <section className="rounded-2xl border bg-white p-4">
           <SectionHeader
-            icon={<Trophy size={16} />}
+            icon={<Trophy size={15} />}
             title="Top Contributors"
           />
 

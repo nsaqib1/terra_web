@@ -334,6 +334,22 @@ export interface PostItem {
 
 export type PostSortOption = "newest" | "top" | "comments" | "oldest";
 
+export interface TrendingPost {
+  id: string;
+  document: any;
+  community: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  author: PostAuthor;
+  tags: PostTagItem[];
+  score: number;
+  commentCount: number;
+  createdAt: string;
+  trendingScore: number;
+}
+
 export interface GetPostsQuery {
   communityId?: string;
   page?: number;

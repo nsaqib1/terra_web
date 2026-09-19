@@ -4,6 +4,7 @@ import {
   GetPostsQuery,
   PaginatedResponse,
   PostItem,
+  TrendingPost,
   UpdatePostInput,
 } from "./types";
 
@@ -18,6 +19,18 @@ export const postsApi = {
         page: query?.page,
         limit: query?.limit,
         sort: query?.sort,
+      },
+    });
+  },
+
+  /**
+   * Fetch trending posts using the time-decayed scoring algorithm.
+   */
+  async getTrending(limit = 5, windowHours = 72): Promise<TrendingPost[]> {
+    return apiClient.get<TrendingPost[]>("/posts/trending", {
+      params: {
+        limit,
+        window_hours: windowHours,
       },
     });
   },
@@ -50,4 +63,5 @@ export const postsApi = {
     return apiClient.delete<{ message: string }>(`/posts/${id}`);
   },
 };
+
 
