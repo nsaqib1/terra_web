@@ -7,22 +7,27 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  KeyRound,
   Loader2,
   Mail,
+  Sparkles,
+  Ticket,
   User,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { invitesApi } from "@/lib/api/invites";
 import { extractErrorMessage } from "@/lib/api/errors";
 import { PasswordStrength } from "./PasswordStrength";
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signup } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -30,19 +35,89 @@ export function SignupForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Invite & Beta State
+  const [isInviteOnly, setIsInviteOnly] = useState<boolean>(true);
+  const [checkingInviteStatus, setCheckingInviteStatus] = useState<boolean>(true);
+  const [validatingCode, setValidatingCode] = useState<boolean>(false);
+  const [inviteFeedback, setInviteFeedback] = useState<{
+    valid: boolean;
+    message: string;
+    label?: string | null;
+    remainingUses?: number;
+  } | null>(null);
+
   const [form, setForm] = useState({
     name: "",
     username: "",
     email: "",
     password: "",
+    inviteCode: "",
     agree: false,
   });
+
+  // Check backend invite-only status on mount
+  useEffect(() => {
+    let mounted = true;
+    async function loadStatus() {
+      try {
+        const res = await invitesApi.getStatus();
+        if (mounted) {
+          setIsInviteOnly(res.isInviteOnlyEnabled);
+        }
+      } catch {
+        // Default to invite-only if check fails
+        if (mounted) setIsInviteOnly(true);
+      } finally {
+        if (mounted) setCheckingInviteStatus(false);
+      }
+    }
+    loadStatus();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Pre-fill invite code from URL param (?invite=... or ?code=...)
+  useEffect(() => {
+    const codeParam = searchParams.get("invite") || searchParams.get("code");
+    if (codeParam) {
+      const cleanCode = codeParam.trim().toUpperCase();
+      setForm((prev) => ({ ...prev, inviteCode: cleanCode }));
+      validateCode(cleanCode);
+    }
+  }, [searchParams]);
+
+  const validateCode = async (codeToTest: string) => {
+    const trimmed = codeToTest.trim().toUpperCase();
+    if (!trimmed) {
+      setInviteFeedback(null);
+      return;
+    }
+
+    setValidatingCode(true);
+    try {
+      const res = await invitesApi.validate(trimmed);
+      setInviteFeedback({
+        valid: true,
+        message: "Invite code verified",
+        label: res.label,
+        remainingUses: res.remainingUses,
+      });
+    } catch (err) {
+      const msg = extractErrorMessage(err, "Invalid or expired invite code");
+      setInviteFeedback({
+        valid: false,
+        message: msg,
+      });
+    } finally {
+      setValidatingCode(false);
+    }
+  };
 
   const update = (
     field: keyof typeof form,
     value: string | boolean,
   ) => {
-    // Clear error message when user starts making changes
     if (errorMessage) {
       setErrorMessage(null);
     }
@@ -51,6 +126,19 @@ export function SignupForm() {
       ...current,
       [field]: value,
     }));
+
+    if (field === "inviteCode" && typeof value === "string") {
+      const upper = value.trim().toUpperCase();
+      if (!upper) {
+        setInviteFeedback(null);
+      }
+    }
+  };
+
+  const handleInviteBlur = () => {
+    if (form.inviteCode.trim()) {
+      validateCode(form.inviteCode);
+    }
   };
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
@@ -63,13 +151,19 @@ export function SignupForm() {
   const isPasswordValid =
     form.password.length >= 8 && form.password.length <= 128;
 
+  const isInviteValid =
+    !isInviteOnly ||
+    (Boolean(form.inviteCode.trim()) && inviteFeedback?.valid === true);
+
   const canSubmit =
     isNameValid &&
     isUsernameValid &&
     isEmailValid &&
     isPasswordValid &&
+    isInviteValid &&
     form.agree &&
-    !isSubmitting;
+    !isSubmitting &&
+    !validatingCode;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -84,10 +178,10 @@ export function SignupForm() {
         username: form.username.trim().toLowerCase(),
         email: form.email.trim().toLowerCase(),
         password: form.password,
+        inviteCode: form.inviteCode.trim() ? form.inviteCode.trim().toUpperCase() : undefined,
       });
 
       setIsSuccess(true);
-      // Give the user a brief visual feedback then navigate to home
       setTimeout(() => {
         router.push("/");
       }, 700);
@@ -100,7 +194,7 @@ export function SignupForm() {
 
   return (
     <div className="w-full max-w-[440px]">
-      {/* Mobile Branding (Clean & Consistent with Brand Panel) */}
+      {/* Mobile Branding */}
       <div className="mb-8 lg:hidden">
         <Link
           href="/"
@@ -131,34 +225,27 @@ export function SignupForm() {
         </Link>
       </div>
 
-      {/* Header Copy */}
+      {/* Beta Exclusive Badge & Header */}
       <div>
-        <p
-          className="
-            text-[11px]
-            font-bold
-            uppercase
-            tracking-[0.18em]
-            text-brand-desert-dark
-          "
-        >
-          Get Started
-        </p>
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 border border-amber-200/80 px-2.5 py-1 text-[11px] font-bold text-amber-900 shadow-2xs">
+          <Sparkles size={13} className="text-amber-700" />
+          <span>Closed Beta Access</span>
+        </div>
 
         <h1
           className="
-            mt-1.5
+            mt-2.5
             text-3xl
             font-extrabold
             tracking-tight
             text-brand-brown-950
           "
         >
-          Create your account
+          Join the Beta
         </h1>
 
         <p className="mt-2 text-sm leading-relaxed text-brand-brown-600">
-          Claim your unique handle and join vibrant, purpose-driven communities.
+          Sign up with your exclusive invitation link to test and help shape Commons.
         </p>
       </div>
 
@@ -208,11 +295,126 @@ export function SignupForm() {
 
       {/* Form Area */}
       <form
-        className="mt-7 space-y-4"
+        className="mt-6 space-y-4"
         onSubmit={handleSubmit}
         noValidate
       >
-        {/* Name Input */}
+        {/* Beta Invite Code Field */}
+        <div className="rounded-xl border border-brand-sand-dark/70 bg-brand-sand/30 p-3.5">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="inviteCode"
+              className="flex items-center gap-1.5 text-xs font-bold text-brand-brown-950"
+            >
+              <KeyRound size={14} className="text-brand-desert-dark" />
+              <span>Beta Invite Code</span>
+              {isInviteOnly && (
+                <span className="rounded-full bg-brand-desert-light/60 px-1.5 py-0.2 text-[9px] font-bold uppercase text-brand-brown-900">
+                  Required
+                </span>
+              )}
+            </label>
+
+            {form.inviteCode.trim() && (
+              <button
+                type="button"
+                onClick={() => validateCode(form.inviteCode)}
+                disabled={validatingCode || isSubmitting || isSuccess}
+                className="text-[11px] font-semibold text-brand-desert-dark hover:underline disabled:opacity-50"
+              >
+                {validatingCode ? "Verifying..." : "Verify Code"}
+              </button>
+            )}
+          </div>
+
+          <div className="relative mt-1.5">
+            <Ticket
+              size={16}
+              className="
+                absolute left-3.5 top-1/2
+                -translate-y-1/2
+                text-brand-brown-600/50
+              "
+            />
+
+            <input
+              id="inviteCode"
+              value={form.inviteCode}
+              disabled={isSubmitting || isSuccess}
+              onChange={(event) =>
+                update("inviteCode", event.target.value.toUpperCase())
+              }
+              onBlur={handleInviteBlur}
+              placeholder="e.g. BETA-7K9Q2M"
+              autoComplete="off"
+              maxLength={50}
+              className="
+                h-11 w-full
+                rounded-xl
+                border border-brand-sand-dark/80
+                bg-white
+                pl-10 pr-10
+                text-sm
+                font-mono
+                font-semibold
+                tracking-wider
+                text-brand-brown-950
+                outline-none
+                transition-all
+                placeholder:font-sans
+                placeholder:font-normal
+                placeholder:tracking-normal
+                placeholder:text-brand-brown-600/40
+                focus:border-brand-desert-dark
+                focus:ring-2
+                focus:ring-brand-desert-light/50
+                disabled:bg-brand-sand/30
+                disabled:cursor-not-allowed
+              "
+            />
+
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center">
+              {validatingCode && (
+                <Loader2 size={16} className="animate-spin text-brand-brown-600" />
+              )}
+              {!validatingCode && inviteFeedback?.valid && (
+                <CheckCircle2 size={17} className="text-emerald-600" />
+              )}
+              {!validatingCode && inviteFeedback && !inviteFeedback.valid && (
+                <AlertCircle size={17} className="text-red-500" />
+              )}
+            </div>
+          </div>
+
+          {/* Feedback Message */}
+          {inviteFeedback && (
+            <div
+              className={`mt-2 flex items-center gap-1.5 text-xs font-medium ${
+                inviteFeedback.valid ? "text-emerald-700" : "text-red-600"
+              }`}
+            >
+              <span>{inviteFeedback.message}</span>
+              {inviteFeedback.label && (
+                <span className="text-brand-brown-600">
+                  • {inviteFeedback.label}
+                </span>
+              )}
+              {inviteFeedback.remainingUses !== undefined && (
+                <span className="text-brand-brown-600/80">
+                  ({inviteFeedback.remainingUses} left)
+                </span>
+              )}
+            </div>
+          )}
+
+          {!inviteFeedback && isInviteOnly && (
+            <p className="mt-1.5 text-[11px] text-brand-brown-600/80">
+              Paste the invite link or code you received from an administrator or beta tester.
+            </p>
+          )}
+        </div>
+
+        {/* Full Name Input */}
         <div>
           <label
             htmlFor="name"
@@ -494,7 +696,7 @@ export function SignupForm() {
             </>
           ) : (
             <>
-              <span>Create Account</span>
+              <span>Join Beta & Create Account</span>
               <ArrowRight size={16} />
             </>
           )}

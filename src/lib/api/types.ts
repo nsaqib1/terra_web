@@ -70,6 +70,7 @@ export interface RegisterDto {
   displayName: string;
   email: string;
   password: string;
+  inviteCode?: string;
 }
 
 export interface LoginDto {
@@ -419,4 +420,94 @@ export interface CreateCommentInput {
 export interface UpdateCommentInput {
   body: string;
 }
+
+// ==========================================
+// Invite & Beta Testing Types
+// ==========================================
+
+export type InviteStatus = "active" | "inactive" | "expired" | "depleted";
+
+export interface InviteUsageItem {
+  id: string;
+  inviteId: string;
+  userId: string;
+  usedAt: string;
+  user: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+    createdAt: string;
+  };
+}
+
+export interface InviteItem {
+  id: string;
+  code: string;
+  label: string | null;
+  maxUses: number;
+  usedCount: number;
+  remainingUses: number;
+  status: InviteStatus;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: {
+    id: string;
+    username: string;
+    displayName: string;
+  } | null;
+  usages?: InviteUsageItem[];
+}
+
+export interface InviteListResponse {
+  items: InviteItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface InviteStatsResponse {
+  isInviteOnlyEnabled: boolean;
+  totalInvites: number;
+  activeInvites: number;
+  totalRedemptions: number;
+  totalCapacity: number;
+  remainingCapacity: number;
+}
+
+export interface ValidateInviteResponse {
+  valid: boolean;
+  code: string;
+  label?: string | null;
+  remainingUses: number;
+  expiresAt?: string | null;
+}
+
+export interface CreateInviteInput {
+  code?: string;
+  label?: string;
+  maxUses?: number;
+  expiresAt?: string | null;
+}
+
+export interface UpdateInviteInput {
+  label?: string;
+  maxUses?: number;
+  expiresAt?: string | null;
+  isActive?: boolean;
+}
+
+export interface InviteQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: "all" | "active" | "inactive" | "expired" | "depleted";
+}
+
 

@@ -10,6 +10,7 @@ import {
   Menu,
   Shield,
   Tag,
+  Ticket,
   Users,
   X,
 } from "lucide-react";
@@ -27,6 +28,11 @@ const adminNavItems = [
     label: "Dashboard",
     href: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Beta Invites",
+    href: "/admin/invites",
+    icon: Ticket,
   },
   {
     label: "Communities",
@@ -65,6 +71,7 @@ export default function AdminLayout({
 
   const currentRouteTitle = () => {
     if (pathname === "/admin") return "Overview";
+    if (pathname.startsWith("/admin/invites")) return "Beta Invites";
     if (pathname.startsWith("/admin/communities")) return "Communities";
     if (pathname.startsWith("/admin/proposals")) return "Proposals";
     if (pathname.startsWith("/admin/tags")) return "Tags";

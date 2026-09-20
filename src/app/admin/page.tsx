@@ -11,6 +11,7 @@ import {
   Plus,
   ShieldCheck,
   TrendingUp,
+  Ticket,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -19,14 +20,17 @@ import { CommunityFormModal } from "@/components/admin/CommunityFormModal";
 import { ProposalReviewModal } from "@/components/admin/ProposalReviewModal";
 import { Button } from "@/components/ui/button";
 import { adminApi } from "@/lib/api/admin";
+import { invitesApi } from "@/lib/api/invites";
 import {
   AdminCommunityStats,
   Community,
   CommunityProposal,
+  InviteStatsResponse,
 } from "@/lib/api/types";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminCommunityStats | null>(null);
+  const [inviteStats, setInviteStats] = useState<InviteStatsResponse | null>(null);
   const [recentCommunities, setRecentCommunities] = useState<Community[]>([]);
   const [pendingProposals, setPendingProposals] = useState<CommunityProposal[]>(
     []
@@ -44,8 +48,9 @@ export default function AdminDashboardPage() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [statsRes, communitiesRes, proposalsRes] = await Promise.all([
+      const [statsRes, inviteStatsRes, communitiesRes, proposalsRes] = await Promise.all([
         adminApi.getStats().catch(() => null),
+        invitesApi.getAdminStats().catch(() => null),
         adminApi.getCommunities({ limit: 5 }).catch(() => ({ data: [], meta: { total: 0, page: 1, limit: 5, totalPages: 1 } })),
         adminApi
           .getProposals({ status: "PENDING", limit: 5 })
@@ -53,6 +58,7 @@ export default function AdminDashboardPage() {
       ]);
 
       if (statsRes) setStats(statsRes);
+      if (inviteStatsRes) setInviteStats(inviteStatsRes);
       setRecentCommunities(communitiesRes.data || []);
       setPendingProposals(proposalsRes.data || []);
     } finally {
@@ -97,6 +103,40 @@ export default function AdminDashboardPage() {
             </Button>
           </Link>
         </div>
+      </div>
+
+      {/* Beta Access & Invites Banner */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-brand-desert-dark/30 bg-gradient-to-r from-brand-sand/70 via-brand-sand/40 to-white p-5 shadow-2xs">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-desert text-brand-brown-950 shadow-xs">
+            <Ticket size={22} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-brand-brown-950">
+                Beta Testing & Invite Management
+              </h3>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                Invite-Only Active
+              </span>
+            </div>
+            <p className="mt-0.5 text-xs text-brand-brown-600">
+              {inviteStats
+                ? `${inviteStats.totalRedemptions} beta testers joined • ${inviteStats.activeInvites} active invite links • ${inviteStats.remainingCapacity} spots remaining`
+                : "Manage and monitor exclusive invite links for beta testers."}
+            </p>
+          </div>
+        </div>
+
+        <Link href="/admin/invites">
+          <Button
+            size="sm"
+            className="h-9 gap-1.5 rounded-xl bg-brand-brown-950 px-4 text-xs font-semibold text-white shadow-xs hover:bg-brand-brown-900"
+          >
+            <span>Manage Invite Links</span>
+            <ArrowRight size={14} />
+          </Button>
+        </Link>
       </div>
 
       {/* Metrics Grid */}

@@ -1,12 +1,11 @@
+import { Suspense } from "react";
 import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
 import { SignupForm } from "@/components/auth/SignupForm";
 
 export default function SignupPage() {
   return (
     <main className="min-h-screen bg-brand-cream">
-
       <div className="flex min-h-screen">
-
         {/* Brand side */}
         <AuthBrandPanel />
 
@@ -25,11 +24,11 @@ export default function SignupPage() {
             xl:px-20
           "
         >
-          <SignupForm />
+          <Suspense fallback={<div className="w-full max-w-[440px] text-center text-brand-brown-600">Loading signup...</div>}>
+            <SignupForm />
+          </Suspense>
         </section>
-
       </div>
-
     </main>
   );
 }
