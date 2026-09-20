@@ -90,7 +90,7 @@ export default function AdminLayout({
             </div>
             <div>
               <span className="text-sm font-bold tracking-tight text-brand-brown-950 block">
-                Commons
+                Terramids
               </span>
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-desert-dark block">
                 Admin Console
@@ -140,7 +140,7 @@ export default function AdminLayout({
               className="flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-semibold text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950 transition-colors"
             >
               <ArrowLeft size={16} />
-              <span>Back to Commons</span>
+              <span>Back to Terramids</span>
             </Link>
 
             {user && (
@@ -249,7 +249,7 @@ export default function AdminLayout({
                     className="flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-semibold text-brand-brown-700"
                   >
                     <ArrowLeft size={16} />
-                    <span>Back to Commons</span>
+                    <span>Back to Terramids</span>
                   </Link>
                 </div>
               </nav>

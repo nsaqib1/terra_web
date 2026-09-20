@@ -65,7 +65,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
                 className="h-11 w-full gap-2 rounded-xl border-brand-sand-dark font-medium text-brand-brown-800 hover:bg-brand-sand"
               >
                 <ArrowLeft size={16} />
-                Return to Commons
+                Return to Terramids
               </Button>
             </Link>
           </div>

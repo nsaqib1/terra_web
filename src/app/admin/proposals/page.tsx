@@ -89,7 +89,7 @@ export default function AdminProposalsPage() {
             </span>
           </div>
           <p className="mt-1 text-xs text-brand-brown-600">
-            Review citizen-submitted proposals for new communities across Commons.
+            Review citizen-submitted proposals for new communities across Terramids.
           </p>
         </div>
 

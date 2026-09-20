@@ -119,7 +119,7 @@ export default function AdminInvitesPage() {
     const origin =
       typeof window !== "undefined"
         ? window.location.origin
-        : "https://commons.app";
+        : "https://terramids.com";
     const fullUrl = `${origin}/signup?invite=${encodeURIComponent(code)}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedLink(code);

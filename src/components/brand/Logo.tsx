@@ -24,11 +24,7 @@ export function Logo({ compact = false }: LogoProps) {
       {!compact && (
         <div className="leading-none">
           <span className="block text-[19px] font-bold tracking-[-0.035em] text-brand-brown-950">
-            Commons
-          </span>
-
-          <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.18em] text-brand-brown-600">
-            Every interest has a home
+            Terramids
           </span>
         </div>
       )}

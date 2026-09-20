@@ -212,7 +212,7 @@ export function SignupForm() {
           >
             <Image
               src="/logo.png"
-              alt="Commons Logo"
+              alt="Terramids Logo"
               width={40}
               height={40}
               className="h-10 w-10 object-contain"
@@ -220,7 +220,7 @@ export function SignupForm() {
           </div>
 
           <span className="text-xl font-bold tracking-tight text-brand-brown-950">
-            Commons
+            Terramids
           </span>
         </Link>
       </div>
@@ -245,7 +245,7 @@ export function SignupForm() {
         </h1>
 
         <p className="mt-2 text-sm leading-relaxed text-brand-brown-600">
-          Sign up with your exclusive invitation link to test and help shape Commons.
+          Sign up with your exclusive invitation link to test and help shape Terramids.
         </p>
       </div>
 

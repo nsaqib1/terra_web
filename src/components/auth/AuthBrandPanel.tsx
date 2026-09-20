@@ -81,7 +81,7 @@ export function AuthBrandPanel() {
           >
             <Image
               src="/logo.png"
-              alt="Commons Logo"
+              alt="Terramids Logo"
               width={44}
               height={44}
               className="h-11 w-11 object-contain"
@@ -91,7 +91,7 @@ export function AuthBrandPanel() {
 
           <div className="flex flex-col">
             <span className="text-xl font-extrabold tracking-tight text-white">
-              Commons
+              Terramids
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-widest text-brand-desert/80">
               one community per interest

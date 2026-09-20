@@ -806,7 +806,7 @@ export function AvatarUploadModal({
                       Live Preview
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      How you appear across Terra
+                      How you appear across Terramids
                     </p>
                   </div>
 
