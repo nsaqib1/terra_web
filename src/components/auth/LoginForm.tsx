@@ -10,6 +10,7 @@ import {
   LockKeyhole,
   Mail,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -49,9 +50,15 @@ export function LoginForm() {
   const isIdentifierValid = form.identifier.trim().length >= 3;
   const isPasswordValid = form.password.length >= 8;
 
-  const canSubmit = isIdentifierValid && isPasswordValid && !isSubmitting && !isSuccess;
+  const canSubmit =
+    isIdentifierValid &&
+    isPasswordValid &&
+    !isSubmitting &&
+    !isSuccess;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     if (!canSubmit) {
@@ -68,11 +75,16 @@ export function LoginForm() {
       });
 
       setIsSuccess(true);
+
       setTimeout(() => {
         router.push("/");
       }, 600);
     } catch (err) {
-      const msg = extractErrorMessage(err, "Invalid credentials. Please try again.");
+      const msg = extractErrorMessage(
+        err,
+        "Invalid credentials. Please try again.",
+      );
+
       setErrorMessage(msg);
       setIsSubmitting(false);
     }
@@ -80,74 +92,105 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-[430px]">
-      {/* Logo */}
-      <div className="flex justify-center">
+      {/* ================================================================
+          HEADER
+      ================================================================= */}
+      <div className="text-center">
         <Link
           href="/"
           className="
+            mx-auto
             flex h-14 w-14
             items-center justify-center
             overflow-hidden
             rounded-2xl
             bg-brand-desert
             shadow-sm
+            ring-1 ring-brand-desert-dark/10
+            transition-transform duration-200
+            hover:scale-[1.03]
           "
+          aria-label="Terramids home"
         >
-          <span className="text-2xl">🐪</span>
+          <Image
+            src="/logo.png"
+            alt="Terramids"
+            width={56}
+            height={56}
+            className="h-14 w-14 object-contain"
+            priority
+          />
         </Link>
+
+        <div className="mt-6">
+          <p
+            className="
+              text-[10px]
+              font-bold
+              uppercase
+              tracking-[0.18em]
+              text-brand-desert-dark
+            "
+          >
+            Welcome back
+          </p>
+
+          <h1
+            className="
+              mt-2
+              text-3xl
+              font-black
+              tracking-[-0.035em]
+              text-brand-brown-950
+            "
+          >
+            Log in to Terramids
+          </h1>
+
+          <p
+            className="
+              mx-auto
+              mt-2
+              max-w-sm
+              text-sm
+              leading-6
+              text-brand-brown-600
+            "
+          >
+            Pick up where you left off.
+          </p>
+        </div>
       </div>
 
-      {/* Heading */}
-      <div className="mt-7 text-center">
-        <p
-          className="
-            text-[10px]
-            font-bold
-            uppercase
-            tracking-[0.16em]
-            text-brand-desert-dark
-          "
-        >
-          Welcome back
-        </p>
-
-        <h1
-          className="
-            mt-2
-            text-3xl
-            font-bold
-            tracking-[-0.035em]
-            text-brand-brown-950
-          "
-        >
-          Welcome back
-        </h1>
-
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-brand-brown-600">
-          Continue the conversations, communities, and ideas you care
-          about.
-        </p>
-      </div>
-
-      {/* Status Messages */}
+      {/* ================================================================
+          STATUS
+      ================================================================= */}
       {errorMessage && (
         <div
           role="alert"
           className="
             mt-6
             flex items-start gap-3
-            rounded-xl
+            rounded-2xl
             border border-red-200
             bg-red-50/90
             p-3.5
             text-sm
             text-red-800
             shadow-sm
-            animate-in fade-in slide-in-from-top-1
+            animate-in
+            fade-in
+            slide-in-from-top-1
           "
         >
-          <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-600" />
-          <div className="flex-1 font-medium">{errorMessage}</div>
+          <AlertCircle
+            size={18}
+            className="mt-0.5 shrink-0 text-red-600"
+          />
+
+          <div className="flex-1 font-medium">
+            {errorMessage}
+          </div>
         </div>
       )}
 
@@ -157,7 +200,7 @@ export function LoginForm() {
           className="
             mt-6
             flex items-center gap-3
-            rounded-xl
+            rounded-2xl
             border border-emerald-200
             bg-emerald-50
             p-3.5
@@ -165,16 +208,35 @@ export function LoginForm() {
             font-medium
             text-emerald-800
             shadow-sm
-            animate-in fade-in slide-in-from-top-1
+            animate-in
+            fade-in
+            slide-in-from-top-1
           "
         >
-          <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
-          <span>Logged in successfully! Redirecting...</span>
+          <CheckCircle2
+            size={18}
+            className="shrink-0 text-emerald-600"
+          />
+
+          <span>Logged in successfully. Taking you in...</span>
         </div>
       )}
 
-      {/* Form Card */}
-      <div className="mt-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-7">
+      {/* ================================================================
+          FORM
+      ================================================================= */}
+      <div
+        className="
+          mt-7
+          rounded-[1.75rem]
+          border border-brand-sand-dark
+          bg-white/90
+          p-5
+          shadow-[0_20px_60px_rgba(47,41,31,0.08)]
+          backdrop-blur-xl
+          sm:p-7
+        "
+      >
         <form
           onSubmit={handleSubmit}
           className="space-y-5"
@@ -184,7 +246,11 @@ export function LoginForm() {
           <div>
             <label
               htmlFor="identifier"
-              className="text-xs font-semibold text-brand-brown-900"
+              className="
+                text-xs
+                font-bold
+                text-brand-brown-900
+              "
             >
               Email or username
             </label>
@@ -195,7 +261,7 @@ export function LoginForm() {
                 className="
                   absolute left-3.5 top-1/2
                   -translate-y-1/2
-                  text-muted-foreground
+                  text-brand-brown-500
                 "
               />
 
@@ -211,20 +277,24 @@ export function LoginForm() {
                 autoComplete="username"
                 autoFocus
                 className="
-                  h-12 w-full
+                  h-12
+                  w-full
                   rounded-xl
-                  border
-                  bg-white
-                  pl-10 pr-4
+                  border border-brand-sand-dark
+                  bg-brand-cream/30
+                  pl-10
+                  pr-4
                   text-sm
                   text-brand-brown-950
                   outline-none
-                  placeholder:text-brand-brown-600/40
+                  placeholder:text-brand-brown-500/45
+                  transition
                   focus:border-brand-desert-dark
+                  focus:bg-white
                   focus:ring-4
-                  focus:ring-brand-desert-light/50
-                  disabled:bg-brand-sand/30
+                  focus:ring-brand-desert-light/40
                   disabled:cursor-not-allowed
+                  disabled:bg-brand-sand/30
                 "
               />
             </div>
@@ -235,7 +305,11 @@ export function LoginForm() {
             <div className="flex items-center justify-between">
               <label
                 htmlFor="login-password"
-                className="text-xs font-semibold text-brand-brown-900"
+                className="
+                  text-xs
+                  font-bold
+                  text-brand-brown-900
+                "
               >
                 Password
               </label>
@@ -245,7 +319,8 @@ export function LoginForm() {
                 className="
                   text-[11px]
                   font-semibold
-                  text-brand-brown-700
+                  text-brand-brown-600
+                  transition
                   hover:text-brand-desert-dark
                   hover:underline
                 "
@@ -260,7 +335,7 @@ export function LoginForm() {
                 className="
                   absolute left-3.5 top-1/2
                   -translate-y-1/2
-                  text-muted-foreground
+                  text-brand-brown-500
                 "
               />
 
@@ -275,20 +350,24 @@ export function LoginForm() {
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 className="
-                  h-12 w-full
+                  h-12
+                  w-full
                   rounded-xl
-                  border
-                  bg-white
-                  pl-10 pr-11
+                  border border-brand-sand-dark
+                  bg-brand-cream/30
+                  pl-10
+                  pr-11
                   text-sm
                   text-brand-brown-950
                   outline-none
-                  placeholder:text-brand-brown-600/40
+                  placeholder:text-brand-brown-500/45
+                  transition
                   focus:border-brand-desert-dark
+                  focus:bg-white
                   focus:ring-4
-                  focus:ring-brand-desert-light/50
-                  disabled:bg-brand-sand/30
+                  focus:ring-brand-desert-light/40
                   disabled:cursor-not-allowed
+                  disabled:bg-brand-sand/30
                 "
               />
 
@@ -302,7 +381,8 @@ export function LoginForm() {
                   absolute right-3.5 top-1/2
                   -translate-y-1/2
                   rounded-lg p-1
-                  text-muted-foreground
+                  text-brand-brown-500
+                  transition
                   hover:bg-brand-sand
                   hover:text-brand-brown-900
                   disabled:opacity-40
@@ -327,13 +407,15 @@ export function LoginForm() {
             type="submit"
             disabled={!canSubmit || isSubmitting || isSuccess}
             className="
-              h-12 w-full
+              h-12
+              w-full
               gap-2
               rounded-xl
               bg-brand-brown-950
               font-semibold
               text-white
               shadow-none
+              transition
               hover:bg-brand-brown-800
               disabled:cursor-not-allowed
               disabled:opacity-40
@@ -341,13 +423,16 @@ export function LoginForm() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2
+                  size={16}
+                  className="animate-spin"
+                />
                 <span>Logging in...</span>
               </>
             ) : isSuccess ? (
               <>
                 <CheckCircle2 size={16} />
-                <span>Logged in!</span>
+                <span>Logged in</span>
               </>
             ) : (
               <>
@@ -359,24 +444,37 @@ export function LoginForm() {
         </form>
       </div>
 
-      {/* Signup */}
+      {/* ================================================================
+          SIGNUP
+      ================================================================= */}
       <div className="mt-6 text-center">
-        <span className="text-xs text-muted-foreground">
-          Don't have any account?
-        </span>{" "}
+        <p className="text-xs text-brand-brown-500">
+          New to Terramids?
+        </p>
+
         <Link
           href="/signup"
           className="
-            text-xs
+            mt-1
+            inline-flex
+            items-center
+            gap-1
+            text-sm
             font-bold
             text-brand-brown-900
+            transition
             hover:text-brand-desert-dark
-            hover:underline
           "
         >
-          Signup
+          Create your account
+          <ArrowRight size={14} />
         </Link>
       </div>
+
+      {/* Small continuity cue */}
+      <p className="mt-8 text-center text-[10px] font-medium text-brand-brown-400">
+        Your Communities are waiting.
+      </p>
     </div>
   );
 }
