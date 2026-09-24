@@ -32,9 +32,13 @@ import { usersApi } from "@/lib/api/users";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1"
-).replace(/\/+$/, "");
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is not configured");
+}
+
+const API_BASE = API_URL.replace(/\/+$/, "");
 
 interface AvatarUploadModalProps {
   isOpen: boolean;
@@ -471,9 +475,9 @@ export function AvatarUploadModal({
       setUser((prev) =>
         prev
           ? {
-              ...prev,
-              avatarUrl: updated.user.avatarUrl,
-            }
+            ...prev,
+            avatarUrl: updated.user.avatarUrl,
+          }
           : null,
       );
 
@@ -485,7 +489,7 @@ export function AvatarUploadModal({
       console.error("Avatar upload failed:", err);
       setErrorMessage(
         err?.message ||
-          "Failed to upload and update profile picture. Please try again.",
+        "Failed to upload and update profile picture. Please try again.",
       );
     } finally {
       setIsSaving(false);
@@ -506,9 +510,9 @@ export function AvatarUploadModal({
       setUser((prev) =>
         prev
           ? {
-              ...prev,
-              avatarUrl: null,
-            }
+            ...prev,
+            avatarUrl: null,
+          }
           : null,
       );
 
@@ -601,11 +605,10 @@ export function AvatarUploadModal({
                   if (file) processFile(file);
                 }}
                 onClick={() => fileInputRef.current?.click()}
-                className={`group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all duration-200 ${
-                  isDraggingOver
+                className={`group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all duration-200 ${isDraggingOver
                     ? "border-brand-desert-dark bg-brand-desert/10 scale-[1.01]"
                     : "border-brand-sand-dark bg-brand-cream/30 hover:border-brand-desert hover:bg-brand-cream/60"
-                }`}
+                  }`}
               >
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-sand text-brand-brown-900 group-hover:scale-110 group-hover:bg-brand-desert-light transition-all duration-300 shadow-xs">
                   <UploadCloud size={30} className="text-brand-desert-dark" />
@@ -674,11 +677,10 @@ export function AvatarUploadModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("crop")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all ${
-                    activeTab === "crop"
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all ${activeTab === "crop"
                       ? "bg-white text-brand-brown-950 shadow-xs"
                       : "text-brand-brown-700 hover:text-brand-brown-950"
-                  }`}
+                    }`}
                 >
                   <Crop size={14} />
                   Position & Crop
@@ -687,11 +689,10 @@ export function AvatarUploadModal({
                 <button
                   type="button"
                   onClick={() => setActiveTab("adjust")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all ${
-                    activeTab === "adjust"
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all ${activeTab === "adjust"
                       ? "bg-white text-brand-brown-950 shadow-xs"
                       : "text-brand-brown-700 hover:text-brand-brown-950"
-                  }`}
+                    }`}
                 >
                   <Sliders size={14} />
                   Lighting & Filters
@@ -977,11 +978,10 @@ export function AvatarUploadModal({
                         type="button"
                         onClick={() => setFlipH((prev) => !prev)}
                         title="Flip Horizontal"
-                        className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs ${
-                          flipH
+                        className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs ${flipH
                             ? "border-brand-desert-dark bg-brand-desert/20 text-brand-brown-950"
                             : "border-brand-sand-dark bg-white text-brand-brown-800 hover:bg-brand-sand"
-                        }`}
+                          }`}
                       >
                         <FlipHorizontal size={13} />
                         Flip H
@@ -992,11 +992,10 @@ export function AvatarUploadModal({
                         type="button"
                         onClick={() => setFlipV((prev) => !prev)}
                         title="Flip Vertical"
-                        className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs ${
-                          flipV
+                        className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs ${flipV
                             ? "border-brand-desert-dark bg-brand-desert/20 text-brand-brown-950"
                             : "border-brand-sand-dark bg-white text-brand-brown-800 hover:bg-brand-sand"
-                        }`}
+                          }`}
                       >
                         <FlipVertical size={13} />
                         Flip V
@@ -1065,11 +1064,10 @@ export function AvatarUploadModal({
                               preset: p.id as FilterPreset,
                             }))
                           }
-                          className={`flex flex-col items-center rounded-xl border p-2 text-center transition-all ${
-                            filters.preset === p.id
+                          className={`flex flex-col items-center rounded-xl border p-2 text-center transition-all ${filters.preset === p.id
                               ? "border-brand-desert-dark bg-brand-desert/20 text-brand-brown-950 font-bold shadow-xs"
                               : "border-brand-sand-dark bg-white text-brand-brown-700 hover:bg-brand-sand text-xs font-medium"
-                          }`}
+                            }`}
                         >
                           <Sparkles
                             size={12}

@@ -2,9 +2,13 @@ import { ApiError } from "./errors";
 import { tokenStorage } from "./token";
 import { AuthResponse, RequestOptions } from "./types";
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1"
-).replace(/\/+$/, "");
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is not configured");
+}
+
+const API_BASE_URL = (API_URL).replace(/\/+$/, "");
 
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -53,17 +57,13 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   };
 
   let response: Response;
-  try {
-    response = await fetch(url, fetchOptions);
-  } catch (err) {
-    throw err;
-  }
+  response = await fetch(url, fetchOptions);
 
   // Handle 401 Unauthorized for authenticated endpoints (transparent token refresh)
   const isAuthEndpoint =
-    endpoint.includes("/auth/login") ||
-    endpoint.includes("/auth/register") ||
-    endpoint.includes("/auth/refresh");
+    endpoint === "/auth/login" ||
+    endpoint === "/auth/register" ||
+    endpoint === "/auth/refresh";
 
   if (response.status === 401 && !skipAuth && !isAuthEndpoint) {
     const newToken = await attemptSilentRefresh();

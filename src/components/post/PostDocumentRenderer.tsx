@@ -147,11 +147,13 @@ function CodeBlockNode({ node }: { node: PostCodeBlockNode }) {
   );
 }
 
-const API_BASE =
-  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1").replace(
-    /\/+$/,
-    "",
-  );
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is not configured");
+}
+
+const API_BASE = API_URL.replace(/\/+$/, "");
 
 function ImageNode({ node }: { node: PostImageNode }) {
   const src = `${API_BASE}/media/${node.mediaId}`;
