@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   EditorContent,
   useEditor,
@@ -30,6 +30,11 @@ export function PostEditor({
 }: PostEditorProps) {
   const [imageUploaderOpen, setImageUploaderOpen] =
     useState(false);
+
+  // Keep temporary local object URLs outside PostDocument.
+  // They allow newly uploaded images to remain visible before
+  // the media is activated by post creation.
+  const previewUrlsRef = useRef<Map<string, string>>(new Map());
 
   const editor = useEditor({
     extensions: postEditorExtensions,
@@ -64,8 +69,10 @@ export function PostEditor({
       return;
     }
 
-    const nextContent =
-      convertPostDocumentToTiptap(value);
+    const nextContent = convertPostDocumentToTiptap(
+      value,
+      previewUrlsRef.current,
+    );
 
     const currentContent = editor.getJSON();
 
@@ -81,6 +88,17 @@ export function PostEditor({
     });
   }, [editor, value]);
 
+  // Clean up blob URLs when the editor is destroyed.
+  useEffect(() => {
+    return () => {
+      for (const url of previewUrlsRef.current.values()) {
+        URL.revokeObjectURL(url);
+      }
+
+      previewUrlsRef.current.clear();
+    };
+  }, []);
+
   if (!editor) {
     return (
       <div className="rounded-xl border bg-white">
@@ -88,6 +106,8 @@ export function PostEditor({
       </div>
     );
   }
+
+  const activeEditor = editor;
 
   function handleImageClick() {
     setImageUploaderOpen(true);
@@ -98,7 +118,11 @@ export function PostEditor({
     alt,
     previewUrl,
   }: ImageInsertData) {
-    editor!
+    // Keep the temporary blob URL outside PostDocument.
+    // This allows the preview to survive controlled editor updates.
+    previewUrlsRef.current.set(mediaId, previewUrl);
+
+    activeEditor
       .chain()
       .focus()
       .setPostImage({
@@ -116,16 +140,16 @@ export function PostEditor({
       <div>
         <div className="rounded-xl border bg-white">
           <EditorToolbar
-            editor={editor}
+            editor={activeEditor}
             onImageClick={handleImageClick}
           />
 
-          <EditorContent editor={editor} />
+          <EditorContent editor={activeEditor} />
         </div>
 
         <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
-          {editor.getText().trim()
-            ? `${editor.getText().length} characters`
+          {activeEditor.getText().trim()
+            ? `${activeEditor.getText().length} characters`
             : "Write something to publish"}
         </p>
       </div>
@@ -152,6 +176,7 @@ const API_BASE = API_URL.replace(/\/+$/, "");
 
 function convertPostDocumentToTiptap(
   document: PostDocument,
+  previewUrls: Map<string, string>,
 ) {
   return {
     type: "doc",
@@ -180,9 +205,7 @@ function convertPostDocumentToTiptap(
               content: [
                 {
                   type: "paragraph",
-                  content: convertTextNodes(
-                    item.content,
-                  ),
+                  content: convertTextNodes(item.content),
                 },
               ],
             })),
@@ -196,9 +219,7 @@ function convertPostDocumentToTiptap(
               content: [
                 {
                   type: "paragraph",
-                  content: convertTextNodes(
-                    item.content,
-                  ),
+                  content: convertTextNodes(item.content),
                 },
               ],
             })),
@@ -210,9 +231,7 @@ function convertPostDocumentToTiptap(
             content: [
               {
                 type: "paragraph",
-                content: convertTextNodes(
-                  node.content,
-                ),
+                content: convertTextNodes(node.content),
               },
             ],
           };
@@ -232,7 +251,13 @@ function convertPostDocumentToTiptap(
             attrs: {
               mediaId: node.mediaId,
               alt: node.altText ?? null,
-              src: node.mediaId ? `${API_BASE}/media/${node.mediaId}` : null,
+
+              // Use the local blob URL while the media is temporary.
+              // Once there is no local preview, use the permanent API URL.
+              src: node.mediaId
+                ? previewUrls.get(node.mediaId) ??
+                `${API_BASE}/media/${node.mediaId}`
+                : null,
             },
           };
 
