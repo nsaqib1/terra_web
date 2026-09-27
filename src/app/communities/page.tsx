@@ -53,7 +53,7 @@ export default function CommunitiesPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-[1180px] space-y-8">
-        {/* Streamlined Header & Actions (Propose community is static for now) */}
+        {/* Streamlined Header & Actions */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between border-b pb-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-brand-brown-950">
@@ -64,10 +64,13 @@ export default function CommunitiesPage() {
             </p>
           </div>
 
-          <button className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90">
+          <Link
+            href="/communities/propose"
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          >
             <Plus size={16} />
             <span>Propose a Community</span>
-          </button>
+          </Link>
         </div>
 
         {/* Focused Controls: Search Bar (Static for now) */}
