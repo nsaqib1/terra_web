@@ -339,6 +339,7 @@ export function SignupForm() {
 
             <input
               id="inviteCode"
+              name="inviteCode"
               value={form.inviteCode}
               disabled={isSubmitting || isSuccess}
               onChange={(event) =>
@@ -389,9 +390,8 @@ export function SignupForm() {
           {/* Feedback Message */}
           {inviteFeedback && (
             <div
-              className={`mt-2 flex items-center gap-1.5 text-xs font-medium ${
-                inviteFeedback.valid ? "text-emerald-700" : "text-red-600"
-              }`}
+              className={`mt-2 flex items-center gap-1.5 text-xs font-medium ${inviteFeedback.valid ? "text-emerald-700" : "text-red-600"
+                }`}
             >
               <span>{inviteFeedback.message}</span>
               {inviteFeedback.label && (
@@ -435,6 +435,7 @@ export function SignupForm() {
 
             <input
               id="name"
+              name="name"
               value={form.name}
               disabled={isSubmitting || isSuccess}
               onChange={(event) => update("name", event.target.value)}
@@ -488,6 +489,7 @@ export function SignupForm() {
 
             <input
               id="username"
+              name="handle"
               value={form.username}
               disabled={isSubmitting || isSuccess}
               onChange={(event) =>
@@ -497,7 +499,7 @@ export function SignupForm() {
                 )
               }
               placeholder="alexmorgan"
-              autoComplete="username"
+              autoComplete="nickname"
               maxLength={30}
               className="
                 h-11 w-full
@@ -541,12 +543,13 @@ export function SignupForm() {
 
             <input
               id="email"
+              name="email"
               type="email"
               value={form.email}
               disabled={isSubmitting || isSuccess}
               onChange={(event) => update("email", event.target.value)}
               placeholder="alex@example.com"
-              autoComplete="email"
+              autoComplete="username email"
               maxLength={255}
               className="
                 h-11 w-full
@@ -581,6 +584,7 @@ export function SignupForm() {
           <div className="relative mt-1.5">
             <input
               id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
               value={form.password}
               disabled={isSubmitting || isSuccess}
@@ -633,6 +637,7 @@ export function SignupForm() {
         <label className="flex cursor-pointer items-start gap-2.5 pt-1">
           <input
             type="checkbox"
+            name="agree"
             checked={form.agree}
             disabled={isSubmitting || isSuccess}
             onChange={(event) => update("agree", event.target.checked)}
