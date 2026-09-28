@@ -121,7 +121,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
       {/* Main Grid */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
         <main className="min-w-0">
-          <div className="rounded-2xl border border-brand-sand-dark/70 bg-white p-5 sm:p-6 shadow-2xs">
+          <div className="-mx-4 rounded-none border-y border-brand-sand-dark/70 bg-white p-5 shadow-2xs sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
             <div className="space-y-6">
               {/* Community Display (read-only) */}
               <div>
@@ -226,7 +226,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
 
         {/* Sidebar Info & Guidelines */}
         <aside className="space-y-4">
-          <div className="rounded-2xl border border-brand-sand-dark/60 bg-white p-5 shadow-2xs">
+          <div className="-mx-4 rounded-none border-y border-brand-sand-dark/60 bg-white p-5 shadow-2xs sm:mx-0 sm:rounded-2xl sm:border">
             <h3 className="flex items-center gap-2 text-sm font-bold text-brand-brown-950">
               <Sparkles size={16} className="text-brand-desert-dark" />
               Editing Tips
@@ -248,7 +248,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-brand-sand-dark/60 bg-brand-sand/20 p-5">
+          <div className="-mx-4 rounded-none border-y border-brand-sand-dark/60 bg-brand-sand/20 p-5 sm:mx-0 sm:rounded-2xl sm:border">
             <div className="flex items-start gap-2.5">
               <Info size={16} className="text-brand-brown-700 mt-0.5 shrink-0" />
               <div className="text-xs text-brand-brown-700">

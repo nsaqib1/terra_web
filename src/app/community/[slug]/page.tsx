@@ -217,7 +217,7 @@ export default function CommunityPage() {
       <AppShell>
         <div className="mx-auto max-w-[1180px] space-y-6 animate-pulse">
           {/* Header Skeleton */}
-          <div className="h-48 rounded-2xl border bg-white p-6">
+          <div className="-mx-4 h-48 rounded-none border-y bg-white p-6 sm:mx-0 sm:rounded-2xl sm:border">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-2xl bg-brand-sand/60" />
               <div className="space-y-2">
@@ -229,10 +229,10 @@ export default function CommunityPage() {
           {/* Feed Skeleton */}
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="space-y-4">
-              <div className="h-40 rounded-2xl border bg-white p-5" />
-              <div className="h-40 rounded-2xl border bg-white p-5" />
+              <div className="-mx-4 h-40 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border" />
+              <div className="-mx-4 h-40 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border" />
             </div>
-            <div className="h-60 rounded-2xl border bg-white p-5" />
+            <div className="-mx-4 h-60 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border" />
           </div>
         </div>
       </AppShell>
@@ -243,7 +243,7 @@ export default function CommunityPage() {
     return (
       <AppShell>
         <div className="mx-auto max-w-[1180px] py-12">
-          <div className="rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-sm">
+          <div className="-mx-4 rounded-none border-y border-rose-200 bg-white p-8 text-center shadow-sm sm:mx-0 sm:rounded-2xl sm:border">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-600">
               <AlertCircle size={28} />
             </div>
@@ -290,7 +290,7 @@ export default function CommunityPage() {
         )}
 
         {/* Community Header Banner */}
-        <div className="overflow-hidden rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="-mx-4 overflow-hidden rounded-none border-y bg-white p-6 shadow-sm sm:mx-0 sm:rounded-2xl sm:border">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             {/* Left: Avatar & Title & Stats */}
             <div className="flex items-center gap-4">
@@ -475,10 +475,10 @@ export default function CommunityPage() {
           {/* Main Feed */}
           <main className="space-y-4">
             {isLoadingPosts ? (
-              <div className="space-y-4 animate-pulse">
-                <div className="h-36 rounded-2xl border bg-white p-5" />
-                <div className="h-36 rounded-2xl border bg-white p-5" />
-                <div className="h-36 rounded-2xl border bg-white p-5" />
+              <div className="-mx-4 space-y-4 animate-pulse sm:mx-0">
+                <div className="h-36 rounded-none border-y bg-white p-5 sm:rounded-2xl sm:border" />
+                <div className="h-36 rounded-none border-y bg-white p-5 sm:rounded-2xl sm:border" />
+                <div className="h-36 rounded-none border-y bg-white p-5 sm:rounded-2xl sm:border" />
               </div>
             ) : filteredPosts.length > 0 ? (
               <div className="space-y-4">
@@ -487,7 +487,7 @@ export default function CommunityPage() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border bg-white p-10 text-center shadow-sm">
+              <div className="-mx-4 rounded-none border-y bg-white p-10 text-center shadow-sm sm:mx-0 sm:rounded-2xl sm:border">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-desert-light text-brand-brown-800">
                   <FileText size={24} />
                 </div>
@@ -515,7 +515,7 @@ export default function CommunityPage() {
 
           {/* Right Sidebar: About Community */}
           <aside className="space-y-4">
-            <div className="rounded-2xl border bg-white p-4">
+            <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
               <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
                 <Sparkles size={14} className="text-brand-desert-dark" />
                 <span>About Community</span>

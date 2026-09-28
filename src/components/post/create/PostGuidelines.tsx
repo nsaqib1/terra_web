@@ -8,7 +8,7 @@ import {
 export function PostGuidelines() {
   return (
     <aside className="space-y-4">
-      <section className="rounded-2xl border bg-white p-5">
+      <section className="-mx-4 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border">
         <div className="flex items-center gap-2">
           <Lightbulb
             size={16}
@@ -43,10 +43,11 @@ export function PostGuidelines() {
 
       <section
         className="
-          rounded-2xl
-          border border-brand-desert-light
+          -mx-4 rounded-none
+          border-y border-brand-desert-light
           bg-brand-desert-light/30
           p-5
+          sm:mx-0 sm:rounded-2xl sm:border
         "
       >
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-desert">

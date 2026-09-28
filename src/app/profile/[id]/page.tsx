@@ -196,9 +196,9 @@ export default function PublicProfilePage() {
   const { user, stats } = profileData;
   const joinedDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-      })
+      month: "long",
+      year: "numeric",
+    })
     : "Recent";
 
   return (
@@ -207,7 +207,7 @@ export default function PublicProfilePage() {
         {/* =========================================================
             PROFILE HEADER
         ========================================================= */}
-        <section className="overflow-hidden rounded-3xl border border-brand-sand-dark bg-white shadow-xs">
+        <section className="-mx-4 overflow-hidden rounded-none border-y border-brand-sand-dark bg-white shadow-xs sm:mx-0 sm:rounded-3xl sm:border">
           {/* Banner */}
           <div className="relative h-40 sm:h-48 w-full bg-gradient-to-r from-[#e8cba2] via-[#e2b781] to-[#cf985e]">
             <div
@@ -340,13 +340,13 @@ export default function PublicProfilePage() {
             </div>
 
             {posts.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-brand-sand-dark bg-white p-8 text-center">
+              <div className="-mx-4 rounded-none border-y border-dashed border-brand-sand-dark bg-white p-8 text-center sm:mx-0 sm:rounded-2xl sm:border">
                 <p className="text-sm text-brand-brown-600">
                   No active posts published yet.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="-mx-4 space-y-4 sm:mx-0">
                 {posts.map((post) => (
                   <ProfilePostCard
                     key={post.id}
@@ -372,7 +372,7 @@ export default function PublicProfilePage() {
             </div>
 
             {communities.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-brand-sand-dark bg-white p-6 text-center">
+              <div className="-mx-4 rounded-none border-y border-dashed border-brand-sand-dark bg-white p-6 text-center sm:mx-0 sm:rounded-2xl sm:border">
                 <p className="text-xs text-brand-brown-600">
                   Not currently a member of any community.
                 </p>
@@ -407,7 +407,7 @@ function ProfilePostCard({
   const relativeTime = formatRelativeTime(post.createdAt);
 
   return (
-    <article className="group rounded-2xl border border-brand-sand-dark bg-white p-5 shadow-xs transition-all hover:border-brand-sand-dark/80 hover:shadow-sm sm:p-6">
+    <article className="group -mx-4 rounded-none border border-x-0 border-brand-sand-dark bg-white p-5 shadow-xs transition-all hover:border-brand-sand-dark/80 hover:shadow-sm sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
       {/* Community + Tags */}
       <div className="flex items-center justify-between gap-3">
         {/* Community */}
@@ -491,7 +491,7 @@ function CommunityCard({
   return (
     <Link
       href={`/community/${community.slug}`}
-      className="group block rounded-2xl border border-brand-sand-dark bg-white p-4 shadow-xs transition-all hover:border-brand-sand-dark/80 hover:shadow-sm"
+      className="group -mx-4 block rounded-none border-y border-brand-sand-dark bg-white p-4 shadow-xs transition-all hover:border-brand-sand-dark/80 hover:shadow-sm sm:mx-0 sm:rounded-2xl sm:border"
     >
       <div className="flex items-start gap-3">
         {/* Community avatar */}

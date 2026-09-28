@@ -11,7 +11,7 @@ interface FeedEmptyStateProps {
 
 export function FeedEmptyState({ onResetFilter, hasFilter }: FeedEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-brand-sand-dark/80 bg-white/60 py-16 px-6 text-center backdrop-blur-sm">
+    <div className="-mx-4 flex flex-col items-center justify-center rounded-none border-y border-dashed border-brand-sand-dark/80 bg-white/60 px-6 py-16 text-center backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-sand text-brand-brown-700 shadow-inner">
         <MessageSquareDashed size={32} />
       </div>

@@ -8,7 +8,7 @@ export function FeedSkeleton() {
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-2xl border border-brand-sand-dark/50 bg-white p-5 space-y-4"
+          className="-mx-4 animate-pulse space-y-4 rounded-none border-y border-brand-sand-dark/50 bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border"
         >
           {/* Header */}
           <div className="flex items-center justify-between">

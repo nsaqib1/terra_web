@@ -59,7 +59,7 @@ export function FeedPagination({
   const pages = getPageNumbers();
 
   return (
-    <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-brand-sand-dark/60 bg-white/80 p-4 backdrop-blur-sm sm:flex-row">
+    <div className="-mx-4 mt-8 flex flex-col items-center justify-between gap-4 rounded-none border-y border-brand-sand-dark/60 bg-white/80 p-4 backdrop-blur-sm sm:mx-0 sm:flex-row sm:rounded-2xl sm:border">
       {/* Stats counter */}
       <div className="text-xs text-muted-foreground">
         Showing <span className="font-semibold text-brand-brown-950">{startItem}</span> -{" "}
@@ -130,10 +130,9 @@ export function FeedPagination({
                 aria-current={isActive ? "page" : undefined}
                 className={`
                   flex h-9 min-w-[36px] items-center justify-center rounded-xl px-2.5 text-xs font-bold transition-all
-                  ${
-                    isActive
-                      ? "bg-brand-desert text-brand-brown-950 shadow-sm ring-1 ring-brand-desert-dark/30"
-                      : "border border-brand-sand-dark/50 text-brand-brown-700 hover:bg-brand-sand/70 hover:text-brand-brown-950"
+                  ${isActive
+                    ? "bg-brand-desert text-brand-brown-950 shadow-sm ring-1 ring-brand-desert-dark/30"
+                    : "border border-brand-sand-dark/50 text-brand-brown-700 hover:bg-brand-sand/70 hover:text-brand-brown-950"
                   }
                 `}
               >

@@ -47,13 +47,12 @@ function CharCount({
   const ok = current >= min;
   return (
     <span
-      className={`text-[10px] font-medium tabular-nums transition-colors ${
-        current === 0
+      className={`text-[10px] font-medium tabular-nums transition-colors ${current === 0
           ? "text-muted-foreground"
           : ok
             ? "text-emerald-600"
             : "text-amber-600"
-      }`}
+        }`}
     >
       {current}/{max}
       {current > 0 && current < min && (
@@ -302,7 +301,7 @@ export default function ProposeCommunityPage() {
           </div>
 
           {/* Description */}
-          <div className="rounded-2xl border bg-white p-5 shadow-xs">
+          <div className="-mx-4 rounded-none border-y bg-white p-5 shadow-xs sm:mx-0 sm:rounded-2xl sm:border">
             <div className="flex items-center justify-between">
               <label htmlFor={descId} className="text-sm font-bold text-brand-brown-950">
                 Short description

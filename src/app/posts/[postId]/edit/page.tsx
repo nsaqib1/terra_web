@@ -58,13 +58,13 @@ export default function EditPostPage() {
       <AppShell>
         <div className="mx-auto max-w-[1180px]">
           {isLoading || authLoading ? (
-            <div className="rounded-2xl border border-brand-sand-dark/60 bg-white p-8 space-y-4 animate-pulse">
+            <div className="-mx-4 space-y-4 rounded-none border-y border-brand-sand-dark/60 bg-white p-8 animate-pulse sm:mx-0 sm:rounded-2xl sm:border">
               <div className="h-6 w-32 rounded-lg bg-brand-sand" />
               <div className="h-10 w-3/4 rounded-xl bg-brand-sand" />
               <div className="h-48 w-full rounded-2xl bg-brand-sand/60" />
             </div>
           ) : error || !post ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50/80 p-8 text-center">
+            <div className="-mx-4 rounded-none border-y border-red-200 bg-red-50/80 p-8 text-center sm:mx-0 sm:rounded-2xl sm:border">
               <AlertCircle size={32} className="mx-auto text-red-500 mb-3" />
               <h2 className="text-base font-bold text-red-900">Unable to load post</h2>
               <p className="mt-1 text-xs text-red-700">{error || "Post not found"}</p>
@@ -83,7 +83,7 @@ export default function EditPostPage() {
               </div>
             </div>
           ) : !isAuthor ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-8 text-center">
+            <div className="-mx-4 rounded-none border-y border-amber-200 bg-amber-50/80 p-8 text-center sm:mx-0 sm:rounded-2xl sm:border">
               <ShieldAlert size={36} className="mx-auto text-amber-600 mb-3" />
               <h2 className="text-base font-bold text-amber-950">Permission Denied</h2>
               <p className="mt-1.5 max-w-md mx-auto text-xs text-amber-800">

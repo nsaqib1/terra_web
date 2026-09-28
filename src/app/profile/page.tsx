@@ -64,7 +64,7 @@ function EditableProfileHeader({
   onOpenAvatarModal?: () => void;
 }) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-brand-sand-dark bg-white shadow-xs">
+    <section className="-mx-4 overflow-hidden rounded-none border-y border-brand-sand-dark bg-white shadow-xs sm:mx-0 sm:rounded-3xl sm:border">
       {/* Cover */}
       <div className="relative h-40 sm:h-48 w-full bg-gradient-to-r from-[#e8cba2] via-[#e2b781] to-[#cf985e]">
         <div
@@ -357,7 +357,7 @@ function ProfileInfoTab({
       </div>
 
       {/* Edit form */}
-      <div className="rounded-2xl border border-brand-sand-dark bg-white p-6 shadow-xs sm:p-8">
+      <div className="-mx-4 rounded-none border-y border-brand-sand-dark bg-white p-6 shadow-xs sm:mx-0 sm:rounded-2xl sm:border sm:p-8">
         <SectionHeader
           title="Profile Information"
           description="Update the information shown on your public profile."
@@ -550,7 +550,7 @@ function SecurityTab({ email }: { email?: string }) {
   return (
     <div className="space-y-5">
       {/* Email */}
-      <div className="rounded-2xl border border-brand-sand-dark bg-white p-6 shadow-xs sm:p-8">
+      <div className="-mx-4 rounded-none border-y border-brand-sand-dark bg-white p-6 shadow-xs sm:mx-0 sm:rounded-2xl sm:border sm:p-8">
         <div className="flex items-start justify-between gap-5">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-sand text-brand-brown-800">
@@ -586,20 +586,18 @@ function SecurityTab({ email }: { email?: string }) {
             <span>Change</span>
             <ChevronRight
               size={14}
-              className={`transition-transform duration-300 ${
-                activeForm === "email" ? "rotate-90" : "rotate-0"
-              }`}
+              className={`transition-transform duration-300 ${activeForm === "email" ? "rotate-90" : "rotate-0"
+                }`}
             />
           </Button>
         </div>
 
         {/* Expand/Collapse Container */}
         <div
-          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
-            activeForm === "email"
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${activeForm === "email"
               ? "grid-rows-[1fr] opacity-100"
               : "grid-rows-[0fr] opacity-0 pointer-events-none"
-          }`}
+            }`}
         >
           <div className="overflow-hidden">
             <div className="mt-6 border-t border-brand-sand-dark pt-6">
@@ -647,7 +645,7 @@ function SecurityTab({ email }: { email?: string }) {
       </div>
 
       {/* Password */}
-      <div className="rounded-2xl border border-brand-sand-dark bg-white p-6 shadow-xs sm:p-8">
+      <div className="-mx-4 rounded-none border-y border-brand-sand-dark bg-white p-6 shadow-xs sm:mx-0 sm:rounded-2xl sm:border sm:p-8">
         <div className="flex items-start justify-between gap-5">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-sand text-brand-brown-800">
@@ -682,20 +680,18 @@ function SecurityTab({ email }: { email?: string }) {
             <span>Change</span>
             <ChevronRight
               size={14}
-              className={`transition-transform duration-300 ${
-                activeForm === "password" ? "rotate-90" : "rotate-0"
-              }`}
+              className={`transition-transform duration-300 ${activeForm === "password" ? "rotate-90" : "rotate-0"
+                }`}
             />
           </Button>
         </div>
 
         {/* Expand/Collapse Container */}
         <div
-          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
-            activeForm === "password"
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${activeForm === "password"
               ? "grid-rows-[1fr] opacity-100"
               : "grid-rows-[0fr] opacity-0 pointer-events-none"
-          }`}
+            }`}
         >
           <div className="overflow-hidden">
             <div className="mt-6 border-t border-brand-sand-dark pt-6">
@@ -754,7 +750,7 @@ function PrivacyAccountTab() {
   return (
     <div className="space-y-5">
       {/* Disable account */}
-      <div className="rounded-2xl border border-brand-sand-dark bg-white p-6 shadow-xs sm:p-8">
+      <div className="-mx-4 rounded-none border-y border-brand-sand-dark bg-white p-6 shadow-xs sm:mx-0 sm:rounded-2xl sm:border sm:p-8">
         <h3 className="text-sm font-bold text-brand-brown-950">
           Disable Account
         </h3>
@@ -777,7 +773,7 @@ function PrivacyAccountTab() {
       </div>
 
       {/* Delete account */}
-      <div className="rounded-2xl border border-red-200 bg-red-50/40 p-6 sm:p-8">
+      <div className="-mx-4 rounded-none border-y border-red-200 bg-red-50/40 p-6 sm:p-8 sm:mx-0 sm:rounded-2xl sm:border">
         <h3 className="text-sm font-bold text-red-800">
           Delete Account
         </h3>
@@ -807,22 +803,22 @@ const NAV_TABS: {
   label: string;
   icon: React.ReactNode;
 }[] = [
-  {
-    id: "profile",
-    label: "Profile Info",
-    icon: <User size={15} />,
-  },
-  {
-    id: "security",
-    label: "Security",
-    icon: <Key size={15} />,
-  },
-  {
-    id: "privacy",
-    label: "Privacy & Account",
-    icon: <Shield size={15} />,
-  },
-];
+    {
+      id: "profile",
+      label: "Profile Info",
+      icon: <User size={15} />,
+    },
+    {
+      id: "security",
+      label: "Security",
+      icon: <Key size={15} />,
+    },
+    {
+      id: "privacy",
+      label: "Privacy & Account",
+      icon: <Shield size={15} />,
+    },
+  ];
 
 /* ─────────────────────────────────────────────────────────── page */
 export default function ProfilePage() {
@@ -888,12 +884,12 @@ export default function ProfilePage() {
     setProfileData((prev) =>
       prev
         ? {
-            ...prev,
-            user: {
-              ...prev.user,
-              avatarUrl: newAvatarUrl,
-            },
-          }
+          ...prev,
+          user: {
+            ...prev.user,
+            avatarUrl: newAvatarUrl,
+          },
+        }
         : null
     );
   };
@@ -918,15 +914,15 @@ export default function ProfilePage() {
       setUser((prev) =>
         prev
           ? {
-              ...prev,
-              displayName: res.user.displayName,
-              username: res.user.username,
-              avatarUrl: res.user.avatarUrl,
-              bio: res.user.bio,
-              location: res.user.location,
-              website: res.user.website,
-              points: res.user.points,
-            }
+            ...prev,
+            displayName: res.user.displayName,
+            username: res.user.username,
+            avatarUrl: res.user.avatarUrl,
+            bio: res.user.bio,
+            location: res.user.location,
+            website: res.user.website,
+            points: res.user.points,
+          }
           : null
       );
 
@@ -958,9 +954,9 @@ export default function ProfilePage() {
           joinedDate={
             createdAt
               ? new Date(createdAt).toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })
+                month: "long",
+                year: "numeric",
+              })
               : "Recent"
           }
         />
@@ -1002,11 +998,10 @@ export default function ProfilePage() {
                     id={`profile-tab-${id}`}
                     type="button"
                     onClick={() => setActiveTab(id)}
-                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
-                      activeTab === id
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${activeTab === id
                         ? "bg-brand-brown-950 text-white shadow-sm"
                         : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2.5">
                       {icon}

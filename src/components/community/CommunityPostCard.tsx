@@ -96,11 +96,11 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
   const commentCount = post.commentCount ?? 0;
 
   return (
-    <article className="group relative rounded-2xl border bg-white p-5 transition-all duration-200 hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]">
+    <article className="group relative -mx-4 rounded-none border border-x-0 bg-white p-5 transition-all duration-200 hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)] sm:mx-0 sm:rounded-2xl sm:border">
       {/* Whole card is clickable to view post page */}
       <Link
         href={`/posts/${post.id}`}
-        className="absolute inset-0 z-0 rounded-2xl"
+        className="absolute inset-0 z-0 rounded-none sm:rounded-2xl"
         aria-label={`View discussion by ${authorName}`}
       />
 

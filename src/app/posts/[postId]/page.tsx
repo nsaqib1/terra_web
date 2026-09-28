@@ -65,7 +65,7 @@ function relativeTime(iso?: string | null): string {
 
 function PostSkeleton() {
   return (
-    <div className="rounded-2xl border bg-white p-6 space-y-4 animate-pulse">
+    <div className="-mx-4 space-y-4 rounded-none border-y bg-white p-6 animate-pulse sm:mx-0 sm:rounded-2xl sm:border">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-full bg-brand-sand/70" />
         <div className="space-y-1.5 flex-1">
@@ -84,7 +84,7 @@ function PostSkeleton() {
 
 function PostError({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-red-100 bg-red-50/80 p-6 flex items-start gap-3">
+    <div className="-mx-4 flex items-start gap-3 rounded-none border-y border-red-100 bg-red-50/80 p-6 sm:mx-0 sm:rounded-2xl sm:border">
       <AlertCircle size={20} className="text-red-500 mt-0.5 shrink-0" />
       <div>
         <p className="text-sm font-bold text-red-800">Could not load post</p>
@@ -157,7 +157,7 @@ function CommentNode({
   };
 
   return (
-    <div className="group rounded-2xl border bg-white p-4 transition-all duration-200 hover:border-brand-brown-700/20 hover:shadow-sm">
+    <div className="group -mx-4 rounded-none border-y bg-white p-4 transition-all duration-200 hover:border-brand-brown-700/20 hover:shadow-sm sm:mx-0 sm:rounded-2xl sm:border">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
@@ -219,11 +219,10 @@ function CommentNode({
           <button
             onClick={() => onVote(comment.id, "UP")}
             aria-label="Upvote comment"
-            className={`rounded p-1 transition-all ${
-              currentUserVote === "UP"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
-            }`}
+            className={`rounded p-1 transition-all ${currentUserVote === "UP"
+              ? "bg-emerald-600 text-white shadow-xs"
+              : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
+              }`}
           >
             <ArrowUp
               size={13}
@@ -232,13 +231,12 @@ function CommentNode({
           </button>
 
           <span
-            className={`px-1.5 text-[11px] font-bold ${
-              currentUserVote === "UP"
-                ? "text-emerald-700"
-                : currentUserVote === "DOWN"
-                  ? "text-rose-700"
-                  : "text-brand-brown-900"
-            }`}
+            className={`px-1.5 text-[11px] font-bold ${currentUserVote === "UP"
+              ? "text-emerald-700"
+              : currentUserVote === "DOWN"
+                ? "text-rose-700"
+                : "text-brand-brown-900"
+              }`}
           >
             {comment.score}
           </span>
@@ -246,11 +244,10 @@ function CommentNode({
           <button
             onClick={() => onVote(comment.id, "DOWN")}
             aria-label="Downvote comment"
-            className={`rounded p-1 transition-all ${
-              currentUserVote === "DOWN"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
-            }`}
+            className={`rounded p-1 transition-all ${currentUserVote === "DOWN"
+              ? "bg-rose-600 text-white shadow-xs"
+              : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
+              }`}
           >
             <ArrowDown
               size={13}
@@ -263,11 +260,10 @@ function CommentNode({
         {!comment.parentId && (
           <button
             onClick={() => setIsReplying(!isReplying)}
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-              isReplying
-                ? "bg-brand-desert-light text-brand-brown-950"
-                : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
-            }`}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors ${isReplying
+              ? "bg-brand-desert-light text-brand-brown-950"
+              : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
+              }`}
           >
             <CornerDownRight size={13} />
             <span>Reply</span>
@@ -406,11 +402,10 @@ function CommentNode({
                     <button
                       onClick={() => onVote(reply.id, "UP")}
                       aria-label="Upvote reply"
-                      className={`rounded p-0.5 transition-all ${
-                        replyUserVote === "UP"
-                          ? "bg-emerald-600 text-white"
-                          : "text-brand-brown-700 hover:bg-brand-sand"
-                      }`}
+                      className={`rounded p-0.5 transition-all ${replyUserVote === "UP"
+                        ? "bg-emerald-600 text-white"
+                        : "text-brand-brown-700 hover:bg-brand-sand"
+                        }`}
                     >
                       <ArrowUp
                         size={12}
@@ -418,24 +413,22 @@ function CommentNode({
                       />
                     </button>
                     <span
-                      className={`px-1 text-[10px] font-bold ${
-                        replyUserVote === "UP"
-                          ? "text-emerald-700"
-                          : replyUserVote === "DOWN"
-                            ? "text-rose-700"
-                            : "text-brand-brown-900"
-                      }`}
+                      className={`px-1 text-[10px] font-bold ${replyUserVote === "UP"
+                        ? "text-emerald-700"
+                        : replyUserVote === "DOWN"
+                          ? "text-rose-700"
+                          : "text-brand-brown-900"
+                        }`}
                     >
                       {reply.score}
                     </span>
                     <button
                       onClick={() => onVote(reply.id, "DOWN")}
                       aria-label="Downvote reply"
-                      className={`rounded p-0.5 transition-all ${
-                        replyUserVote === "DOWN"
-                          ? "bg-rose-600 text-white"
-                          : "text-brand-brown-700 hover:bg-brand-sand"
-                      }`}
+                      className={`rounded p-0.5 transition-all ${replyUserVote === "DOWN"
+                        ? "bg-rose-600 text-white"
+                        : "text-brand-brown-700 hover:bg-brand-sand"
+                        }`}
                     >
                       <ArrowDown
                         size={12}
@@ -892,13 +885,12 @@ export default function PostPage() {
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <div
-            className={`flex items-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold shadow-lg backdrop-blur-md ${
-              toast.type === "error"
-                ? "border border-red-200 bg-red-50/95 text-red-900"
-                : toast.type === "success"
-                  ? "border border-emerald-200 bg-emerald-50/95 text-emerald-900"
-                  : "border border-brand-sand bg-brand-brown-950 text-white"
-            }`}
+            className={`flex items-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold shadow-lg backdrop-blur-md ${toast.type === "error"
+              ? "border border-red-200 bg-red-50/95 text-red-900"
+              : toast.type === "success"
+                ? "border border-emerald-200 bg-emerald-50/95 text-emerald-900"
+                : "border border-brand-sand bg-brand-brown-950 text-white"
+              }`}
           >
             {toast.type === "error" && (
               <AlertCircle size={15} className="text-red-500 shrink-0" />
@@ -927,7 +919,7 @@ export default function PostPage() {
             ) : error ? (
               <PostError message={error} />
             ) : post && document ? (
-              <article className="rounded-2xl border bg-white p-5 transition-shadow">
+              <article className="-mx-4 rounded-none border-y bg-white p-5 transition-shadow sm:mx-0 sm:rounded-2xl sm:border">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -1089,7 +1081,7 @@ export default function PostPage() {
             ) : null}
 
             {/* Comment Composer */}
-            <div className="rounded-2xl border bg-white p-4 shadow-xs">
+            <div className="-mx-4 rounded-none border-y bg-white p-4 shadow-xs sm:mx-0 sm:rounded-2xl sm:border">
               {isAuthenticated ? (
                 <div>
                   <div className="flex items-center gap-2.5 mb-3">
@@ -1194,11 +1186,11 @@ export default function PostPage() {
 
               {/* Comments list */}
               {isLoadingComments ? (
-                <div className="space-y-3">
+                <div className="-mx-4 space-y-3">
                   {[1, 2, 3].map((n) => (
                     <div
                       key={n}
-                      className="rounded-2xl border bg-white p-4 space-y-3 animate-pulse"
+                      className="space-y-3 rounded-none border-y bg-white p-4 animate-pulse sm:rounded-2xl sm:border"
                     >
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-full bg-brand-sand/70" />
@@ -1215,7 +1207,7 @@ export default function PostPage() {
                   ))}
                 </div>
               ) : comments.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-brand-sand bg-white/60 p-8 text-center">
+                <div className="-mx-4 rounded-none border-y border-dashed border-brand-sand bg-white/60 p-8 text-center sm:mx-0 sm:rounded-2xl sm:border">
                   <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-brand-sand/50 text-brand-brown-700">
                     <MessageCircle size={20} />
                   </div>
@@ -1250,7 +1242,7 @@ export default function PostPage() {
 
           {/* Sidebar */}
           <aside className="space-y-4">
-            <div className="rounded-2xl border bg-white p-4">
+            <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
               {isLoading ? (
                 <div className="space-y-3 animate-pulse">
                   <div className="flex items-center gap-3">

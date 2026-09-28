@@ -96,7 +96,7 @@ export function CreatePostForm() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <main className="min-w-0">
-          <div className="rounded-2xl border bg-white p-5 sm:p-6">
+          <div className="-mx-4 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
             <div className="space-y-6">
               <CommunitySelector
                 value={communityId}

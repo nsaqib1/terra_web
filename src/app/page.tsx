@@ -139,7 +139,7 @@ export default function Home() {
           {isLoading ? (
             <FeedSkeleton />
           ) : errorMessage ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50/70 p-6 text-center backdrop-blur-sm">
+            <div className="-mx-4 rounded-none border-y border-red-200 bg-red-50/70 p-6 text-center backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border">
               <AlertCircle size={28} className="mx-auto text-red-600 mb-2" />
               <h3 className="text-sm font-bold text-red-950">Unable to load discussions</h3>
               <p className="mt-1 text-xs text-red-700 max-w-md mx-auto">{errorMessage}</p>

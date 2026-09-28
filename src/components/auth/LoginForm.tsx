@@ -227,13 +227,14 @@ export function LoginForm() {
       ================================================================= */}
       <div
         className="
-          mt-7
-          rounded-[1.75rem]
-          border border-brand-sand-dark
+          mt-7 -mx-5
+          rounded-none
+          border-y border-brand-sand-dark
           bg-white/90
           p-5
           shadow-[0_20px_60px_rgba(47,41,31,0.08)]
           backdrop-blur-xl
+          sm:mx-0 sm:rounded-[1.75rem] sm:border
           sm:p-7
         "
       >

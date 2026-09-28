@@ -377,7 +377,7 @@ export default function ManagePostsPage() {
           </div>
 
           {/* Search, Filter & Controls Bar */}
-          <div className="rounded-2xl border border-brand-sand-dark/60 bg-white p-4 shadow-2xs">
+          <div className="-mx-4 rounded-none border-y border-brand-sand-dark/60 bg-white p-4 shadow-2xs sm:mx-0 sm:rounded-2xl sm:border">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               {/* Search input */}
               <div className="relative flex-1">
@@ -470,7 +470,7 @@ export default function ManagePostsPage() {
                 <PostCardSkeleton />
               </div>
             ) : error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50/70 p-6 text-center">
+              <div className="-mx-4 rounded-none border-y border-red-200 bg-red-50/70 p-6 text-center sm:mx-0 sm:rounded-2xl sm:border">
                 <AlertCircle size={24} className="mx-auto text-red-500 mb-2" />
                 <h3 className="text-sm font-bold text-red-800">Could not load your posts</h3>
                 <p className="mt-1 text-xs text-red-600">{error}</p>
@@ -482,7 +482,7 @@ export default function ManagePostsPage() {
                 </Button>
               </div>
             ) : filteredPosts.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-brand-sand-dark bg-white p-12 text-center">
+              <div className="-mx-4 rounded-none border-y border-dashed border-brand-sand-dark bg-white p-12 text-center sm:mx-0 sm:rounded-2xl sm:border">
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-sand/70 text-brand-brown-800">
                   <LayoutList size={26} />
                 </div>
@@ -542,7 +542,7 @@ export default function ManagePostsPage() {
                   return (
                     <div
                       key={post.id}
-                      className="group relative rounded-2xl border border-brand-sand-dark/70 bg-white p-5 transition-all duration-200 hover:border-brand-desert-dark/60 hover:shadow-[0_4px_20px_rgba(72,64,48,0.06)]"
+                      className="group relative -mx-4 rounded-none border border-x-0 border-brand-sand-dark/70 bg-white p-5 transition-all duration-200 hover:border-brand-desert-dark/60 hover:shadow-[0_4px_20px_rgba(72,64,48,0.06)] sm:mx-0 sm:rounded-2xl sm:border"
                     >
                       {/* Top Bar: Community + Timestamp + Actions */}
                       <div className="flex items-start justify-between gap-4">
@@ -758,7 +758,7 @@ export default function ManagePostsPage() {
 
 function PostCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-brand-sand-dark/60 bg-white p-5 space-y-3 animate-pulse">
+    <div className="-mx-4 space-y-3 rounded-none border-y border-brand-sand-dark/60 bg-white p-5 animate-pulse sm:mx-0 sm:rounded-2xl sm:border">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-6 w-28 rounded-lg bg-brand-sand" />
