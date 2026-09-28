@@ -162,7 +162,7 @@ export default function Home() {
               onResetFilter={() => setSelectedTag(null)}
             />
           ) : (
-            <div className="space-y-4">
+            <div className="-mx-4 space-y-4 sm:mx-0">
               {displayedPosts.map((post) => (
                 <FeedPostCard
                   key={post.id}

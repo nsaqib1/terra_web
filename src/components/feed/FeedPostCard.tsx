@@ -170,11 +170,11 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
   };
 
   return (
-    <article className="group relative rounded-2xl border border-brand-sand-dark/60 bg-white p-5 transition-all duration-200 hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)]">
+    <article className="group relative rounded-none border border-x-0 border-brand-sand-dark/60 bg-white p-5 transition-all duration-200 hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)] sm:rounded-2xl sm:border">
       {/* Clickable background overlay */}
       <Link
         href={`/posts/${post.id}`}
-        className="absolute inset-0 z-0 rounded-2xl"
+        className="absolute inset-0 z-0 rounded-none sm:rounded-2xl"
         aria-label={`View discussion by ${authorName}`}
       />
 
@@ -298,10 +298,9 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
               onClick={(e) => handleVote(e, "UP")}
               className={`
                 flex items-center justify-center rounded-lg p-1.5 transition-colors
-                ${
-                  currentVote === "UP"
-                    ? "bg-brand-desert text-brand-brown-950 font-bold"
-                    : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
+                ${currentVote === "UP"
+                  ? "bg-brand-desert text-brand-brown-950 font-bold"
+                  : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
                 }
               `}
             >
@@ -318,10 +317,9 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
               onClick={(e) => handleVote(e, "DOWN")}
               className={`
                 flex items-center justify-center rounded-lg p-1.5 transition-colors
-                ${
-                  currentVote === "DOWN"
-                    ? "bg-brand-desert text-brand-brown-950 font-bold"
-                    : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
+                ${currentVote === "DOWN"
+                  ? "bg-brand-desert text-brand-brown-950 font-bold"
+                  : "text-brand-brown-700 hover:bg-brand-desert-light hover:text-brand-brown-950"
                 }
               `}
             >
