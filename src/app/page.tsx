@@ -86,12 +86,12 @@ export default function Home() {
   // Filter posts by tag if one is selected client-side
   const displayedPosts = selectedTag
     ? posts.filter((post) =>
-        post.tags?.some(
-          (t) =>
-            t.name.toLowerCase() === selectedTag.toLowerCase() ||
-            t.slug.toLowerCase() === selectedTag.toLowerCase()
-        )
+      post.tags?.some(
+        (t) =>
+          t.name.toLowerCase() === selectedTag.toLowerCase() ||
+          t.slug.toLowerCase() === selectedTag.toLowerCase()
       )
+    )
     : posts;
 
   return (
@@ -101,7 +101,7 @@ export default function Home() {
           {/* Header & Controls */}
           <div className="mb-6 space-y-4">
             {/* Sorting Bar */}
-            <div className="flex items-center justify-between border-b border-brand-sand-dark/50 pb-3">
+            <div className="hidden items-center justify-between border-b border-brand-sand-dark/50 pb-3 sm:flex">
               <FeedSorting
                 currentSort={currentSort}
                 onSortChange={handleSortChange}
@@ -190,10 +190,9 @@ export default function Home() {
           <div
             className={`
               fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-xs font-semibold shadow-xl transition-all animate-in fade-in slide-in-from-bottom-5
-              ${
-                toast.type === "error"
-                  ? "bg-red-900 text-white shadow-red-900/20"
-                  : toast.type === "success"
+              ${toast.type === "error"
+                ? "bg-red-900 text-white shadow-red-900/20"
+                : toast.type === "success"
                   ? "bg-brand-brown-950 text-white shadow-brand-brown-950/20"
                   : "bg-brand-brown-900 text-white shadow-brand-brown-900/20"
               }
