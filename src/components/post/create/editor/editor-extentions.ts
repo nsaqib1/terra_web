@@ -2,6 +2,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import { PostImage } from "./extensions/PostImage";
+import Youtube from "@tiptap/extension-youtube";
 
 
 export const postEditorExtensions = [
@@ -43,6 +44,8 @@ export const postEditorExtensions = [
     link: false,
 
     underline: false,
+
+
   }),
 
   Underline,
@@ -63,4 +66,13 @@ export const postEditorExtensions = [
   }),
 
   PostImage,
+
+  Youtube.configure({
+    width: 640,
+    height: 360,
+    controls: true,
+    nocookie: true,
+    allowFullscreen: true,
+    autoplay: false,
+  }),
 ];

@@ -261,6 +261,16 @@ function convertPostDocumentToTiptap(
             },
           };
 
+        case "youtube":
+          return {
+            type: "youtube",
+            attrs: {
+              src: `https://www.youtube.com/watch?v=${node.videoId}`,
+              width: 640,
+              height: 360,
+            },
+          };
+
         default:
           return {
             type: "paragraph",

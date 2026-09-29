@@ -20,6 +20,8 @@ import { type Editor, useEditorState } from "@tiptap/react";
 
 import { LinkPopover } from "./LinkPopover";
 
+import { YoutubePopover } from "./YoutubePopover";
+
 interface EditorToolbarProps {
   editor: Editor;
   onImageClick: () => void;
@@ -290,6 +292,8 @@ export function EditorToolbar({
       >
         🖼
       </button>
+
+      <YoutubePopover editor={editor} />
     </div>
   );
 }

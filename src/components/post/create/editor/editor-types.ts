@@ -75,10 +75,16 @@ export type PostNode =
   | PostOrderedListNode
   | PostBlockquoteNode
   | PostCodeBlockNode
-  | PostImageNode;
+  | PostImageNode
+  | PostYoutubeNode;
 
 export interface PostDocument {
   type: "doc";
   version: 1;
   content: PostNode[];
+}
+
+export interface PostYoutubeNode {
+  type: "youtube";
+  videoId: string;
 }

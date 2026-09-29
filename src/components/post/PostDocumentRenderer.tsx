@@ -11,6 +11,7 @@ import type {
   PostParagraphNode,
   PostTextMark,
   PostTextNode,
+  PostYoutubeNode,
 } from "@/components/post/create/editor/editor-types";
 import React from "react";
 
@@ -274,6 +275,27 @@ function ImageNode({
   );
 }
 
+function YoutubeNode({
+  node,
+}: {
+  node: PostYoutubeNode;
+}) {
+  return (
+    <div className="my-4 overflow-hidden rounded-2xl border border-brand-sand bg-brand-cream/30">
+      <div className="aspect-video w-full">
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${node.videoId}`}
+          title="YouTube video"
+          className="h-full w-full"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Node renderer
 // ---------------------------------------------------------------------------
@@ -317,6 +339,11 @@ function RenderNode({
     case "image":
       return (
         <ImageNode node={node} />
+      );
+
+    case "youtube":
+      return (
+        <YoutubeNode node={node} />
       );
 
     default:

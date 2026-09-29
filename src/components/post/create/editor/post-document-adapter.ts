@@ -234,8 +234,68 @@ function convertNode(
       };
     }
 
+    case "youtube": {
+      const src = node.attrs?.src;
+
+      if (typeof src !== "string") {
+        return null;
+      }
+
+      const videoId = extractYoutubeVideoId(src);
+
+      if (!videoId) {
+        return null;
+      }
+
+      const YOUTUBE_VIDEO_ID_REGEX = /^[A-Za-z0-9_-]{11}$/;
+      if (!YOUTUBE_VIDEO_ID_REGEX.test(videoId)) {
+        return null;
+      }
+
+      return {
+        type: "youtube",
+        videoId,
+      };
+    }
+
     default:
       return null;
+  }
+}
+
+function extractYoutubeVideoId(
+  url: string,
+): string | null {
+  try {
+    const parsed = new URL(url);
+
+    if (
+      parsed.hostname === "youtube.com" ||
+      parsed.hostname === "www.youtube.com"
+    ) {
+      if (parsed.pathname === "/watch") {
+        return parsed.searchParams.get("v");
+      }
+
+      if (parsed.pathname.startsWith("/shorts/")) {
+        return parsed.pathname.split("/")[2] ?? null;
+      }
+
+      if (parsed.pathname.startsWith("/embed/")) {
+        return parsed.pathname.split("/")[2] ?? null;
+      }
+    }
+
+    if (
+      parsed.hostname === "youtu.be" ||
+      parsed.hostname === "www.youtu.be"
+    ) {
+      return parsed.pathname.slice(1) || null;
+    }
+
+    return null;
+  } catch {
+    return null;
   }
 }
 
