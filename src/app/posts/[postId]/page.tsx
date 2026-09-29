@@ -20,6 +20,8 @@ import {
   X,
   Sparkles,
   Edit3,
+  MoreHorizontal,
+  Flag,
 } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -484,6 +486,7 @@ export default function PostPage() {
   // Author actions state
   const [showDeletePostModal, setShowDeletePostModal] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [showPostMenu, setShowPostMenu] = useState(false);
 
   const isAuthor = Boolean(user && post && user.id === post.author?.id);
 
@@ -517,6 +520,13 @@ export default function PostPage() {
       setIsDeletingPost(false);
       setShowDeletePostModal(false);
     }
+  };
+
+  const handleReportPost = () => {
+    setShowPostMenu(false);
+
+    // TODO: Connect this to the report API when the reporting system is implemented.
+    showToast("Post reporting will be available soon.", "info");
   };
 
   // 1. Fetch Post Data
@@ -1037,32 +1047,88 @@ export default function PostPage() {
                   </div>
 
                   {/* Action buttons (Author Controls & Share) */}
+                  {/* Action buttons */}
                   <div className="flex items-center gap-1.5">
-                    {isAuthor && (
-                      <>
-                        <Link
-                          href={`/posts/${post.id}/edit`}
-                          className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-brand-brown-800 bg-brand-sand/50 hover:bg-brand-sand transition-colors"
-                          title="Edit your post"
-                        >
-                          <Edit3 size={13} />
-                          <span>Edit</span>
-                        </Link>
+                    {/* Post Menu */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowPostMenu((prev) => !prev)}
+                        aria-label="Post options"
+                        aria-haspopup="menu"
+                        aria-expanded={showPostMenu}
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${showPostMenu
+                          ? "bg-brand-sand text-brand-brown-950"
+                          : "text-brand-brown-700 hover:bg-brand-sand/70 hover:text-brand-brown-950"
+                          }`}
+                      >
+                        <MoreHorizontal size={18} />
+                      </button>
 
-                        <button
-                          type="button"
-                          onClick={() => setShowDeletePostModal(true)}
-                          className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-red-700 bg-red-50/70 hover:bg-red-100/80 transition-colors"
-                          title="Delete your post"
-                        >
-                          <Trash2 size={13} />
-                          <span>Delete</span>
-                        </button>
-                      </>
-                    )}
+                      {showPostMenu && (
+                        <>
+                          {/* Invisible backdrop for closing the menu */}
+                          <button
+                            type="button"
+                            aria-label="Close post options"
+                            className="fixed inset-0 z-30 cursor-default"
+                            onClick={() => setShowPostMenu(false)}
+                          />
 
-                    {/* Share button */}
+                          <div
+                            role="menu"
+                            className="absolute right-0 top-11 z-40 w-44 overflow-hidden rounded-xl border border-brand-sand bg-white p-1.5 shadow-xl"
+                          >
+                            {isAuthor && (
+                              <>
+                                {/* Edit */}
+                                <Link
+                                  href={`/posts/${post.id}/edit`}
+                                  role="menuitem"
+                                  onClick={() => setShowPostMenu(false)}
+                                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-semibold text-brand-brown-800 transition-colors hover:bg-brand-sand"
+                                >
+                                  <Edit3 size={14} />
+                                  <span>Edit Post</span>
+                                </Link>
+
+                                {/* Delete */}
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  onClick={() => {
+                                    setShowPostMenu(false);
+                                    setShowDeletePostModal(true);
+                                  }}
+                                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Delete Post</span>
+                                </button>
+
+                                <div className="my-1 border-t border-brand-sand/70" />
+                              </>
+                            )}
+
+                            {/* Report */}
+                            <button
+                              type="button"
+                              role="menuitem"
+                              onClick={handleReportPost}
+                              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-semibold text-brand-brown-700 transition-colors hover:bg-brand-sand"
+                            >
+                              <Flag size={14} />
+                              <span>Report Post</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+
+                    </div>
+
+                    {/* Share */}
                     <button
+                      type="button"
                       onClick={() => {
                         if (navigator.clipboard) {
                           navigator.clipboard.writeText(window.location.href);
@@ -1070,7 +1136,7 @@ export default function PostPage() {
                         }
                       }}
                       title="Copy share link"
-                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-brown-700 hover:bg-brand-sand/50 transition-colors"
+                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-brown-700 transition-colors hover:bg-brand-sand/50"
                     >
                       <Share2 size={14} />
                       <span className="hidden sm:inline">Share</span>
