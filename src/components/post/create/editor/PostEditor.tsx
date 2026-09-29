@@ -101,7 +101,7 @@ export function PostEditor({
 
   if (!editor) {
     return (
-      <div className="rounded-xl border bg-white">
+      <div className="-mx-5 rounded-none border-y bg-white sm:mx-0 sm:rounded-xl sm:border">
         <div className="h-[350px] animate-pulse bg-brand-cream/40" />
       </div>
     );
@@ -138,7 +138,7 @@ export function PostEditor({
   return (
     <>
       <div>
-        <div className="rounded-xl border bg-white">
+        <div className="-mx-5 rounded-none border-y bg-white sm:mx-0 sm:rounded-xl sm:border">
           <EditorToolbar
             editor={activeEditor}
             onImageClick={handleImageClick}
