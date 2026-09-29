@@ -931,8 +931,10 @@ export default function PostPage() {
             ) : post && document ? (
               <article className="-mx-4 rounded-none border-y bg-white p-5 transition-shadow sm:mx-0 sm:rounded-2xl sm:border">
                 {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
+                {/* Header */}
+                <div className="flex flex-col gap-3">
+                  {/* Author + Community */}
+                  <div className="flex min-w-0 items-center gap-3">
                     {/* Author avatar + community badge */}
                     <div className="relative shrink-0">
                       {post.author?.avatarUrl ? (
@@ -948,6 +950,7 @@ export default function PostPage() {
                           )}
                         </div>
                       )}
+
                       <div
                         title={post.community?.name}
                         className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-md bg-brand-desert-light text-[9px] font-bold text-brand-brown-800 ring-2 ring-white"
@@ -957,22 +960,28 @@ export default function PostPage() {
                     </div>
 
                     {/* Meta */}
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-1.5 text-xs truncate">
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex min-w-0 items-center gap-1.5 text-xs">
                         <Link
                           href={`/community/${post.community?.slug}`}
-                          className="font-bold text-brand-brown-950 hover:underline truncate"
+                          className="truncate font-bold text-brand-brown-950 hover:underline"
                         >
                           {post.community?.name}
                         </Link>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-muted-foreground shrink-0">
+
+                        <span className="shrink-0 text-muted-foreground">
+                          •
+                        </span>
+
+                        <span className="shrink-0 text-muted-foreground">
                           {relativeTime(post.createdAt)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                        <span>Posted by</span>
-                        <span className="font-medium text-brand-brown-700 truncate">
+
+                      <div className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+                        <span className="shrink-0">Posted by</span>
+
+                        <span className="truncate font-medium text-brand-brown-700">
                           @{post.author?.username}
                         </span>
                       </div>
@@ -981,7 +990,7 @@ export default function PostPage() {
 
                   {/* Tags */}
                   {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 shrink-0">
+                    <div className="flex flex-wrap gap-1.5">
                       {post.tags.map((tag) => (
                         <span
                           key={tag.id}
