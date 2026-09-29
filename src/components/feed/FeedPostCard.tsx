@@ -119,6 +119,28 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
   const commentCount = post.commentCount ?? 0;
   const hasMedia = post.media && post.media.length > 0;
 
+  const navigateToPost = () => {
+    router.push(`/posts/${post.id}`);
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent navigation if text is selected
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+
+    navigateToPost();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      // Avoid triggering when inner interactive controls have focus
+      if (e.target === e.currentTarget) {
+        e.preventDefault();
+        navigateToPost();
+      }
+    }
+  };
+
   const handleVote = async (e: React.MouseEvent, value: VoteValue) => {
     e.preventDefault();
     e.stopPropagation();
@@ -170,16 +192,21 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
   };
 
   return (
-    <article className="group relative rounded-none border border-x-0 border-brand-sand-dark/60 bg-white p-5 transition-all duration-200 hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)] sm:rounded-2xl sm:border">
-      {/* Clickable background overlay */}
-      <Link
-        href={`/posts/${post.id}`}
-        className="absolute inset-0 z-0 rounded-none sm:rounded-2xl"
-        aria-label={`View discussion by ${authorName}`}
-      />
-
+    <article
+      tabIndex={0}
+      role="article"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      className="
+        group relative cursor-pointer rounded-none border border-x-0 border-brand-sand-dark/60 
+        bg-white p-5 transition-all duration-200 
+        hover:border-brand-brown-700/30 hover:shadow-[0_8px_30px_rgba(72,64,48,0.07)] 
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown-700
+        sm:rounded-2xl sm:border
+      "
+    >
       {/* Header: Community + Author Info & Tags */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           {/* Author Avatar with Community Badge */}
           <div className="relative shrink-0">
@@ -274,7 +301,7 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
       </div>
 
       {/* Body Preview */}
-      <div className="relative z-10 mt-3.5">
+      <div className="mt-3.5">
         <p className="line-clamp-3 text-sm leading-relaxed text-brand-brown-900">
           {previewText}
         </p>
@@ -282,16 +309,22 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
         {hasMedia && (
           <div className="mt-2.5 flex items-center gap-1.5 text-xs text-brand-brown-600 font-medium">
             <ImageIcon size={14} className="text-brand-brown-700" />
-            <span>{post.media?.length} {post.media?.length === 1 ? "media attachment" : "media attachments"}</span>
+            <span>
+              {post.media?.length}{" "}
+              {post.media?.length === 1 ? "media attachment" : "media attachments"}
+            </span>
           </div>
         )}
       </div>
 
-      {/* Actions */}
-      <div className="relative z-10 mt-4 flex items-center justify-between border-t border-brand-sand-dark/40 pt-3">
+      {/* Actions Toolbar */}
+      <div className="mt-4 flex items-center justify-between border-t border-brand-sand-dark/40 pt-3">
         <div className="flex items-center gap-3">
           {/* Vote Controls */}
-          <div className="flex items-center rounded-xl bg-brand-sand/50 p-1">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center rounded-xl bg-brand-sand/50 p-1"
+          >
             <button
               type="button"
               aria-label="Upvote"
@@ -327,7 +360,7 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
             </button>
           </div>
 
-          {/* Comments link button */}
+          {/* Comments Link */}
           <Link
             href={`/posts/${post.id}#comments`}
             onClick={(e) => e.stopPropagation()}
@@ -342,15 +375,6 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
             <span>{commentCount}</span>
           </Link>
         </div>
-
-        {/* View Discussion Link */}
-        <Link
-          href={`/posts/${post.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="text-xs font-semibold text-brand-brown-700 hover:text-brand-brown-950 hover:underline"
-        >
-          View discussion →
-        </Link>
       </div>
     </article>
   );
