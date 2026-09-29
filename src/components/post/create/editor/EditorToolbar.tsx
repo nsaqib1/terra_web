@@ -14,6 +14,7 @@ import {
   Strikethrough,
   Undo2,
   Underline,
+  Image
 } from "lucide-react";
 
 import { type Editor, useEditorState } from "@tiptap/react";
@@ -274,24 +275,12 @@ export function EditorToolbar({
 
       <LinkPopover editor={editor} />
 
-      <button
-        type="button"
-        aria-label="Add image"
-        title="Add image"
-        onMouseDown={(event) => {
-          event.preventDefault();
-        }}
+      <ToolbarButton
+        label="Add image"
         onClick={onImageClick}
-        className="
-    flex h-8 w-8 items-center
-    justify-center rounded-lg
-    text-muted-foreground
-    hover:bg-brand-sand
-    hover:text-brand-brown-950
-  "
       >
-        🖼
-      </button>
+        <Image size={15} />
+      </ToolbarButton>
 
       <YoutubePopover editor={editor} />
     </div>
