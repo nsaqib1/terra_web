@@ -62,8 +62,16 @@ export const resourcesApi = {
     return apiClient.patch<ResourceItem>(`/admin/resources/${id}`, data);
   },
 
-  async adminArchive(id: string): Promise<{ id: string; status: ResourceItem["status"]; deletedAt: string }> {
+  async adminDelete(id: string): Promise<{ id: string; deleted: boolean }> {
     return apiClient.delete(`/admin/resources/${id}`);
+  },
+
+  async adminPublish(id: string): Promise<ResourceItem> {
+    return apiClient.post<ResourceItem>(`/admin/resources/${id}/publish`, {});
+  },
+
+  async adminUnpublish(id: string): Promise<ResourceItem> {
+    return apiClient.post<ResourceItem>(`/admin/resources/${id}/unpublish`, {});
   },
 
   async adminListTags(communityId: string, q?: string): Promise<ResourceTag[]> {

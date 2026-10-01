@@ -100,7 +100,7 @@ export default function AdminResourcesPage() {
   const [tags, setTags] = useState<ResourceTag[]>([]);
   const [search, setSearch] = useState("");
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "PUBLISHED" | "ARCHIVED">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PUBLISHED" | "UNPUBLISHED">("ALL");
   const [sortBy, setSortBy] = useState<"newest" | "downloads" | "oldest">("newest");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -283,10 +283,30 @@ export default function AdminResourcesPage() {
     }
   };
 
-  const archive = async (id: string, currentTitle: string) => {
-    if (!window.confirm(`Are you sure you want to archive resource "${currentTitle}"?`)) return;
+  const unpublishResource = async (id: string, currentTitle: string) => {
+    if (!window.confirm(`Unpublish resource "${currentTitle}"? It will be hidden from the community.`)) return;
     try {
-      await resourcesApi.adminArchive(id);
+      const updated = await resourcesApi.adminUnpublish(id);
+      setResources((prev) => prev.map((r) => r.id === id ? updated : r));
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    }
+  };
+
+  const publishResource = async (id: string, currentTitle: string) => {
+    if (!window.confirm(`Publish resource "${currentTitle}"? It will become visible to the community.`)) return;
+    try {
+      const updated = await resourcesApi.adminPublish(id);
+      setResources((prev) => prev.map((r) => r.id === id ? updated : r));
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    }
+  };
+
+  const deleteResource = async (id: string, currentTitle: string) => {
+    if (!window.confirm(`Permanently delete resource "${currentTitle}"? This action CANNOT be undone. The file will be deleted.`)) return;
+    try {
+      await resourcesApi.adminDelete(id);
       await loadResources();
     } catch (err) {
       setError(extractErrorMessage(err));
@@ -408,7 +428,7 @@ export default function AdminResourcesPage() {
               >
                 <option value="ALL">Status: All</option>
                 <option value="PUBLISHED">Published</option>
-                <option value="ARCHIVED">Archived</option>
+                <option value="UNPUBLISHED">Unpublished</option>
               </select>
             </div>
           </div>
@@ -473,9 +493,9 @@ export default function AdminResourcesPage() {
                           >
                             {category.label}
                           </span>
-                          {resource.status === "ARCHIVED" && (
+                          {resource.status === "UNPUBLISHED" && (
                             <span className="rounded-md bg-amber-100 border border-amber-200 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-800 uppercase">
-                              Archived
+                              Unpublished
                             </span>
                           )}
                         </div>
@@ -547,15 +567,33 @@ export default function AdminResourcesPage() {
                         <Edit3 size={14} />
                       </button>
 
-                      {resource.status === "PUBLISHED" && (
+                      {/* Publish / Unpublish toggle */}
+                      {resource.status === "PUBLISHED" ? (
                         <button
-                          onClick={() => archive(resource.id, resource.title)}
-                          className="rounded-xl border border-brand-sand-dark p-2 text-brand-brown-600 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                          title="Archive resource"
+                          onClick={() => unpublishResource(resource.id, resource.title)}
+                          className="rounded-xl border border-brand-sand-dark p-2 text-amber-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"
+                          title="Unpublish resource"
                         >
                           <Archive size={14} />
                         </button>
+                      ) : (
+                        <button
+                          onClick={() => publishResource(resource.id, resource.title)}
+                          className="rounded-xl border border-brand-sand-dark p-2 text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                          title="Publish resource"
+                        >
+                          <Check size={14} />
+                        </button>
                       )}
+
+                      {/* Permanent delete */}
+                      <button
+                        onClick={() => deleteResource(resource.id, resource.title)}
+                        className="rounded-xl border border-brand-sand-dark p-2 text-brand-brown-600 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                        title="Permanently delete resource"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
                 );

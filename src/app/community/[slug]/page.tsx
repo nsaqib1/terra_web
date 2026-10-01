@@ -516,17 +516,20 @@ export default function CommunityPage() {
 
           {/* Right Sidebar: About Community */}
           <aside className="space-y-4">
-            <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
-              <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
-                <FolderOpen size={14} className="text-brand-desert-dark" />
-                <span>Resources</span>
+            {/* Resources Card — only shown when there are published resources */}
+            {(community._count?.resources ?? 0) > 0 && (
+              <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
+                <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
+                  <FolderOpen size={14} className="text-brand-desert-dark" />
+                  <span>Resources</span>
+                </div>
+                <p className="mt-3 text-2xl font-extrabold text-brand-brown-950">{formatCount(community._count?.resources ?? 0)}</p>
+                <p className="mt-0.5 text-[11px] text-brand-brown-600">Files and knowledge shared for this community.</p>
+                <Link href={`/community/${community.slug}/resources`} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-brand-sand px-3 py-2 text-xs font-semibold text-brand-brown-900 hover:bg-brand-desert-light">
+                  Explore resources
+                </Link>
               </div>
-              <p className="mt-3 text-2xl font-extrabold text-brand-brown-950">{formatCount(community._count?.resources ?? 0)}</p>
-              <p className="mt-0.5 text-[11px] text-brand-brown-600">Files and knowledge shared for this community.</p>
-              <Link href={`/community/${community.slug}/resources`} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-brand-sand px-3 py-2 text-xs font-semibold text-brand-brown-900 hover:bg-brand-desert-light">
-                Explore resources
-              </Link>
-            </div>
+            )}
 
             <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
               <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">

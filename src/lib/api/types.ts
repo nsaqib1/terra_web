@@ -514,7 +514,7 @@ export interface InviteQuery {
 
 
 
-export type ResourceStatus = "PUBLISHED" | "ARCHIVED";
+export type ResourceStatus = "PUBLISHED" | "UNPUBLISHED";
 
 export interface ResourceTag {
   id: string;
@@ -579,4 +579,5 @@ export interface UpdateResourceInput {
   title?: string;
   description?: string;
   tagIds?: string[];
+  status?: ResourceStatus;
 }
