@@ -10,6 +10,7 @@ import {
   Menu,
   Shield,
   Tag,
+  Files,
   Ticket,
   Users,
   X,
@@ -49,6 +50,11 @@ const adminNavItems = [
     href: "/admin/tags",
     icon: Tag,
   },
+  {
+    label: "Resources",
+    href: "/admin/resources",
+    icon: Files,
+  },
 ];
 
 export default function AdminLayout({
@@ -75,6 +81,7 @@ export default function AdminLayout({
     if (pathname.startsWith("/admin/communities")) return "Communities";
     if (pathname.startsWith("/admin/proposals")) return "Proposals";
     if (pathname.startsWith("/admin/tags")) return "Tags";
+    if (pathname.startsWith("/admin/resources")) return "Resources";
     return "Admin Console";
   };
 

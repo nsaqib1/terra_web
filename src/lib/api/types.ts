@@ -155,6 +155,7 @@ export interface Community {
   deletedAt: string | null;
   membersCount?: number;
   postsCount?: number;
+  resourcesCount?: number;
   tagsCount?: number;
   tags?: CommunityTag[];
 }
@@ -272,6 +273,7 @@ export interface CommunityDetail {
   _count: {
     memberships: number;
     posts: number;
+    resources?: number;
   };
 }
 
@@ -511,3 +513,70 @@ export interface InviteQuery {
 }
 
 
+
+export type ResourceStatus = "PUBLISHED" | "ARCHIVED";
+
+export interface ResourceTag {
+  id: string;
+  communityId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  usageCount: number;
+  status: TagStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResourceTagItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
+export interface ResourceItem {
+  id: string;
+  communityId: string;
+  community: { id: string; name: string; slug: string };
+  title: string;
+  description: string | null;
+  originalFilename: string;
+  mimeType: string;
+  size: number;
+  status: ResourceStatus;
+  downloadCount: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  tags: Array<{ tag: ResourceTagItem }>;
+}
+
+export interface ResourceListQuery {
+  communityId: string;
+  q?: string;
+  tagIds?: string[];
+  mimeType?: string;
+  sort?: "newest" | "oldest" | "downloads";
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateResourceTagInput {
+  communityId: string;
+  name: string;
+  description?: string;
+  slug?: string;
+}
+
+export interface UpdateResourceTagInput {
+  name?: string;
+  description?: string;
+  status?: TagStatus;
+}
+
+export interface UpdateResourceInput {
+  title?: string;
+  description?: string;
+  tagIds?: string[];
+}
