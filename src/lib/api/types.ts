@@ -110,9 +110,33 @@ export interface GameCommunity {
 export interface GameVersionSummary {
   id: string;
   version: string;
-  buildPath: string;
+  buildPath: string | null;
   status: GameVersionStatus;
   publishedAt?: string | null;
+}
+
+export interface GameVersion {
+  id: string;
+  gameId: string;
+  version: string;
+  buildPath: string | null;
+  status: GameVersionStatus;
+  releaseNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+}
+
+export interface CreateGameVersionInput {
+  version: string;
+  buildPath?: string;
+  releaseNotes?: string;
+}
+
+export interface UpdateGameVersionInput {
+  version?: string;
+  buildPath?: string;
+  releaseNotes?: string;
 }
 
 export interface AdminGame {

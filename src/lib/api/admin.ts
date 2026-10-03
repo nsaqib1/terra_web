@@ -5,6 +5,9 @@ import {
   AdminGameQuery,
   CreateGameInput,
   UpdateGameInput,
+  GameVersion,
+  CreateGameVersionInput,
+  UpdateGameVersionInput,
   AdminCommunityStats,
   Community,
   CommunityProposal,
@@ -99,6 +102,26 @@ export const adminApi = {
 
   async unpublishGame(id: string): Promise<AdminGame> {
     return apiClient.post<AdminGame>(`/admin/games/${id}/unpublish`);
+  },
+
+  async getGameVersions(gameId: string): Promise<GameVersion[]> {
+    return apiClient.get<GameVersion[]>(`/admin/games/${gameId}/versions`);
+  },
+
+  async createGameVersion(gameId: string, data: CreateGameVersionInput): Promise<GameVersion> {
+    return apiClient.post<GameVersion>(`/admin/games/${gameId}/versions`, data);
+  },
+
+  async updateGameVersion(gameId: string, versionId: string, data: UpdateGameVersionInput): Promise<GameVersion> {
+    return apiClient.patch<GameVersion>(`/admin/games/${gameId}/versions/${versionId}`, data);
+  },
+
+  async publishGameVersion(gameId: string, versionId: string): Promise<GameVersion> {
+    return apiClient.post<GameVersion>(`/admin/games/${gameId}/versions/${versionId}/publish`);
+  },
+
+  async archiveGameVersion(gameId: string, versionId: string): Promise<GameVersion> {
+    return apiClient.post<GameVersion>(`/admin/games/${gameId}/versions/${versionId}/archive`);
   },
 
   /**
