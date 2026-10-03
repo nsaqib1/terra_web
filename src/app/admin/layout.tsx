@@ -11,6 +11,7 @@ import {
   Shield,
   Tag,
   Files,
+  Gamepad2,
   Ticket,
   Users,
   X,
@@ -55,6 +56,11 @@ const adminNavItems = [
     href: "/admin/resources",
     icon: Files,
   },
+  {
+    label: "Games",
+    href: "/admin/games",
+    icon: Gamepad2,
+  },
 ];
 
 export default function AdminLayout({
@@ -82,6 +88,7 @@ export default function AdminLayout({
     if (pathname.startsWith("/admin/proposals")) return "Proposals";
     if (pathname.startsWith("/admin/tags")) return "Tags";
     if (pathname.startsWith("/admin/resources")) return "Resources";
+    if (pathname.startsWith("/admin/games")) return "Games";
     return "Admin Console";
   };
 
@@ -123,11 +130,10 @@ export default function AdminLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-semibold transition-colors ${
-                      isActive
+                    className={`flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-semibold transition-colors ${isActive
                         ? "bg-brand-sand text-brand-brown-950 font-bold shadow-2xs"
                         : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
-                    }`}
+                      }`}
                   >
                     <Icon
                       size={17}
@@ -237,11 +243,10 @@ export default function AdminLayout({
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-semibold ${
-                        isActive
+                      className={`flex h-10 items-center gap-3 rounded-xl px-3 text-xs font-semibold ${isActive
                           ? "bg-brand-sand text-brand-brown-950 font-bold"
                           : "text-brand-brown-700 hover:bg-brand-sand/60"
-                      }`}
+                        }`}
                     >
                       <Icon size={17} />
                       <span>{item.label}</span>

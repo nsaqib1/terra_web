@@ -1,6 +1,10 @@
 import { apiClient } from "./client";
 import {
   AdminCommunityQuery,
+  AdminGame,
+  AdminGameQuery,
+  CreateGameInput,
+  UpdateGameInput,
   AdminCommunityStats,
   Community,
   CommunityProposal,
@@ -59,6 +63,42 @@ export const adminApi = {
    */
   async deleteCommunity(id: string): Promise<Community> {
     return apiClient.delete<Community>(`/admin/communities/${id}`);
+  },
+
+  async getGames(
+    query?: AdminGameQuery
+  ): Promise<PaginatedResponse<AdminGame>> {
+    return apiClient.get<PaginatedResponse<AdminGame>>("/admin/games", {
+      params: query as Record<string, string | number | boolean | undefined>,
+    });
+  },
+
+  async getGame(id: string): Promise<AdminGame> {
+    return apiClient.get<AdminGame>(`/admin/games/${id}`);
+  },
+
+  async createGame(data: CreateGameInput): Promise<AdminGame> {
+    return apiClient.post<AdminGame>("/admin/games", data);
+  },
+
+  async updateGame(id: string, data: UpdateGameInput): Promise<AdminGame> {
+    return apiClient.patch<AdminGame>(`/admin/games/${id}`, data);
+  },
+
+  async updateGameCommunities(id: string, communityIds: string[]): Promise<AdminGame> {
+    return apiClient.put<AdminGame>(`/admin/games/${id}/communities`, { communityIds });
+  },
+
+  async deleteGame(id: string): Promise<AdminGame> {
+    return apiClient.delete<AdminGame>(`/admin/games/${id}`);
+  },
+
+  async publishGame(id: string): Promise<AdminGame> {
+    return apiClient.post<AdminGame>(`/admin/games/${id}/publish`);
+  },
+
+  async unpublishGame(id: string): Promise<AdminGame> {
+    return apiClient.post<AdminGame>(`/admin/games/${id}/unpublish`);
   },
 
   /**

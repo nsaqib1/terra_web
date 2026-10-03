@@ -95,6 +95,83 @@ export interface RequestOptions extends Omit<RequestInit, "body"> {
   skipAuth?: boolean;
 }
 
+
+export type GameCategory = "ENTERTAINMENT" | "LEARNING" | "SIMULATION";
+export type GameType = "SINGLE_PLAYER" | "MULTIPLAYER";
+export type GameStatus = "DRAFT" | "PUBLISHED" | "UNPUBLISHED" | "ARCHIVED";
+export type GameVersionStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+
+export interface GameCommunity {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface GameVersionSummary {
+  id: string;
+  version: string;
+  buildPath: string;
+  status: GameVersionStatus;
+  publishedAt?: string | null;
+}
+
+export interface AdminGame {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  category: GameCategory;
+  type: GameType;
+  status: GameStatus;
+  scoreEnabled: boolean;
+  leaderboardEnabled: boolean;
+  currentVersionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  communities: GameCommunity[];
+  versions: GameVersionSummary[];
+  _count?: { sessions: number; scores: number };
+}
+
+export interface AdminGameQuery {
+  search?: string;
+  status?: GameStatus;
+  category?: GameCategory;
+  type?: GameType;
+  communityId?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: "createdAt" | "title" | "updatedAt";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface CreateGameInput {
+  title: string;
+  slug: string;
+  description?: string;
+  thumbnailUrl?: string;
+  category?: GameCategory;
+  type?: GameType;
+  status?: GameStatus;
+  scoreEnabled?: boolean;
+  leaderboardEnabled?: boolean;
+  communityIds?: string[];
+}
+
+export interface UpdateGameInput {
+  title?: string;
+  slug?: string;
+  description?: string;
+  thumbnailUrl?: string;
+  category?: GameCategory;
+  type?: GameType;
+  status?: GameStatus;
+  scoreEnabled?: boolean;
+  leaderboardEnabled?: boolean;
+}
+
 export type CommunityStatus = "ACTIVE" | "INACTIVE" | "ARCHIVED";
 export type CommunityMaturity = "NEW" | "GROWING" | "ESTABLISHED" | "SELF_GOVERNED";
 export type GovernanceMode = "PLATFORM_MANAGED" | "SELF_GOVERNED";
