@@ -124,6 +124,20 @@ export const adminApi = {
     return apiClient.post<GameVersion>(`/admin/games/${gameId}/versions/${versionId}/archive`);
   },
 
+  async uploadGameBuild(
+    gameId: string,
+    versionId: string,
+    file: File,
+  ): Promise<GameVersion> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiClient.post<GameVersion>(
+      `/admin/games/${gameId}/versions/${versionId}/build`,
+      formData,
+    );
+  },
+
   /**
    * Get citizen community proposals with status filter
    */

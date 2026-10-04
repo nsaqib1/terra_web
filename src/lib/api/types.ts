@@ -129,13 +129,11 @@ export interface GameVersion {
 
 export interface CreateGameVersionInput {
   version: string;
-  buildPath?: string;
   releaseNotes?: string;
 }
 
 export interface UpdateGameVersionInput {
   version?: string;
-  buildPath?: string;
   releaseNotes?: string;
 }
 
