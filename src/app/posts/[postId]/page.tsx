@@ -32,6 +32,7 @@ import { commentsApi } from "@/lib/api/comments";
 import { votesApi } from "@/lib/api/votes";
 import { PostItem, CommentItem, VoteValue } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
+import { consumePostForNavigation } from "@/lib/api/postNavigationCache";
 import type { PostDocument } from "@/components/post/create/editor/editor-types";
 
 // ---------------------------------------------------------------------------
@@ -534,8 +535,19 @@ export default function PostPage() {
     if (!postId) return;
     let cancelled = false;
 
-    setIsLoading(true);
     setError(null);
+
+    const cachedPost = consumePostForNavigation(postId);
+    if (cachedPost) {
+      setPost(cachedPost);
+      setPostScore(cachedPost.score ?? 0);
+      setIsLoading(false);
+      return;
+    }
+
+    setPost(null);
+    setPostScore(0);
+    setIsLoading(true);
 
     postsApi
       .getById(postId)

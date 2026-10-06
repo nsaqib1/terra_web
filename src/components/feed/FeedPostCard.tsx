@@ -7,6 +7,7 @@ import { PostItem, VoteValue } from "@/lib/api/types";
 import { votesApi } from "@/lib/api/votes";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { cachePostForNavigation } from "@/lib/api/postNavigationCache";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -412,6 +413,7 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
   const hasMedia = Boolean(mediaPreview || post.media?.length);
 
   const navigateToPost = () => {
+    cachePostForNavigation(post);
     router.push(`/posts/${post.id}`);
   };
 
