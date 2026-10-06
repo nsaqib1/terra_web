@@ -35,6 +35,7 @@ export function PostEditor({
   // They allow newly uploaded images to remain visible before
   // the media is activated by post creation.
   const previewUrlsRef = useRef<Map<string, string>>(new Map());
+  const lastEmittedDocumentRef = useRef<PostDocument | null>(null);
 
   const editor = useEditor({
     extensions: postEditorExtensions,
@@ -58,21 +59,29 @@ export function PostEditor({
     },
 
     onUpdate: ({ editor }) => {
-      onChange(
-        toPostDocument(editor.getJSON()),
-      );
+      const document = toPostDocument(editor.getJSON());
+      lastEmittedDocumentRef.current = document;
+      onChange(document);
     },
   });
 
   useEffect(() => {
-    if (!editor || !value) {
+    if (
+      !editor ||
+      !value ||
+      value === lastEmittedDocumentRef.current
+    ) {
       return;
     }
 
     let isCurrent = true;
 
     queueMicrotask(() => {
-      if (!isCurrent || editor.isDestroyed) {
+      if (
+        !isCurrent ||
+        editor.isDestroyed ||
+        value === lastEmittedDocumentRef.current
+      ) {
         return;
       }
 
