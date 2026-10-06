@@ -2,19 +2,21 @@ import {
   Node,
   mergeAttributes,
 } from "@tiptap/core";
+import {
+  postImageNodeView,
+  type PostImageAttributes,
+} from "./PostImageNodeView";
 
 export interface PostImageOptions {
-  HTMLAttributes: Record<string, any>;
+  HTMLAttributes: Record<string, unknown>;
 }
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     postImage: {
-      setPostImage: (attributes: {
-        mediaId: string;
-        alt?: string;
-        src?: string;
-      }) => ReturnType;
+      setPostImage: (
+        attributes: PostImageAttributes,
+      ) => ReturnType;
     };
   }
 }
@@ -55,7 +57,23 @@ export const PostImage =
         src: {
           default: null,
         },
+
+        uploading: {
+          default: false,
+        },
+
+        uploadError: {
+          default: null,
+        },
+
+        uploadId: {
+          default: null,
+        },
       };
+    },
+
+    addNodeView() {
+      return postImageNodeView;
     },
 
     parseHTML() {

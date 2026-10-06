@@ -21,6 +21,7 @@ export function CreatePostForm() {
   const [communityId, setCommunityId] = useState<string>("");
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [document, setDocument] = useState<PostDocument | null>(null);
+  const [pendingImageUploads, setPendingImageUploads] = useState(0);
 
   const [isPending, setIsPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -30,7 +31,11 @@ export function CreatePostForm() {
     document !== null &&
     document.content.length > 0;
 
-  const canPublish = Boolean(communityId) && hasContent && !isPending;
+  const canPublish =
+    Boolean(communityId) &&
+    hasContent &&
+    !isPending &&
+    pendingImageUploads === 0;
 
   function handleCommunityChange(id: string) {
     setCommunityId(id);
@@ -106,6 +111,7 @@ export function CreatePostForm() {
               <PostEditor
                 value={document}
                 onChange={setDocument}
+                onImageUploadsChange={setPendingImageUploads}
               />
 
               <TagPicker
@@ -121,6 +127,12 @@ export function CreatePostForm() {
                       Citizens of this community will see your post as soon
                       as you publish.
                     </p>
+
+                    {pendingImageUploads > 0 && (
+                      <p className="text-[11px] font-medium text-brand-brown-800">
+                        Wait for the image upload to finish before publishing.
+                      </p>
+                    )}
 
                     {submitError && (
                       <p className="text-[11px] font-medium text-red-500">

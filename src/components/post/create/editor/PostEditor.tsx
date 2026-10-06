@@ -5,10 +5,15 @@ import {
   EditorContent,
   useEditor,
 } from "@tiptap/react";
+import type { Editor } from "@tiptap/react";
+import { mediaApi } from "@/lib/api/media";
 
 import { EditorToolbar } from "./EditorToolbar";
-import { MediaUploader } from "./MediaUploader";
 import { toPostDocument } from "./post-document-adapter";
+import {
+  PostImageUploadContext,
+  type PostImageAttributes,
+} from "./extensions/PostImageNodeView";
 
 import type { PostDocument, PostTextMark } from "./editor-types";
 import { postEditorExtensions } from "./editor-extentions";
@@ -16,26 +21,39 @@ import { postEditorExtensions } from "./editor-extentions";
 interface PostEditorProps {
   value: PostDocument | null;
   onChange: (document: PostDocument) => void;
-}
-
-interface ImageInsertData {
-  mediaId: string;
-  alt?: string;
-  previewUrl: string;
+  onImageUploadsChange?: (count: number) => void;
 }
 
 export function PostEditor({
   value,
   onChange,
+  onImageUploadsChange,
 }: PostEditorProps) {
-  const [imageUploaderOpen, setImageUploaderOpen] =
-    useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageSelectionError, setImageSelectionError] =
+    useState<string | null>(null);
 
   // Keep temporary local object URLs outside PostDocument.
   // They allow newly uploaded images to remain visible before
   // the media is activated by post creation.
   const previewUrlsRef = useRef<Map<string, string>>(new Map());
+  const objectUrlsRef = useRef<Set<string>>(new Set());
+  const uploadsInProgressRef = useRef<Set<string>>(new Set());
   const lastEmittedDocumentRef = useRef<PostDocument | null>(null);
+
+  function clearImagePreview(
+    src: string | null | undefined,
+    mediaId: string | null | undefined,
+  ) {
+    if (mediaId) {
+      previewUrlsRef.current.delete(mediaId);
+    }
+
+    if (src?.startsWith("blob:")) {
+      objectUrlsRef.current.delete(src);
+      URL.revokeObjectURL(src);
+    }
+  }
 
   const editor = useEditor({
     extensions: postEditorExtensions,
@@ -111,12 +129,16 @@ export function PostEditor({
 
   // Clean up blob URLs when the editor is destroyed.
   useEffect(() => {
+    const objectUrls = objectUrlsRef.current;
+    const previewUrls = previewUrlsRef.current;
+
     return () => {
-      for (const url of previewUrlsRef.current.values()) {
+      for (const url of objectUrls) {
         URL.revokeObjectURL(url);
       }
 
-      previewUrlsRef.current.clear();
+      previewUrls.clear();
+      objectUrls.clear();
     };
   }, []);
 
@@ -131,60 +153,198 @@ export function PostEditor({
   const activeEditor = editor;
 
   function handleImageClick() {
-    setImageUploaderOpen(true);
+    imageInputRef.current?.click();
   }
 
-  function handleImageInsert({
-    mediaId,
-    alt,
-    previewUrl,
-  }: ImageInsertData) {
-    // Keep the temporary blob URL outside PostDocument.
-    // This allows the preview to survive controlled editor updates.
-    previewUrlsRef.current.set(mediaId, previewUrl);
+  async function handleImageFile(
+    file: File,
+    updateAttributes?: (
+      attributes: PostImageAttributes,
+    ) => void,
+    previousSrc?: string | null,
+    previousMediaId?: string | null,
+  ) {
+    if (
+      ![
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+      ].includes(file.type)
+    ) {
+      setImageSelectionError(
+        "Please choose a JPEG, PNG, or WebP image.",
+      );
+      return;
+    }
 
-    activeEditor
-      .chain()
-      .focus()
-      .setPostImage({
-        mediaId,
-        alt,
-        src: previewUrl,
-      })
-      .run();
+    setImageSelectionError(null);
+    const uploadId = crypto.randomUUID();
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlsRef.current.add(previewUrl);
+    const pendingImage: PostImageAttributes = {
+      mediaId: null,
+      alt: file.name,
+      src: previewUrl,
+      uploading: true,
+      uploadError: null,
+      uploadId,
+    };
 
-    setImageUploaderOpen(false);
+    if (updateAttributes) {
+      updateAttributes(pendingImage);
+    } else {
+      activeEditor
+        .chain()
+        .focus()
+        .setPostImage(pendingImage)
+        .run();
+    }
+
+    clearImagePreview(previousSrc, previousMediaId);
+    uploadsInProgressRef.current.add(uploadId);
+    onImageUploadsChange?.(
+      uploadsInProgressRef.current.size,
+    );
+
+    try {
+      const media = await mediaApi.upload(file);
+      const updated = updatePostImageByUploadId(
+        activeEditor,
+        uploadId,
+        {
+          mediaId: media.id,
+          uploading: false,
+          uploadError: null,
+        },
+      );
+
+      if (updated) {
+        previewUrlsRef.current.set(media.id, previewUrl);
+      } else {
+        clearImagePreview(previewUrl, null);
+      }
+    } catch (error) {
+      console.error(error);
+      const updated = updatePostImageByUploadId(
+        activeEditor,
+        uploadId,
+        {
+          uploading: false,
+          uploadError:
+            "We couldn't upload this image. Choose another image to try again.",
+        },
+      );
+
+      if (!updated) {
+        clearImagePreview(previewUrl, null);
+      }
+    } finally {
+      uploadsInProgressRef.current.delete(uploadId);
+      onImageUploadsChange?.(
+        uploadsInProgressRef.current.size,
+      );
+    }
   }
 
   return (
     <>
-      <div>
-        <div className="-mx-5 rounded-none border-y bg-white sm:mx-0 sm:rounded-xl sm:border">
-          <EditorToolbar
-            editor={activeEditor}
-            onImageClick={handleImageClick}
-          />
+      <PostImageUploadContext.Provider
+        value={{
+          onImageFileSelected: handleImageFile,
+          onImageDeleted: clearImagePreview,
+        }}
+      >
+        <div>
+          <div className="-mx-5 rounded-none border-y bg-white sm:mx-0 sm:rounded-xl sm:border">
+            <EditorToolbar
+              editor={activeEditor}
+              onImageClick={handleImageClick}
+            />
 
-          <EditorContent editor={activeEditor} />
+            <EditorContent editor={activeEditor} />
+
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+
+                if (file) {
+                  void handleImageFile(file);
+                }
+
+                event.target.value = "";
+              }}
+            />
+          </div>
+
+          {imageSelectionError && (
+            <p
+              className="mt-2 text-xs text-red-600"
+              role="alert"
+            >
+              {imageSelectionError}
+            </p>
+          )}
+
+          <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
+            {activeEditor.getText().trim()
+              ? `${activeEditor.getText().length} characters`
+              : "Write something to publish"}
+          </p>
         </div>
-
-        <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
-          {activeEditor.getText().trim()
-            ? `${activeEditor.getText().length} characters`
-            : "Write something to publish"}
-        </p>
-      </div>
-
-      {imageUploaderOpen && (
-        <MediaUploader
-          onInsert={handleImageInsert}
-          onClose={() =>
-            setImageUploaderOpen(false)
-          }
-        />
-      )}
+      </PostImageUploadContext.Provider>
     </>
   );
+}
+
+function updatePostImageByUploadId(
+  editor: Editor,
+  uploadId: string,
+  attributes: Partial<PostImageAttributes>,
+): boolean {
+  if (editor.isDestroyed) {
+    return false;
+  }
+
+  const { state, view } = editor;
+  let imagePosition: number | null = null;
+
+  state.doc.descendants((node, position) => {
+    if (
+      node.type.name === "postImage" &&
+      node.attrs.uploadId === uploadId
+    ) {
+      imagePosition = position;
+      return false;
+    }
+
+    return true;
+  });
+
+  if (imagePosition === null) {
+    return false;
+  }
+
+  const node = state.doc.nodeAt(imagePosition);
+
+  if (!node || node.type.name !== "postImage") {
+    return false;
+  }
+
+  view.dispatch(
+    state.tr.setNodeMarkup(
+      imagePosition,
+      undefined,
+      {
+        ...node.attrs,
+        ...attributes,
+      },
+    ),
+  );
+  return true;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;

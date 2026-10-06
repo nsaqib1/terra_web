@@ -29,6 +29,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
   const router = useRouter();
 
   const [document, setDocument] = useState<PostDocument | null>(post.document);
+  const [pendingImageUploads, setPendingImageUploads] = useState(0);
   const [tagIds, setTagIds] = useState<string[]>(
     post.tags ? post.tags.map((t) => t.id) : []
   );
@@ -43,7 +44,10 @@ export function EditPostForm({ post }: EditPostFormProps) {
     document.content &&
     document.content.length > 0;
 
-  const canSave = hasContent && !isPending;
+  const canSave =
+    hasContent &&
+    !isPending &&
+    pendingImageUploads === 0;
 
   function toggleTag(tagId: string) {
     setTagIds((current) =>
@@ -153,6 +157,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
                 <PostEditor
                   value={document}
                   onChange={setDocument}
+                  onImageUploadsChange={setPendingImageUploads}
                 />
               </div>
 
@@ -178,7 +183,9 @@ export function EditPostForm({ post }: EditPostFormProps) {
                       </p>
                     ) : (
                       <p className="text-[11px] leading-5 text-muted-foreground">
-                        Your changes will take effect immediately.
+                        {pendingImageUploads > 0
+                          ? "Wait for the image upload to finish before saving."
+                          : "Your changes will take effect immediately."}
                       </p>
                     )}
                   </div>
