@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowUp, ArrowDown, MessageCircle, Play } from "lucide-react";
+import { ArrowUp, ArrowDown, MessageCircle } from "lucide-react";
 import { PostItem, VoteValue } from "@/lib/api/types";
 import { votesApi } from "@/lib/api/votes";
 import { useAuth } from "@/context/AuthContext";
@@ -124,7 +124,7 @@ function getMediaPreviewFromNode(node: Record<string, unknown>): FeedMediaPrevie
   if (videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)) {
     return {
       type: "youtube",
-      src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      videoId,
     };
   }
 
@@ -243,7 +243,7 @@ function getPostPreviewContent(
 
 type FeedMediaPreview =
   | { type: "image"; src: string; alt: string }
-  | { type: "youtube"; src: string };
+  | { type: "youtube"; videoId: string };
 
 function getYoutubeVideoId(url: string): string | null {
   try {
@@ -306,23 +306,33 @@ function FeedMediaPreviewCard({
 }: {
   media: FeedMediaPreview;
 }) {
+  if (media.type === "youtube") {
+    return (
+      <div className="mt-3 overflow-hidden rounded-xl border border-brand-sand-dark/50 bg-black">
+        <div className="relative aspect-video max-h-135 w-full">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${media.videoId}`}
+            title="YouTube video"
+            className="h-full w-full"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-brand-sand-dark/50 bg-brand-sand/40">
       <div className="relative mx-auto flex max-h-135 w-full items-center justify-center overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={media.src}
-          alt={media.type === "image" ? media.alt : "YouTube video thumbnail"}
+          alt={media.alt}
           loading="lazy"
           className="block h-auto max-h-135 w-auto max-w-full object-contain"
         />
-        {media.type === "youtube" && (
-          <span className="absolute inset-0 flex items-center justify-center bg-black/10">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/75 text-white shadow-lg transition-transform group-hover:scale-105">
-              <Play size={23} fill="currentColor" className="ml-0.5" />
-            </span>
-          </span>
-        )}
       </div>
     </div>
   );
