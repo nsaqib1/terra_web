@@ -304,13 +304,17 @@ function getFeedMediaPreview(
 
 function FeedMediaPreviewCard({
   media,
+  compact = false,
 }: {
   media: FeedMediaPreview;
+  compact?: boolean;
 }) {
+  const maxHeightClass = compact ? "max-h-120" : "max-h-135";
+
   if (media.type === "youtube") {
     return (
       <div className="mt-3 overflow-hidden rounded-xl border border-brand-sand-dark/50 bg-black">
-        <div className="relative aspect-video max-h-135 w-full">
+        <div className={`relative aspect-video ${maxHeightClass} w-full`}>
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${media.videoId}`}
             title="YouTube video"
@@ -326,13 +330,15 @@ function FeedMediaPreviewCard({
 
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-brand-sand-dark/50 bg-brand-sand/40">
-      <div className="relative mx-auto flex max-h-135 w-full items-center justify-center overflow-hidden">
+      <div
+        className={`relative mx-auto flex ${maxHeightClass} w-full items-center justify-center overflow-hidden`}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={media.src}
           alt={media.alt}
           loading="lazy"
-          className="block h-auto max-h-135 w-auto max-w-full object-contain"
+          className={`block h-auto ${maxHeightClass} w-auto max-w-full object-contain`}
         />
       </div>
     </div>
@@ -390,9 +396,15 @@ interface FeedPostCardProps {
   post: PostItem;
   onTagClick?: (tagSlug: string) => void;
   onErrorToast?: (msg: string) => void;
+  compactMedia?: boolean;
 }
 
-export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardProps) {
+export function FeedPostCard({
+  post,
+  onTagClick,
+  onErrorToast,
+  compactMedia = false,
+}: FeedPostCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
 
@@ -608,7 +620,7 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
         )}
 
         {mediaPreview && (
-          <FeedMediaPreviewCard media={mediaPreview} />
+          <FeedMediaPreviewCard media={mediaPreview} compact={compactMedia} />
         )}
       </div>
 

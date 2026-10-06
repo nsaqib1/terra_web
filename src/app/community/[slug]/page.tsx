@@ -237,7 +237,7 @@ export default function CommunityPage() {
           </div>
           {/* Feed Skeleton */}
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <div className="space-y-4">
+            <div className="-mx-4 space-y-4 sm:mx-0">
               <div className="-mx-4 h-40 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border" />
               <div className="-mx-4 h-40 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border" />
             </div>
@@ -468,7 +468,7 @@ export default function CommunityPage() {
                 <div className="h-36 rounded-none border-y bg-white p-5 sm:rounded-2xl sm:border" />
               </div>
             ) : filteredPosts.length > 0 ? (
-              <div className="space-y-4">
+              <div className="-mx-4 space-y-4 sm:mx-0">
                 {filteredPosts.map((post) => (
                   <CommunityPostCard key={post.id} post={post} />
                 ))}
