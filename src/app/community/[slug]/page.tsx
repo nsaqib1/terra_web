@@ -15,6 +15,7 @@ import {
   PlusCircle,
   X,
   FolderOpen,
+  LogOut,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CommunityPostCard } from "@/components/community/CommunityPostCard";
@@ -82,7 +83,9 @@ export default function CommunityPage() {
 
   // Filter state
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [isHoveringMemberButton, setIsHoveringMemberButton] = useState<boolean>(false);
+
+  // Leave modal state
+  const [showLeaveModal, setShowLeaveModal] = useState<boolean>(false);
 
   // 1. Fetch community details and tags
   const loadCommunityData = useCallback(async () => {
@@ -160,8 +163,8 @@ export default function CommunityPage() {
     loadMembershipStatus();
   }, [loadMembershipStatus]);
 
-  // Handle Join / Leave
-  const handleToggleMembership = async () => {
+  // Handle Join
+  const handleJoin = async () => {
     if (authLoading || isActionPending) return;
 
     if (!isAuthenticated) {
@@ -172,32 +175,37 @@ export default function CommunityPage() {
     setIsActionPending(true);
     setActionError(null);
 
-    if (isMember) {
-      // Leave community
-      try {
-        await communitiesApi.leave(slug);
-        setIsMember(false);
-        setJoinedAt(null);
-        setMembersCount((prev) => Math.max(0, prev - 1));
-        window.dispatchEvent(new Event("community-membership-changed"));
-      } catch (err: any) {
-        setActionError(extractErrorMessage(err) || "Failed to leave community.");
-      } finally {
-        setIsActionPending(false);
-      }
-    } else {
-      // Join community
-      try {
-        const membership = await communitiesApi.join(slug);
-        setIsMember(true);
-        setJoinedAt(membership?.joinedAt || new Date().toISOString());
-        setMembersCount((prev) => prev + 1);
-        window.dispatchEvent(new Event("community-membership-changed"));
-      } catch (err: any) {
-        setActionError(extractErrorMessage(err) || "Failed to join community.");
-      } finally {
-        setIsActionPending(false);
-      }
+    try {
+      const membership = await communitiesApi.join(slug);
+      setIsMember(true);
+      setJoinedAt(membership?.joinedAt || new Date().toISOString());
+      setMembersCount((prev) => prev + 1);
+      window.dispatchEvent(new Event("community-membership-changed"));
+    } catch (err: any) {
+      setActionError(extractErrorMessage(err) || "Failed to join community.");
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
+  // Handle Leave (called from modal confirmation)
+  const handleLeave = async () => {
+    if (isActionPending) return;
+
+    setIsActionPending(true);
+    setActionError(null);
+
+    try {
+      await communitiesApi.leave(slug);
+      setIsMember(false);
+      setJoinedAt(null);
+      setMembersCount((prev) => Math.max(0, prev - 1));
+      setShowLeaveModal(false);
+      window.dispatchEvent(new Event("community-membership-changed"));
+    } catch (err: any) {
+      setActionError(extractErrorMessage(err) || "Failed to leave community.");
+    } finally {
+      setIsActionPending(false);
     }
   };
 
@@ -332,37 +340,15 @@ export default function CommunityPage() {
               {isMember ? (
                 <>
                   <button
-                    onClick={handleToggleMembership}
-                    disabled={isActionPending}
-                    onMouseEnter={() => setIsHoveringMemberButton(true)}
-                    onMouseLeave={() => setIsHoveringMemberButton(false)}
-                    className={`
-                      group flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold
-                      transition-all duration-150
-                      ${isHoveringMemberButton
-                        ? "border border-rose-200 bg-rose-50 text-rose-700 shadow-sm"
-                        : "border border-brand-sand-dark/60 bg-brand-sand/50 text-brand-brown-900"
-                      }
-                      disabled:opacity-60
-                    `}
-                    title="Click to leave community"
+                    onClick={() => setShowLeaveModal(true)}
+                    className="
+                      group flex items-center gap-2 rounded-xl border border-brand-sand-dark/60
+                      bg-brand-sand/50 px-5 py-2.5 text-xs font-semibold text-brand-brown-900
+                      transition-all duration-200 hover:border-brand-brown-700 hover:bg-brand-sand
+                    "
                   >
-                    {isActionPending ? (
-                      <>
-                        <Loader2 size={15} className="animate-spin text-brand-brown-800" />
-                        <span>Updating...</span>
-                      </>
-                    ) : isHoveringMemberButton ? (
-                      <>
-                        <X size={15} className="text-rose-600" />
-                        <span>Leave Community</span>
-                      </>
-                    ) : (
-                      <>
-                        <Check size={15} className="text-emerald-700" />
-                        <span>Member</span>
-                      </>
-                    )}
+                    <Check size={15} className="text-emerald-700" />
+                    <span>Member</span>
                   </button>
                   {joinedAt && (
                     <span className="text-[11px] text-muted-foreground px-1">
@@ -372,7 +358,7 @@ export default function CommunityPage() {
                 </>
               ) : (
                 <button
-                  onClick={handleToggleMembership}
+                  onClick={handleJoin}
                   disabled={isActionPending}
                   className="
                     flex items-center gap-2 rounded-xl bg-brand-brown-950
@@ -545,6 +531,84 @@ export default function CommunityPage() {
           </aside>
         </div>
       </div>
+
+      {/* Leave Community Confirmation Modal */}
+      {showLeaveModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={() => !isActionPending && setShowLeaveModal(false)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-[fadeIn_150ms_ease-out]" />
+
+          {/* Modal */}
+          <div
+            className="relative mx-4 w-full max-w-sm rounded-2xl border border-brand-sand-dark/40 bg-white p-6 shadow-2xl animate-[modalSlideUp_200ms_ease-out]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => !isActionPending && setShowLeaveModal(false)}
+              className="absolute right-3 top-3 rounded-lg p-1.5 text-brand-brown-600 transition-colors hover:bg-brand-sand/60 hover:text-brand-brown-950"
+              aria-label="Close"
+              disabled={isActionPending}
+            >
+              <X size={16} />
+            </button>
+
+            {/* Icon */}
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50">
+              <LogOut size={22} className="text-rose-600" />
+            </div>
+
+            {/* Content */}
+            <h3 className="mt-4 text-center text-base font-bold text-brand-brown-950">
+              Leave {community.name}?
+            </h3>
+            <p className="mt-2 text-center text-xs leading-relaxed text-brand-brown-600">
+              You’ll lose access to community posts and discussions. You can always rejoin later.
+            </p>
+
+            {/* Actions */}
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowLeaveModal(false)}
+                disabled={isActionPending}
+                className="
+                  flex-1 rounded-xl border border-brand-sand-dark/60 bg-white
+                  px-4 py-2.5 text-xs font-semibold text-brand-brown-900
+                  transition-colors hover:bg-brand-sand/40
+                  disabled:opacity-60
+                "
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLeave}
+                disabled={isActionPending}
+                className="
+                  flex-1 flex items-center justify-center gap-2 rounded-xl
+                  bg-rose-600 px-4 py-2.5 text-xs font-semibold text-white
+                  transition-all hover:bg-rose-700
+                  disabled:opacity-60
+                "
+              >
+                {isActionPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Leaving…</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut size={14} />
+                    <span>Leave Community</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }
