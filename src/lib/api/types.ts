@@ -157,6 +157,41 @@ export interface AdminGame {
   _count?: { sessions: number; scores: number };
 }
 
+
+export interface PublicGame {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  category: GameCategory;
+  type: GameType;
+  scoreEnabled: boolean;
+  leaderboardEnabled: boolean;
+  currentVersionId: string | null;
+  communities: GameCommunity[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GameSessionResponse {
+  sessionId: string;
+  token: string;
+  expiresAt: string;
+  game: {
+    id: string;
+    slug: string;
+    title: string;
+    scoreEnabled: boolean;
+    leaderboardEnabled: boolean;
+  };
+  version: {
+    id: string;
+    version: string;
+    buildPath: string;
+  };
+}
+
 export interface AdminGameQuery {
   search?: string;
   status?: GameStatus;
