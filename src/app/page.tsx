@@ -97,7 +97,7 @@ export default function Home() {
   return (
     <ProtectedRoute>
       <AppShell>
-        <div className="mx-auto max-w-[850px] pb-12">
+        <div className="mx-auto max-w-[740px] pb-12">
           {/* Header & Controls */}
           <div className="mb-6 space-y-4">
             {/* Sorting Bar */}

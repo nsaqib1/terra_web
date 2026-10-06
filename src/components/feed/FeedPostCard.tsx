@@ -2,49 +2,330 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowUp, ArrowDown, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { ArrowUp, ArrowDown, MessageCircle, Play } from "lucide-react";
 import { PostItem, VoteValue } from "@/lib/api/types";
 import { votesApi } from "@/lib/api/votes";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
-function getPostPreviewText(document: any): string {
-  if (!document) return "";
-  if (typeof document === "string") return document;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  if (document.content && Array.isArray(document.content)) {
-    const textPieces: string[] = [];
-    for (const node of document.content) {
-      if (
-        node.type === "paragraph" ||
-        node.type === "heading" ||
-        node.type === "blockquote"
-      ) {
-        if (Array.isArray(node.content)) {
-          const text = node.content
-            .map((item: any) => item?.text || "")
-            .join("");
-          if (text.trim()) {
-            textPieces.push(text.trim());
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is not configured");
+}
+
+const API_BASE = API_URL.replace(/\/+$/, "");
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function renderInlineContent(content: unknown[]): React.ReactNode[] {
+  return content.flatMap((item, index) => {
+    if (!isRecord(item) || typeof item.text !== "string") return [];
+
+    const marks = Array.isArray(item.marks) ? item.marks : [];
+    let rendered: React.ReactNode = item.text;
+
+    for (let markIndex = marks.length - 1; markIndex >= 0; markIndex -= 1) {
+      const mark = marks[markIndex];
+      if (!isRecord(mark) || typeof mark.type !== "string") continue;
+
+      const key = `${index}-${markIndex}`;
+      switch (mark.type) {
+        case "bold":
+          rendered = <strong key={key}>{rendered}</strong>;
+          break;
+        case "italic":
+          rendered = <em key={key}>{rendered}</em>;
+          break;
+        case "underline":
+          rendered = <u key={key}>{rendered}</u>;
+          break;
+        case "strike":
+          rendered = <s key={key}>{rendered}</s>;
+          break;
+        case "code":
+          rendered = (
+            <code
+              key={key}
+              className="rounded bg-brand-sand px-1 py-0.5 font-mono text-[0.85em] text-brand-brown-800"
+            >
+              {rendered}
+            </code>
+          );
+          break;
+        case "link": {
+          const attrs = isRecord(mark.attrs) ? mark.attrs : null;
+          const href =
+            typeof mark.href === "string"
+              ? mark.href
+              : typeof attrs?.href === "string"
+                ? attrs.href
+                : null;
+          if (href && /^https?:\/\//i.test(href)) {
+            rendered = (
+              <a
+                key={key}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className="text-brand-desert-dark underline underline-offset-2 hover:opacity-80"
+              >
+                {rendered}
+              </a>
+            );
           }
-        }
-      } else if (node.type === "bulletList" || node.type === "orderedList") {
-        if (Array.isArray(node.content)) {
-          for (const item of node.content) {
-            if (Array.isArray(item.content)) {
-              const text = item.content
-                .map((t: any) => t?.text || "")
-                .join("");
-              if (text.trim()) textPieces.push(text.trim());
-            }
-          }
+          break;
         }
       }
     }
-    return textPieces.join(" ");
+
+    return <React.Fragment key={index}>{rendered}</React.Fragment>;
+  });
+}
+
+interface PostPreviewContent {
+  text: React.ReactNode[];
+  media: FeedMediaPreview | null;
+}
+
+function getMediaPreviewFromNode(node: Record<string, unknown>): FeedMediaPreview | null {
+  const attrs = isRecord(node.attrs) ? node.attrs : null;
+  const mediaId =
+    node.type === "image"
+      ? node.mediaId
+      : node.type === "postImage"
+        ? attrs?.mediaId
+        : null;
+
+  if (typeof mediaId === "string" && mediaId.length > 0) {
+    return {
+      type: "image",
+      src: `${API_BASE}/media/${encodeURIComponent(mediaId)}`,
+      alt:
+        typeof node.altText === "string"
+          ? node.altText
+          : typeof attrs?.alt === "string"
+            ? attrs.alt
+            : "Post image",
+    };
   }
 
-  return "";
+  const videoUrl = node.type === "youtube" ? attrs?.src : null;
+  const videoId =
+    node.type === "youtube" && typeof node.videoId === "string"
+      ? node.videoId
+      : typeof videoUrl === "string"
+        ? getYoutubeVideoId(videoUrl)
+        : null;
+
+  if (videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+    return {
+      type: "youtube",
+      src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    };
+  }
+
+  return null;
+}
+
+function getPostPreviewContent(
+  document: unknown,
+  fallbackMedia?: PostItem["media"],
+): PostPreviewContent {
+  if (typeof document === "string") {
+    return {
+      text: document.trim()
+        ? [<p key="text">{document.trim()}</p>]
+        : [],
+      media: getFeedMediaPreview(undefined, fallbackMedia),
+    };
+  }
+  if (!isRecord(document) || !Array.isArray(document.content)) {
+    return { text: [], media: getFeedMediaPreview(undefined, fallbackMedia) };
+  }
+
+  const blocks: React.ReactNode[] = [];
+  for (const [index, node] of document.content.entries()) {
+    if (!isRecord(node)) continue;
+
+    if (node.type === "image" || node.type === "postImage" || node.type === "youtube") {
+      const mediaPreview =
+        getMediaPreviewFromNode(node) ?? getFeedMediaPreview(undefined, fallbackMedia);
+      if (mediaPreview) {
+        return { text: blocks, media: mediaPreview };
+      }
+      continue;
+    }
+
+    if (
+      node.type === "paragraph" ||
+      node.type === "heading" ||
+      node.type === "blockquote" ||
+      node.type === "codeBlock"
+    ) {
+      if (!Array.isArray(node.content)) continue;
+      const inline = renderInlineContent(node.content);
+      if (inline.length === 0) continue;
+
+      if (node.type === "heading") {
+        const level = node.level;
+        const headingClass =
+          level === 1
+            ? "text-xl font-bold text-brand-brown-950"
+            : level === 2
+              ? "text-lg font-bold text-brand-brown-950"
+              : "text-base font-semibold text-brand-brown-900";
+        blocks.push(
+          <div key={index} className={headingClass}>
+            {inline}
+          </div>,
+        );
+      } else if (node.type === "blockquote") {
+        blocks.push(
+          <blockquote
+            key={index}
+            className="border-l-2 border-brand-desert pl-3 text-sm italic leading-relaxed text-brand-brown-700"
+          >
+            {inline}
+          </blockquote>,
+        );
+      } else if (node.type === "codeBlock") {
+        blocks.push(
+          <code
+            key={index}
+            className="rounded bg-brand-brown-950 px-1.5 py-1 font-mono text-xs text-brand-sand"
+          >
+            {inline}
+          </code>,
+        );
+      } else {
+        blocks.push(
+          <p key={index} className="text-sm leading-relaxed text-brand-brown-900">
+            {inline}
+          </p>,
+        );
+      }
+      continue;
+    }
+
+    if (node.type === "bulletList" || node.type === "orderedList") {
+      if (!Array.isArray(node.content)) continue;
+      const items = node.content.flatMap((item, itemIndex) => {
+        if (!isRecord(item) || !Array.isArray(item.content)) return [];
+        const inline = renderInlineContent(item.content);
+        return inline.length
+          ? [<li key={itemIndex}>{inline}</li>]
+          : [];
+      });
+      if (items.length === 0) continue;
+
+      const List = node.type === "orderedList" ? "ol" : "ul";
+      blocks.push(
+        <List
+          key={index}
+          className={`space-y-0.5 pl-5 text-sm leading-relaxed text-brand-brown-900 ${node.type === "orderedList" ? "list-decimal" : "list-disc"
+            }`}
+        >
+          {items}
+        </List>,
+      );
+    }
+  }
+
+  return {
+    text: blocks,
+    media: getFeedMediaPreview(undefined, fallbackMedia),
+  };
+}
+
+type FeedMediaPreview =
+  | { type: "image"; src: string; alt: string }
+  | { type: "youtube"; src: string };
+
+function getYoutubeVideoId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    let videoId: string | null = null;
+
+    if (parsed.hostname === "youtube.com" || parsed.hostname === "www.youtube.com") {
+      if (parsed.pathname === "/watch") {
+        videoId = parsed.searchParams.get("v");
+      } else if (
+        parsed.pathname.startsWith("/embed/") ||
+        parsed.pathname.startsWith("/shorts/")
+      ) {
+        videoId = parsed.pathname.split("/")[2] ?? null;
+      }
+    } else if (
+      parsed.hostname === "youtu.be" ||
+      parsed.hostname === "www.youtu.be"
+    ) {
+      videoId = parsed.pathname.slice(1).split("/")[0] || null;
+    }
+
+    return videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)
+      ? videoId
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function getFeedMediaPreview(
+  document: unknown,
+  media?: PostItem["media"],
+): FeedMediaPreview | null {
+  if (isRecord(document) && Array.isArray(document.content)) {
+    for (const node of document.content) {
+      if (!isRecord(node)) continue;
+      const preview = getMediaPreviewFromNode(node);
+      if (preview) return preview;
+    }
+  }
+
+  const imageAttachment = media?.find((item) =>
+    item.mimeType.toLowerCase().startsWith("image/"),
+  );
+
+  if (imageAttachment) {
+    return {
+      type: "image",
+      src: `${API_BASE}/media/${encodeURIComponent(imageAttachment.id)}`,
+      alt: imageAttachment.altText || "Post image",
+    };
+  }
+
+  return null;
+}
+
+function FeedMediaPreviewCard({
+  media,
+}: {
+  media: FeedMediaPreview;
+}) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-brand-sand-dark/50 bg-brand-sand/40">
+      <div className="relative mx-auto flex max-h-135 w-full items-center justify-center overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={media.src}
+          alt={media.type === "image" ? media.alt : "YouTube video thumbnail"}
+          loading="lazy"
+          className="block h-auto max-h-135 w-auto max-w-full object-contain"
+        />
+        {media.type === "youtube" && (
+          <span className="absolute inset-0 flex items-center justify-center bg-black/10">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/75 text-white shadow-lg transition-transform group-hover:scale-105">
+              <Play size={23} fill="currentColor" className="ml-0.5" />
+            </span>
+          </span>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function formatRelativeTime(dateString: string): string {
@@ -108,7 +389,7 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
   const [currentVote, setCurrentVote] = useState<VoteValue | null>(null);
   const [isVoting, setIsVoting] = useState<boolean>(false);
 
-  const previewText = getPostPreviewText(post.document) || "No text preview available.";
+  const previewContent = getPostPreviewContent(post.document, post.media);
   const authorName = post.author?.displayName || post.author?.username || "Anonymous";
   const authorUsername = post.author?.username || "unknown";
   const relativeTime = formatRelativeTime(post.createdAt);
@@ -117,7 +398,8 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
   const communityInitials = getCommunityInitials(communityName);
   const authorInitials = getAuthorInitials(authorName);
   const commentCount = post.commentCount ?? 0;
-  const hasMedia = post.media && post.media.length > 0;
+  const mediaPreview = previewContent.media;
+  const hasMedia = Boolean(mediaPreview || post.media?.length);
 
   const navigateToPost = () => {
     router.push(`/posts/${post.id}`);
@@ -302,18 +584,19 @@ export function FeedPostCard({ post, onTagClick, onErrorToast }: FeedPostCardPro
 
       {/* Body Preview */}
       <div className="mt-3.5">
-        <p className="line-clamp-3 text-sm leading-relaxed text-brand-brown-900">
-          {previewText}
-        </p>
-
-        {hasMedia && (
-          <div className="mt-2.5 flex items-center gap-1.5 text-xs text-brand-brown-600 font-medium">
-            <ImageIcon size={14} className="text-brand-brown-700" />
-            <span>
-              {post.media?.length}{" "}
-              {post.media?.length === 1 ? "media attachment" : "media attachments"}
-            </span>
+        {(previewContent.text.length > 0 || !hasMedia) && (
+          <div
+            className={`space-y-2 text-sm leading-relaxed text-brand-brown-900 ${hasMedia ? "line-clamp-2" : "line-clamp-3"
+              }`}
+          >
+            {previewContent.text.length > 0
+              ? previewContent.text
+              : "No text preview available."}
           </div>
+        )}
+
+        {mediaPreview && (
+          <FeedMediaPreviewCard media={mediaPreview} />
         )}
       </div>
 

@@ -10,7 +10,7 @@ import { EditorToolbar } from "./EditorToolbar";
 import { MediaUploader } from "./MediaUploader";
 import { toPostDocument } from "./post-document-adapter";
 
-import type { PostDocument } from "./editor-types";
+import type { PostDocument, PostTextMark } from "./editor-types";
 import { postEditorExtensions } from "./editor-extentions";
 
 interface PostEditorProps {
@@ -69,23 +69,35 @@ export function PostEditor({
       return;
     }
 
-    const nextContent = convertPostDocumentToTiptap(
-      value,
-      previewUrlsRef.current,
-    );
+    let isCurrent = true;
 
-    const currentContent = editor.getJSON();
+    queueMicrotask(() => {
+      if (!isCurrent || editor.isDestroyed) {
+        return;
+      }
 
-    if (
-      JSON.stringify(currentContent) ===
-      JSON.stringify(nextContent)
-    ) {
-      return;
-    }
+      const nextContent = convertPostDocumentToTiptap(
+        value,
+        previewUrlsRef.current,
+      );
 
-    editor.commands.setContent(nextContent, {
-      emitUpdate: false,
+      const currentContent = editor.getJSON();
+
+      if (
+        JSON.stringify(currentContent) ===
+        JSON.stringify(nextContent)
+      ) {
+        return;
+      }
+
+      editor.commands.setContent(nextContent, {
+        emitUpdate: false,
+      });
     });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [editor, value]);
 
   // Clean up blob URLs when the editor is destroyed.
@@ -284,7 +296,7 @@ function convertTextNodes(
   nodes: {
     type: "text";
     text: string;
-    marks?: any[];
+    marks?: PostTextMark[];
   }[],
 ) {
   return nodes.map((node) => ({
