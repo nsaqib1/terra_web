@@ -10,6 +10,7 @@ import { FeedSorting } from "@/components/feed/FeedSorting";
 import { FeedPagination } from "@/components/feed/FeedPagination";
 import { FeedSkeleton } from "@/components/feed/FeedSkeleton";
 import { FeedEmptyState } from "@/components/feed/FeedEmptyState";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { postsApi } from "@/lib/api/posts";
 import { PostItem, PostSortOption } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
@@ -96,6 +97,7 @@ export default function Home() {
 
   return (
     <ProtectedRoute>
+      <OnboardingModal onComplete={() => loadFeed(1, currentSort)} />
       <AppShell>
         <div className="mx-auto max-w-[740px] pb-12">
           {/* Header & Controls */}

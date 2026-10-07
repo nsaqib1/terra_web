@@ -217,3 +217,19 @@ body {
     transform: translateY(0) scale(1);
   }
 }
+
+/* Onboarding animations */
+@keyframes welcomePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(240,184,120,0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 14px 35px -5px rgba(240,184,120,0.45); }
+}
+
+@keyframes orbitFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-6px) scale(1.15); opacity: 1; }
+}
+
+@keyframes celebrationBurst {
+  0% { transform: scale(0) translate(0, 0); opacity: 1; }
+  100% { transform: scale(1.5) translate(8px, -12px); opacity: 0; }
+}
