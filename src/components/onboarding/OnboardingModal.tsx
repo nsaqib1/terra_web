@@ -20,7 +20,7 @@ import { CommunityDetail } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
 
 const ONBOARDING_KEY = "terramids_onboarding_completed";
-const MIN_COMMUNITIES = 1;
+const MIN_COMMUNITIES = 5;
 
 type OnboardingStep = "welcome" | "communities" | "complete";
 
@@ -220,36 +220,17 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps = {}) {
       {/* Modal Panel */}
       <div
         className={`
-          relative flex w-full max-w-2xl flex-col overflow-hidden
+          relative flex h-[90dvh] max-h-[90dvh] w-full max-w-2xl flex-col overflow-hidden
           rounded-3xl border border-brand-sand-dark/50
           bg-brand-cream shadow-2xl
           transition-all duration-500 ease-out
+          sm:h-auto sm:max-h-[90vh]
           ${animateIn
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-8 scale-95 opacity-0"
           }
         `}
-        style={{ maxHeight: "90vh" }}
       >
-        {/* Skip button - only on communities step */}
-        {step === "communities" && !joiningAll && (
-          <button
-            type="button"
-            onClick={handleSkip}
-            className="
-              absolute right-4 top-4 z-10
-              flex items-center gap-1 rounded-full
-              bg-brand-sand/80 px-3 py-1.5
-              text-[11px] font-semibold text-brand-brown-700
-              backdrop-blur transition-all
-              hover:bg-brand-sand-dark hover:text-brand-brown-950
-            "
-          >
-            Skip for now
-            <X size={12} />
-          </button>
-        )}
-
         {/* Progress indicator */}
         <div className="flex gap-1.5 px-6 pt-5">
           {(["welcome", "communities", "complete"] as OnboardingStep[]).map(
@@ -271,7 +252,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps = {}) {
         </div>
 
         {/* Step content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {step === "welcome" && (
             <WelcomeStep
               displayName={user.displayName || user.username}
@@ -291,6 +272,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps = {}) {
               joinProgress={joinProgress}
               errorMessage={errorMessage}
               onJoin={handleJoinSelected}
+              onSkip={handleSkip}
             />
           )}
 
@@ -430,6 +412,7 @@ function CommunitiesStep({
   joinProgress,
   errorMessage,
   onJoin,
+  onSkip,
 }: {
   communities: CommunityDetail[];
   loading: boolean;
@@ -441,11 +424,12 @@ function CommunitiesStep({
   joinProgress: number;
   errorMessage: string | null;
   onJoin: () => void;
+  onSkip: () => void;
 }) {
   const canContinue = selectedCount >= minRequired && !joining;
 
   return (
-    <div className="flex flex-col pb-0">
+    <div className="flex min-h-0 flex-1 flex-col pb-0">
       {/* Header */}
       <div className="px-6 pt-6 sm:px-8">
         <div className="flex items-center gap-2">
@@ -472,8 +456,7 @@ function CommunitiesStep({
 
       {/* Community grid */}
       <div
-        className="mt-4 flex-1 overflow-y-auto px-6 pb-4 sm:px-8"
-        style={{ maxHeight: "45vh" }}
+        className="mt-4 min-h-0 flex-1 overflow-y-auto px-6 pb-4 sm:px-8"
       >
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
@@ -527,7 +510,7 @@ function CommunitiesStep({
             </p>
           </div>
         ) : (
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3">
             <div className="text-xs text-brand-brown-600">
               {selectedCount === 0 ? (
                 <span>Select at least {minRequired}</span>
@@ -538,26 +521,42 @@ function CommunitiesStep({
               )}
             </div>
 
-            <button
-              type="button"
-              disabled={!canContinue}
-              onClick={onJoin}
-              className={`
-                inline-flex items-center gap-2
-                rounded-2xl px-6 py-3
-                text-sm font-bold shadow-sm
-                transition-all
-                ${
-                  canContinue
-                    ? "bg-brand-brown-950 text-white hover:bg-brand-brown-900 hover:shadow-md active:scale-[0.98]"
-                    : "cursor-not-allowed bg-brand-sand text-brand-brown-600/50"
-                }
-              `}
-            >
-              Join {selectedCount > 0 ? selectedCount : ""} Communit
-              {selectedCount === 1 ? "y" : "ies"}
-              <ChevronRight size={15} />
-            </button>
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={onSkip}
+                className="
+                  inline-flex shrink-0 items-center gap-1 rounded-full
+                  bg-brand-sand/80 px-3 py-1.5
+                  text-[11px] font-semibold text-brand-brown-700
+                  transition-all hover:bg-brand-sand-dark hover:text-brand-brown-950
+                "
+              >
+                Skip for now
+                <X size={12} />
+              </button>
+
+              <button
+                type="button"
+                disabled={!canContinue}
+                onClick={onJoin}
+                className={`
+                  inline-flex items-center gap-2
+                  rounded-2xl px-6 py-3
+                  text-sm font-bold shadow-sm
+                  transition-all
+                  ${
+                    canContinue
+                      ? "bg-brand-brown-950 text-white hover:bg-brand-brown-900 hover:shadow-md active:scale-[0.98]"
+                      : "cursor-not-allowed bg-brand-sand text-brand-brown-600/50"
+                  }
+                `}
+              >
+                Join {selectedCount > 0 ? selectedCount : ""} Communit
+                {selectedCount === 1 ? "y" : "ies"}
+                <ChevronRight size={15} />
+              </button>
+            </div>
           </div>
         )}
       </div>
