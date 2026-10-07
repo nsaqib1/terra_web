@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Zap,
   ChevronRight,
-  X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { communitiesApi } from "@/lib/api/communities";
@@ -212,7 +211,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps = {}) {
   return (
     <div
       className={`
-        fixed inset-0 z-[100] flex items-center justify-center
+        fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6
         transition-all duration-500 ease-out
         ${animateIn ? "bg-brand-brown-950/60 backdrop-blur-md" : "bg-transparent backdrop-blur-none"}
       `}
@@ -220,11 +219,11 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps = {}) {
       {/* Modal Panel */}
       <div
         className={`
-          relative flex h-[90dvh] max-h-[90dvh] w-full max-w-2xl flex-col overflow-hidden
-          rounded-3xl border border-brand-sand-dark/50
+          relative flex h-[90dvh] max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col overflow-hidden
+          rounded-[1.75rem] border border-brand-sand-dark/70
           bg-brand-cream shadow-2xl
           transition-all duration-500 ease-out
-          sm:h-auto sm:max-h-[90vh]
+          sm:h-auto sm:min-h-[34rem] sm:max-h-[90vh] sm:rounded-3xl
           ${animateIn
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-8 scale-95 opacity-0"
@@ -232,27 +231,48 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps = {}) {
         `}
       >
         {/* Progress indicator */}
-        <div className="flex gap-1.5 px-6 pt-5">
-          {(["welcome", "communities", "complete"] as OnboardingStep[]).map(
-            (s, i) => (
-              <div
-                key={s}
-                className={`
-                  h-1 flex-1 rounded-full transition-all duration-500
-                  ${
-                    i <=
-                    ["welcome", "communities", "complete"].indexOf(step)
-                      ? "bg-brand-desert"
-                      : "bg-brand-sand-dark/50"
-                  }
-                `}
-              />
-            )
-          )}
+        <div className="shrink-0 px-6 pt-5 sm:px-8 sm:pt-6">
+          <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.14em] text-brand-brown-600/80">
+            <span>
+              {step === "welcome"
+                ? "Welcome"
+                : step === "communities"
+                  ? "Your interests"
+                  : "All set"}
+            </span>
+            <span>
+              {["welcome", "communities", "complete"].indexOf(step) + 1} of 3
+            </span>
+          </div>
+          <div
+            className="flex gap-1.5"
+            role="progressbar"
+            aria-label="Onboarding progress"
+            aria-valuemin={1}
+            aria-valuemax={3}
+            aria-valuenow={["welcome", "communities", "complete"].indexOf(step) + 1}
+          >
+            {(["welcome", "communities", "complete"] as OnboardingStep[]).map(
+              (s, i) => (
+                <div
+                  key={s}
+                  className={`
+                    h-1 flex-1 rounded-full transition-colors duration-500
+                    ${
+                      i <=
+                      ["welcome", "communities", "complete"].indexOf(step)
+                        ? "bg-brand-desert-dark"
+                        : "bg-brand-sand-dark/60"
+                    }
+                  `}
+                />
+              )
+            )}
+          </div>
         </div>
 
         {/* Step content */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
           {step === "welcome" && (
             <WelcomeStep
               displayName={user.displayName || user.username}
@@ -300,18 +320,18 @@ function WelcomeStep({
   onContinue: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center px-8 pb-10 pt-8 text-center">
+    <div className="flex min-h-full flex-col items-center justify-center px-5 py-8 text-center sm:px-8 sm:py-10">
       {/* Animated icon cluster */}
-      <div className="relative mb-6">
+      <div className="relative mb-5 sm:mb-6">
         <div
           className="
-            flex h-20 w-20 items-center justify-center
-            rounded-3xl bg-gradient-to-br from-brand-desert to-brand-desert-dark
+            flex h-[4.5rem] w-[4.5rem] items-center justify-center
+            rounded-[1.5rem] bg-gradient-to-br from-brand-desert to-brand-desert-dark
             shadow-lg shadow-brand-desert/30
           "
           style={{ animation: "welcomePulse 2s ease-in-out infinite" }}
         >
-          <Sparkles size={36} className="text-white" />
+          <Sparkles size={32} className="text-white" />
         </div>
         {/* Orbiting dots */}
         <div
@@ -324,19 +344,19 @@ function WelcomeStep({
         />
       </div>
 
-      <h2 className="text-2xl font-black tracking-tight text-brand-brown-950 sm:text-3xl">
+      <h2 className="max-w-xl text-2xl font-black leading-tight tracking-tight text-brand-brown-950 sm:text-3xl">
         Welcome to Terramids,{" "}
         <span className="text-brand-desert-dark">{displayName}</span>!
       </h2>
 
       <p className="mt-3 max-w-md text-sm leading-relaxed text-brand-brown-600">
-        Your account is ready. Let's personalize your experience by joining a
+        Your account is ready. Let&apos;s personalize your experience by joining a
         few communities that match your interests. This will populate your feed
         with relevant discussions.
       </p>
 
       {/* Feature highlights */}
-      <div className="mt-8 grid w-full max-w-md gap-3">
+      <div className="mt-6 grid w-full max-w-md gap-2.5 sm:mt-8 sm:gap-3">
         {[
           {
             icon: Compass,
@@ -359,7 +379,7 @@ function WelcomeStep({
             className="
               flex items-center gap-3.5 rounded-2xl
               border border-brand-sand-dark/60
-              bg-white/70 px-4 py-3.5
+              bg-white/75 px-4 py-3
               text-left backdrop-blur-sm
             "
           >
@@ -382,12 +402,14 @@ function WelcomeStep({
         type="button"
         onClick={onContinue}
         className="
-          mt-8 inline-flex items-center gap-2
-          rounded-2xl bg-brand-brown-950 px-8 py-3.5
+          mt-6 inline-flex min-h-12 items-center justify-center gap-2
+          rounded-2xl bg-brand-brown-950 px-7 py-3
           text-sm font-bold text-white shadow-lg
           shadow-brand-brown-950/20 transition-all
-          hover:bg-brand-brown-900 hover:shadow-xl
+          hover:-translate-y-0.5 hover:bg-brand-brown-900 hover:shadow-xl
           active:scale-[0.98]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-desert-dark focus-visible:ring-offset-2
+          sm:mt-8
         "
       >
         Choose Your Communities
@@ -429,26 +451,29 @@ function CommunitiesStep({
   const canContinue = selectedCount >= minRequired && !joining;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col pb-0">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Header */}
-      <div className="px-6 pt-6 sm:px-8">
+      <div className="shrink-0 px-6 pb-1 pt-5 sm:px-8 sm:pt-6">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-desert/20">
             <Compass size={16} className="text-brand-desert-dark" />
           </div>
           <div>
-            <h2 className="text-lg font-black tracking-tight text-brand-brown-950">
+            <h2 className="text-lg font-black tracking-tight text-brand-brown-950 sm:text-xl">
               Choose your communities
             </h2>
           </div>
         </div>
-        <p className="mt-2 text-xs leading-relaxed text-brand-brown-600">
-          Select at least {minRequired} communit{minRequired === 1 ? "y" : "ies"} to
-          join. Your feed will show discussions from these communities.
+        <p className="mt-2 text-xs leading-relaxed text-brand-brown-600 sm:text-sm">
+          Choose at least {minRequired} communities to personalize your feed and
+          join the conversations that interest you.
         </p>
 
         {errorMessage && (
-          <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-700">
+          <div
+            role="alert"
+            className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-700"
+          >
             {errorMessage}
           </div>
         )}
@@ -456,7 +481,7 @@ function CommunitiesStep({
 
       {/* Community grid */}
       <div
-        className="mt-4 min-h-0 flex-1 overflow-y-auto px-6 pb-4 sm:px-8"
+        className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-4 sm:px-8"
       >
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
@@ -496,7 +521,7 @@ function CommunitiesStep({
       </div>
 
       {/* Sticky footer */}
-      <div className="sticky bottom-0 border-t border-brand-sand-dark/50 bg-brand-cream/95 px-6 py-4 backdrop-blur-sm sm:px-8">
+      <div className="shrink-0 border-t border-brand-sand-dark/70 bg-brand-cream/95 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 backdrop-blur-sm sm:px-8 sm:py-4">
         {joining ? (
           <div className="flex flex-col items-center gap-2">
             <div className="h-2 w-full overflow-hidden rounded-full bg-brand-sand">
@@ -511,14 +536,17 @@ function CommunitiesStep({
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <div className="text-xs text-brand-brown-600">
-              {selectedCount === 0 ? (
-                <span>Select at least {minRequired}</span>
-              ) : (
-                <span className="font-semibold text-brand-brown-900">
-                  {selectedCount} selected
-                </span>
-              )}
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <span className="font-semibold text-brand-brown-900">
+                {selectedCount < minRequired
+                  ? `${selectedCount} of ${minRequired} selected`
+                  : `${selectedCount} selected`}
+              </span>
+              <span className="text-brand-brown-600">
+                {selectedCount >= minRequired
+                  ? "Ready to join"
+                  : `${minRequired - selectedCount} more to go`}
+              </span>
             </div>
 
             <div className="flex items-center justify-between gap-3">
@@ -526,14 +554,13 @@ function CommunitiesStep({
                 type="button"
                 onClick={onSkip}
                 className="
-                  inline-flex shrink-0 items-center gap-1 rounded-full
-                  bg-brand-sand/80 px-3 py-1.5
-                  text-[11px] font-semibold text-brand-brown-700
-                  transition-all hover:bg-brand-sand-dark hover:text-brand-brown-950
+                  inline-flex min-h-11 shrink-0 items-center rounded-xl px-3
+                  text-xs font-semibold text-brand-brown-600
+                  transition-colors hover:bg-brand-sand/80 hover:text-brand-brown-950
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-desert-dark
                 "
               >
                 Skip for now
-                <X size={12} />
               </button>
 
               <button
@@ -541,13 +568,13 @@ function CommunitiesStep({
                 disabled={!canContinue}
                 onClick={onJoin}
                 className={`
-                  inline-flex items-center gap-2
-                  rounded-2xl px-6 py-3
+                  inline-flex min-h-12 items-center gap-2
+                  rounded-2xl px-5 py-3
                   text-sm font-bold shadow-sm
-                  transition-all
+                  transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-desert-dark focus-visible:ring-offset-2
                   ${
                     canContinue
-                      ? "bg-brand-brown-950 text-white hover:bg-brand-brown-900 hover:shadow-md active:scale-[0.98]"
+                      ? "bg-brand-brown-950 text-white hover:-translate-y-0.5 hover:bg-brand-brown-900 hover:shadow-md active:scale-[0.98]"
                       : "cursor-not-allowed bg-brand-sand text-brand-brown-600/50"
                   }
                 `}
@@ -597,21 +624,23 @@ function CommunityCard({
       disabled={disabled}
       className={`
         group relative flex items-start gap-3
-        rounded-2xl border-2 p-3.5
+      rounded-2xl border p-3.5
         text-left transition-all duration-200
         ${
           selected
-            ? "border-brand-desert bg-brand-desert-light/20 shadow-sm"
-            : "border-brand-sand-dark/60 bg-white hover:border-brand-desert/50 hover:shadow-sm"
+          ? "border-brand-desert-dark/70 bg-brand-desert-light/25 shadow-sm"
+          : "border-brand-sand-dark/70 bg-white/90 hover:border-brand-desert-dark/50 hover:bg-white hover:shadow-sm"
         }
         ${disabled ? "cursor-wait opacity-70" : "cursor-pointer active:scale-[0.98]"}
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-desert-dark focus-visible:ring-offset-2
       `}
+      aria-pressed={selected}
     >
       {/* Selection indicator */}
       <div
         className={`
-          flex h-5 w-5 shrink-0 items-center justify-center
-          rounded-md border-2 transition-all duration-200 mt-0.5
+        mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center
+        rounded-md border-2 transition-all duration-200
           ${
             selected
               ? "border-brand-desert-dark bg-brand-desert-dark"
@@ -683,19 +712,19 @@ function CompleteStep({
   }, []);
 
   return (
-    <div className="flex flex-col items-center px-8 pb-10 pt-10 text-center">
+    <div className="flex min-h-full flex-1 flex-col items-center justify-center px-6 py-10 text-center sm:px-8 sm:py-12">
       {/* Success animation */}
-      <div className="relative">
+      <div className="relative mb-1">
         <div
           className={`
-            flex h-20 w-20 items-center justify-center
-            rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-600
-            shadow-lg shadow-emerald-500/30
+            flex h-24 w-24 items-center justify-center
+            rounded-[1.75rem] bg-gradient-to-br from-emerald-400 to-emerald-600
+            shadow-xl shadow-emerald-500/25 ring-8 ring-emerald-500/5
             transition-all duration-500
             ${showCheck ? "scale-100 opacity-100" : "scale-75 opacity-0"}
           `}
         >
-          <Check size={40} className="text-white" strokeWidth={3} />
+          <Check size={44} className="text-white" strokeWidth={2.5} />
         </div>
 
         {/* Celebration particles */}
@@ -728,7 +757,7 @@ function CompleteStep({
           ${showCheck ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
         `}
       >
-        You're all set!
+        You&apos;re all set!
       </h2>
 
       <p
@@ -738,7 +767,7 @@ function CompleteStep({
           ${showCheck ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
         `}
       >
-        You've joined{" "}
+        You&apos;ve joined{" "}
         <span className="font-bold text-brand-brown-900">{count}</span>{" "}
         communit{count === 1 ? "y" : "ies"}. Your feed is now
         personalized with discussions from these communities.
@@ -748,13 +777,14 @@ function CompleteStep({
         type="button"
         onClick={onFinish}
         className={`
-          mt-8 inline-flex items-center gap-2
-          rounded-2xl bg-brand-brown-950 px-8 py-3.5
+          mt-8 inline-flex min-h-12 items-center justify-center gap-2
+          rounded-2xl bg-brand-brown-950 px-8 py-3
           text-sm font-bold text-white shadow-lg
           shadow-brand-brown-950/20 transition-all
           delay-700
           hover:bg-brand-brown-900 hover:shadow-xl
           active:scale-[0.98]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-desert-dark focus-visible:ring-offset-2
           ${showCheck ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
         `}
       >
