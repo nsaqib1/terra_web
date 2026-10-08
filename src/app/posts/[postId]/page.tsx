@@ -160,7 +160,10 @@ function CommentNode({
   };
 
   return (
-    <div className="group -mx-4 rounded-none border-y bg-white p-4 transition-all duration-200 hover:border-brand-brown-700/20 hover:shadow-sm sm:mx-0 sm:rounded-2xl sm:border">
+    <div
+      id={`comment-${comment.id}`}
+      className="group -mx-4 rounded-none border-y bg-white p-4 transition-all duration-200 hover:border-brand-brown-700/20 hover:shadow-sm sm:mx-0 sm:rounded-2xl sm:border"
+    >
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
@@ -354,6 +357,7 @@ function CommentNode({
 
             return (
               <div
+                id={`comment-${reply.id}`}
                 key={reply.id}
                 className="group/reply rounded-xl border border-brand-sand/70 bg-brand-sand/15 p-3 transition-colors hover:bg-white"
               >

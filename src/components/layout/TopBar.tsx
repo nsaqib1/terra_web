@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { MobileNav } from "./MobileNav";
+import { NotificationBell } from "./NotificationBell";
 
 function getPageTitle(pathname: string): string {
   if (pathname === "/") return "Home";
@@ -27,6 +28,7 @@ function getPageTitle(pathname: string): string {
   if (pathname === "/posts/manage") return "My Posts";
   if (pathname.startsWith("/posts/") && pathname.endsWith("/edit")) return "Edit Post";
   if (pathname === "/profile") return "Profile";
+  if (pathname === "/notifications") return "Notifications";
   if (pathname.startsWith("/profile/")) return "Profile";
   if (pathname.startsWith("/community/")) return "Community";
   if (pathname.startsWith("/admin")) return "Admin";
@@ -122,7 +124,9 @@ export function TopBar() {
             ) : (
               <>
                 {user ? (
-                  <div className="relative">
+                  <>
+                    <NotificationBell />
+                    <div className="relative">
                     <button
                       type="button"
                       onClick={() => setShowDropdown(!showDropdown)}
@@ -212,7 +216,8 @@ export function TopBar() {
                         </button>
                       </div>
                     )}
-                  </div>
+                    </div>
+                  </>
                 ) : (
                   <div className="h-9 w-9 animate-pulse rounded-full bg-brand-sand" />
                 )}

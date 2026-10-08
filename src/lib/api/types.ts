@@ -715,3 +715,38 @@ export interface UpdateResourceInput {
   tagIds?: string[];
   status?: ResourceStatus;
 }
+
+export type NotificationType =
+  | "POST_UPVOTED"
+  | "COMMENT_UPVOTED"
+  | "POST_COMMENTED"
+  | "COMMENT_REPLIED";
+
+export interface NotificationActor {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface NotificationItem {
+  id: string;
+  recipientId: string;
+  actorId: string | null;
+  type: NotificationType;
+  postId: string | null;
+  commentId: string | null;
+  readAt: string | null;
+  createdAt: string;
+  actor: NotificationActor | null;
+}
+
+export interface NotificationsResponse {
+  data: NotificationItem[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+export interface NotificationUnreadCountResponse {
+  count: number;
+}
