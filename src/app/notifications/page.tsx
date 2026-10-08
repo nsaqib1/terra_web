@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificationRealtime } from "@/context/NotificationRealtimeContext";
 import { getNotificationMessage, notificationsApi } from "@/lib/api/notifications";
 import type { NotificationItem } from "@/lib/api/types";
 
@@ -28,6 +29,7 @@ function initials(name: string) {
 
 export default function NotificationsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { connected, refreshCount } = useNotificationRealtime();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -67,8 +69,12 @@ export default function NotificationsPage() {
     );
     try {
       await notificationsApi.markRead(notification.id);
+      if (!connected) {
+        await refreshCount();
+      }
     } catch {
       // Keep the optimistic UI; the next refresh will reconcile it.
+      await refreshCount();
     }
   };
 

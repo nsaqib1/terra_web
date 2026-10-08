@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { useNotificationRealtime } from "@/context/NotificationRealtimeContext";
 import {
   getNotificationMessage,
   notificationsApi,
@@ -52,21 +53,16 @@ function NotificationIcon({ type }: { type: NotificationItem["type"] }) {
 
 export function NotificationBell() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [count, setCount] = useState(0);
+  const {
+    count,
+    latestNotification,
+    refreshCount,
+    markAllReadLocal,
+  } = useNotificationRealtime();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const refreshCount = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const response = await notificationsApi.unreadCount();
-      setCount(response.count);
-    } catch {
-      // The notification badge is non-critical; leave the current value alone.
-    }
-  }, [isAuthenticated]);
 
   const loadNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -81,15 +77,18 @@ export function NotificationBell() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setCount(0);
       setItems([]);
-      return;
     }
+  }, [isAuthenticated]);
 
-    refreshCount();
-    const interval = window.setInterval(refreshCount, 30_000);
-    return () => window.clearInterval(interval);
-  }, [isAuthenticated, refreshCount]);
+  useEffect(() => {
+    if (!latestNotification) return;
+
+    setItems((current) => [
+      latestNotification,
+      ...current.filter((item) => item.id !== latestNotification.id),
+    ].slice(0, 8));
+  }, [latestNotification]);
 
   useEffect(() => {
     if (!open) return;
@@ -112,11 +111,11 @@ export function NotificationBell() {
     await loadNotifications();
 
     if (count > 0) {
-      setCount(0);
+      markAllReadLocal();
       try {
         await notificationsApi.markAllRead();
       } catch {
-        refreshCount();
+        await refreshCount();
       }
     }
   };
@@ -196,7 +195,7 @@ export function NotificationBell() {
                     key={notification.id}
                     href={href}
                     onClick={() => setOpen(false)}
-                    className="flex gap-3 border-b border-brand-sand/50 px-4 py-3 transition-colors last:border-b-0 hover:bg-brand-cream"
+                    className={`flex gap-3 border-b border-brand-sand/50 px-4 py-3 transition-colors last:border-b-0 hover:bg-brand-cream ${!notification.readAt ? "bg-brand-cream/45" : ""}`}
                   >
                     <Avatar className="h-9 w-9 shrink-0 border border-brand-sand-dark">
                       {actor?.avatarUrl && (
