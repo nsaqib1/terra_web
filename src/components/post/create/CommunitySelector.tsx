@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { communitiesApi } from "@/lib/api/communities";
+import {
+  getCachedJoinedCommunities,
+  loadJoinedCommunities,
+  refreshJoinedCommunities,
+} from "@/lib/api/joined-communities-cache";
 import type { JoinedCommunity } from "@/lib/api/types";
 
 interface CommunitySelectorProps {
@@ -55,8 +59,8 @@ export function CommunitySelector({
   const [isVisible, setIsVisible] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [communities, setCommunities] = useState<JoinedCommunity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [communities, setCommunities] = useState<JoinedCommunity[]>(() => getCachedJoinedCommunities() ?? []);
+  const [isLoading, setIsLoading] = useState(() => getCachedJoinedCommunities() === null);
   const [error, setError] = useState<string | null>(null);
 
   const titleId = useId();
@@ -78,26 +82,36 @@ export function CommunitySelector({
     }
   }, [value]);
 
-  // Fetch joined communities once
+  // Share the sidebar's cache and in-flight request. If data is already cached,
+  // the grid can render immediately without waiting for another network request.
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
-    communitiesApi
-      .listJoined()
-      .then((data) => {
+    async function loadCommunities(refresh = false) {
+      setError(null);
+      if (refresh && getCachedJoinedCommunities() === null) {
+        setIsLoading(true);
+      }
+
+      try {
+        const data = await (refresh ? refreshJoinedCommunities() : loadJoinedCommunities());
         if (!cancelled) setCommunities(data);
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setError("Could not load communities.");
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setIsLoading(false);
-      });
+      }
+    }
+
+    void loadCommunities();
+    const handleMembershipChanged = () => {
+      void loadCommunities(true);
+    };
+    window.addEventListener("community-membership-changed", handleMembershipChanged);
 
     return () => {
       cancelled = true;
+      window.removeEventListener("community-membership-changed", handleMembershipChanged);
     };
   }, []);
 
@@ -406,8 +420,7 @@ export function CommunitySelector({
                       onClick={() => {
                         setIsLoading(true);
                         setError(null);
-                        communitiesApi
-                          .listJoined()
+                        refreshJoinedCommunities()
                           .then((data) => setCommunities(data))
                           .catch(() => setError("Could not load communities."))
                           .finally(() => setIsLoading(false));

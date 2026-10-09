@@ -17,7 +17,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
-import { communitiesApi } from "@/lib/api/communities";
+import {
+  clearJoinedCommunitiesCache,
+  getCachedJoinedCommunities,
+  loadJoinedCommunities,
+  refreshJoinedCommunities,
+} from "@/lib/api/joined-communities-cache";
 import { JoinedCommunity } from "@/lib/api/types";
 
 const mainNavigation = [
@@ -70,6 +75,7 @@ export function Sidebar() {
     }
 
     if (!isAuthenticated) {
+      clearJoinedCommunitiesCache();
       setCommunities([]);
       setHasError(false);
       setIsLoading(false);
@@ -77,19 +83,30 @@ export function Sidebar() {
     }
 
     let cancelled = false;
-
-    async function loadJoinedCommunities() {
+    const cached = loadJoinedCommunities;
+    // Render cached data immediately; only show skeletons when no cache exists.
+    const initialCommunities = getCachedJoinedCommunities();
+    if (initialCommunities !== null) {
+      setCommunities(initialCommunities);
+      setIsLoading(false);
+    } else {
       setIsLoading(true);
+    }
+    setHasError(false);
+
+    async function loadCommunities(refresh = false) {
+      if (refresh) {
+        setIsLoading(false);
+      }
       setHasError(false);
 
       try {
-        const joined = await communitiesApi.listJoined();
+        const joined = await (refresh ? refreshJoinedCommunities() : cached());
         if (!cancelled) {
           setCommunities(joined);
         }
       } catch {
         if (!cancelled) {
-          setCommunities([]);
           setHasError(true);
         }
       } finally {
@@ -99,10 +116,10 @@ export function Sidebar() {
       }
     }
 
-    void loadJoinedCommunities();
+    void loadCommunities();
 
     const handleMembershipChanged = () => {
-      void loadJoinedCommunities();
+      void loadCommunities(true);
     };
 
     window.addEventListener("community-membership-changed", handleMembershipChanged);
