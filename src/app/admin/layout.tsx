@@ -12,6 +12,7 @@ import {
   Tag,
   Files,
   Gamepad2,
+  FileText,
   Ticket,
   Users,
   X,
@@ -61,6 +62,11 @@ const adminNavItems = [
     href: "/admin/games",
     icon: Gamepad2,
   },
+  {
+    label: "Posts",
+    href: "/admin/posts",
+    icon: FileText,
+  },
 ];
 
 export default function AdminLayout({
@@ -89,6 +95,7 @@ export default function AdminLayout({
     if (pathname.startsWith("/admin/tags")) return "Tags";
     if (pathname.startsWith("/admin/resources")) return "Resources";
     if (pathname.startsWith("/admin/games")) return "Games";
+    if (pathname.startsWith("/admin/posts")) return "Posts";
     return "Admin Console";
   };
 

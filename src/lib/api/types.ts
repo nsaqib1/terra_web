@@ -470,6 +470,28 @@ export interface PostItem {
   updatedAt: string;
 }
 
+
+
+export type PostStatus = "ACTIVE" | "LOCKED" | "REMOVED";
+
+export interface AdminPost extends PostItem {
+  status: PostStatus;
+  deletedAt: string | null;
+  mediaCount: number;
+  voteCount: number;
+}
+
+export interface AdminPostQuery {
+  search?: string;
+  status?: PostStatus;
+  communityId?: string;
+  authorId?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: "createdAt" | "updatedAt" | "score" | "commentCount";
+  sortOrder?: "asc" | "desc";
+}
+
 export type PostSortOption = "newest" | "top" | "comments" | "oldest";
 
 export interface TrendingPost {

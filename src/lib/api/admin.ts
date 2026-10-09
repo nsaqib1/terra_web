@@ -1,6 +1,8 @@
 import { apiClient } from "./client";
 import {
   AdminCommunityQuery,
+  AdminPost,
+  AdminPostQuery,
   AdminGame,
   AdminGameQuery,
   CreateGameInput,
@@ -42,6 +44,34 @@ export const adminApi = {
    */
   async getCommunityById(id: string): Promise<Community> {
     return apiClient.get<Community>(`/admin/communities/${id}`);
+  },
+
+  async getPosts(
+    query?: AdminPostQuery,
+  ): Promise<PaginatedResponse<AdminPost>> {
+    return apiClient.get<PaginatedResponse<AdminPost>>("/admin/posts", {
+      params: query as Record<string, string | number | boolean | undefined>,
+    });
+  },
+
+  async getPost(id: string): Promise<AdminPost> {
+    return apiClient.get<AdminPost>(`/admin/posts/${id}`);
+  },
+
+  async lockPost(id: string): Promise<AdminPost> {
+    return apiClient.post<AdminPost>(`/admin/posts/${id}/lock`);
+  },
+
+  async unlockPost(id: string): Promise<AdminPost> {
+    return apiClient.post<AdminPost>(`/admin/posts/${id}/unlock`);
+  },
+
+  async removePost(id: string): Promise<AdminPost> {
+    return apiClient.post<AdminPost>(`/admin/posts/${id}/remove`);
+  },
+
+  async restorePost(id: string): Promise<AdminPost> {
+    return apiClient.post<AdminPost>(`/admin/posts/${id}/restore`);
   },
 
   /**
