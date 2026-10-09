@@ -72,33 +72,7 @@ export function CreatePostForm() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <Link
-          href="/"
-          className="
-            inline-flex items-center gap-1.5
-            text-xs font-semibold
-            text-muted-foreground
-            hover:text-brand-brown-950
-          "
-        >
-          <ArrowLeft size={14} />
-          Back to home
-        </Link>
-      </div>
-
-      <div className="mt-5">
-        <h1 className="text-2xl font-bold tracking-tight text-brand-brown-950 sm:text-3xl">
-          Create a post
-        </h1>
-
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-brand-brown-600">
-          Share a question, idea, or experience with one community.
-          No title — just the post.
-        </p>
-      </div>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <main className="min-w-0">
           <div className="-mx-4 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
             <div className="space-y-6">
@@ -122,11 +96,6 @@ export function CreatePostForm() {
               <div className="border-t pt-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
-                    <p className="text-[11px] leading-5 text-muted-foreground">
-                      Citizens of this community will see your post as soon
-                      as you publish.
-                    </p>
-
                     {pendingImageUploads > 0 && (
                       <p className="text-[11px] font-medium text-brand-brown-800">
                         Wait for the image upload to finish before publishing.

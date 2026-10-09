@@ -57,14 +57,6 @@ export function CommunitySelector({
 
   return (
     <div className="relative">
-      <label className="text-sm font-semibold text-brand-brown-900">
-        Community
-      </label>
-
-      <p className="mt-1 text-[11px] text-muted-foreground">
-        Only communities you&apos;ve joined appear here.
-      </p>
-
       <button
         type="button"
         disabled={isLoading}
@@ -100,10 +92,6 @@ export function CommunitySelector({
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-brand-brown-950">
                 {selected.name}
-              </p>
-
-              <p className="text-[10px] capitalize text-muted-foreground">
-                {selected.role.toLowerCase()}
               </p>
             </div>
           </>
@@ -196,10 +184,6 @@ export function CommunitySelector({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-bold text-brand-brown-950">
                       {community.name}
-                    </p>
-
-                    <p className="text-[10px] capitalize text-muted-foreground">
-                      {community.role.toLowerCase()}
                     </p>
                   </div>
 

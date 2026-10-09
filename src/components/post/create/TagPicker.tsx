@@ -185,27 +185,6 @@ export function TagPicker({
 
   return (
     <section aria-labelledby="post-topics-label">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Bookmark size={15} className="text-brand-desert-dark" />
-          <label
-            id="post-topics-label"
-            htmlFor="post-topic-search"
-            className="text-sm font-semibold text-brand-brown-900"
-          >
-            Topics
-          </label>
-          <span className="text-[11px] text-muted-foreground">Optional</span>
-        </div>
-        <span className={`text-[11px] font-medium ${atLimit ? "text-brand-brown-900" : "text-muted-foreground"}`}>
-          {selected.length}/{MAX_TAGS}
-        </span>
-      </div>
-
-      <p className="mt-1 text-xs leading-5 text-muted-foreground">
-        Add a few topics so people can discover your post. Search existing topics or create a new one.
-      </p>
-
       {selected.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {selected.map((tagId) => {
@@ -270,94 +249,94 @@ export function TagPicker({
           </button>
         )}
 
-      {!communityId && (
-        <p className="mt-2 text-xs text-muted-foreground">Choose a community to see its topics.</p>
-      )}
+        {!communityId && (
+          <p className="mt-2 text-xs text-muted-foreground">Choose a community to see its topics.</p>
+        )}
 
-      {isOpen && communityId && (
-        <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border bg-white shadow-[0_14px_36px_rgba(72,64,48,0.14)]">
-          {error && (
-            <p role="alert" className="px-3 py-2 text-xs text-red-600">{error}</p>
-          )}
+        {isOpen && communityId && (
+          <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border bg-white shadow-[0_14px_36px_rgba(72,64,48,0.14)]">
+            {error && (
+              <p role="alert" className="px-3 py-2 text-xs text-red-600">{error}</p>
+            )}
 
-          {!error && !isLoading && tags.length === 0 && !normalizedQuery && (
-            <p className="px-3 py-3 text-xs text-muted-foreground">
-              No topics yet. Be the first to create one.
-            </p>
-          )}
+            {!error && !isLoading && tags.length === 0 && !normalizedQuery && (
+              <p className="px-3 py-3 text-xs text-muted-foreground">
+                No topics yet. Be the first to create one.
+              </p>
+            )}
 
-          {!isLoading && tags.map((tag) => {
-            const active = selected.includes(tag.id);
-            return (
+            {!isLoading && tags.map((tag) => {
+              const active = selected.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  disabled={!active && atLimit}
+                  onClick={() => {
+                    onToggle(tag.id);
+                    if (!active) setQuery("");
+                  }}
+                  className="flex w-full items-center gap-3 border-b px-3 py-2.5 text-left last:border-b-0 hover:bg-brand-cream/70 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-sand text-brand-brown-700">
+                    <Bookmark size={13} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-brand-brown-950">{tag.name}</span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      {tag.usageCount === 1 ? "Used in 1 post" : `Used in ${tag.usageCount} posts`}
+                    </span>
+                  </span>
+                  {active ? (
+                    <Check size={16} className="text-brand-desert-dark" />
+                  ) : (
+                    <Plus size={15} className="text-muted-foreground" />
+                  )}
+                </button>
+              );
+            })}
+
+            {isLoading && (
+              <div className="flex items-center gap-2 px-3 py-3 text-xs text-muted-foreground">
+                <Loader2 size={14} className="animate-spin" />
+                Searching topics…
+              </div>
+            )}
+
+            {!isLoading && normalizedQuery && !duplicate && !error && (
               <button
-                key={tag.id}
                 type="button"
-                disabled={!active && atLimit}
-                onClick={() => {
-                  onToggle(tag.id);
-                  if (!active) setQuery("");
-                }}
-                className="flex w-full items-center gap-3 border-b px-3 py-2.5 text-left last:border-b-0 hover:bg-brand-cream/70 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => void createTag()}
+                disabled={isCreating || atLimit || normalizedQuery.length < 2}
+                className="flex w-full items-center gap-3 border-t bg-brand-cream/40 px-3 py-3 text-left hover:bg-brand-desert-light/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-sand text-brand-brown-700">
-                  <Bookmark size={13} />
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-desert-light text-brand-brown-900">
+                  {isCreating ? <Loader2 size={15} className="animate-spin" /> : <Plus size={16} />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-brand-brown-950">{tag.name}</span>
+                  <span className="block text-sm font-semibold text-brand-brown-950">
+                    {isCreating ? "Creating topic…" : `Create “${normalizedQuery}”`}
+                  </span>
                   <span className="block text-[11px] text-muted-foreground">
-                    {tag.usageCount === 1 ? "Used in 1 post" : `Used in ${tag.usageCount} posts`}
+                    Add this topic to the selected community
                   </span>
                 </span>
-                {active ? (
-                  <Check size={16} className="text-brand-desert-dark" />
-                ) : (
-                  <Plus size={15} className="text-muted-foreground" />
-                )}
               </button>
-            );
-          })}
+            )}
 
-          {isLoading && (
-            <div className="flex items-center gap-2 px-3 py-3 text-xs text-muted-foreground">
-              <Loader2 size={14} className="animate-spin" />
-              Searching topics…
-            </div>
-          )}
+            {!isLoading && duplicate && normalizedQuery && !selected.includes(duplicate.id) && (
+              <p className="border-t px-3 py-2 text-[11px] text-muted-foreground">
+                A matching topic already exists. Select it above instead of creating a duplicate.
+              </p>
+            )}
 
-          {!isLoading && normalizedQuery && !duplicate && !error && (
-            <button
-              type="button"
-              onClick={() => void createTag()}
-              disabled={isCreating || atLimit || normalizedQuery.length < 2}
-              className="flex w-full items-center gap-3 border-t bg-brand-cream/40 px-3 py-3 text-left hover:bg-brand-desert-light/50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-desert-light text-brand-brown-900">
-                {isCreating ? <Loader2 size={15} className="animate-spin" /> : <Plus size={16} />}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-brand-brown-950">
-                  {isCreating ? "Creating topic…" : `Create “${normalizedQuery}”`}
-                </span>
-                <span className="block text-[11px] text-muted-foreground">
-                  Add this topic to the selected community
-                </span>
-              </span>
-            </button>
-          )}
-
-          {!isLoading && duplicate && normalizedQuery && !selected.includes(duplicate.id) && (
-            <p className="border-t px-3 py-2 text-[11px] text-muted-foreground">
-              A matching topic already exists. Select it above instead of creating a duplicate.
-            </p>
-          )}
-
-          {atLimit && (
-            <p className="border-t px-3 py-2 text-[11px] text-muted-foreground">
-              You can add up to {MAX_TAGS} topics. Remove one to choose another.
-            </p>
-          )}
-        </div>
-      )}
+            {atLimit && (
+              <p className="border-t px-3 py-2 text-[11px] text-muted-foreground">
+                You can add up to {MAX_TAGS} topics. Remove one to choose another.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {error && !isOpen && (

@@ -292,7 +292,7 @@ export function PostEditor({
           <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
             {activeEditor.getText().trim()
               ? `${activeEditor.getText().length} characters`
-              : "Write something to publish"}
+              : ""}
           </p>
         </div>
       </PostImageUploadContext.Provider>
