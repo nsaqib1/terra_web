@@ -78,6 +78,7 @@ export function CreatePostForm() {
               <CommunitySelector
                 value={communityId}
                 onChange={handleCommunityChange}
+                onClose={() => router.back()}
               />
 
               <PostEditor

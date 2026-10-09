@@ -12,6 +12,7 @@ interface CommunitySelectorProps {
   /** Community id (UUID) — empty string means nothing selected. */
   value: string;
   onChange: (id: string) => void;
+  onClose: () => void;
 }
 
 /**
@@ -46,6 +47,7 @@ function initials(name: string): string {
 export function CommunitySelector({
   value,
   onChange,
+  onClose,
 }: CommunitySelectorProps) {
   const [mounted, setMounted] = useState(false);
   // Show modal immediately if no community is selected yet
@@ -178,6 +180,15 @@ export function CommunitySelector({
     closeModal();
   }
 
+  function handleClose() {
+    if (canClose) {
+      closeModal();
+      return;
+    }
+
+    onClose();
+  }
+
   return (
     <>
       {/* Trigger Button in the Form */}
@@ -295,7 +306,7 @@ export function CommunitySelector({
               aria-modal="true"
               aria-labelledby={titleId}
               className={`
-                relative z-10 flex max-h-[min(88dvh,700px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-brand-sand bg-white shadow-[0_24px_80px_rgba(43,34,24,0.28)] transition-all duration-200 ease-out sm:rounded-3xl
+                relative z-10 flex max-h-[min(88dvh,700px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-brand-sand bg-white shadow-[0_24px_80px_rgba(43,34,24,0.28)] transition-all duration-200 ease-out sm:rounded-3xl
                 ${
                   isVisible
                     ? "scale-100 opacity-100 translate-y-0"
@@ -327,17 +338,16 @@ export function CommunitySelector({
                   </p>
                 </div>
 
-                {/* Close Button (only available if user already has a community selected) */}
-                {canClose && (
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    aria-label="Close modal"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-brand-brown-700 transition hover:bg-brand-sand active:scale-95"
-                  >
-                    <X size={18} />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  aria-label={
+                    canClose ? "Close modal" : "Return to previous page"
+                  }
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-brand-brown-700 transition hover:bg-brand-sand active:scale-95"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
               {/* Search Bar */}
@@ -511,5 +521,4 @@ export function CommunitySelector({
     </>
   );
 }
-
 
