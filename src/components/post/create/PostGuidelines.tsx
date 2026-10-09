@@ -30,7 +30,7 @@ export function PostGuidelines() {
           <Guideline
             icon={<Bookmark size={14} />}
             title="Mark the context"
-            description="Tags organize your post inside the community — they are a controlled vocabulary, not hashtags."
+            description="Choose a few relevant topics. If the right one does not exist, create it for this community."
           />
 
           <Guideline

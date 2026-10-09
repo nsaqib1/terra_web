@@ -24,7 +24,15 @@ export const tagsApi = {
   },
 
   /**
-   * Create a new tag in a community. Requires admin.
+   * Create a community topic while composing a post.
+   * Requires authentication and active membership in the target community.
+   */
+  async createForCommunity(data: CreateTagInput): Promise<Tag> {
+    return apiClient.post<Tag>("/tags/community", data);
+  },
+
+  /**
+   * Create a tag through the admin taxonomy-management interface.
    */
   async create(data: CreateTagInput): Promise<Tag> {
     return apiClient.post<Tag>("/tags", data);

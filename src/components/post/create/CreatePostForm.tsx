@@ -26,10 +26,9 @@ export function CreatePostForm() {
   const [isPending, setIsPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // A post has content when it contains at least one non-empty node
-  const hasContent =
-    document !== null &&
-    document.content.length > 0;
+  // Empty editor paragraphs should not count as a post. Text, images, or
+  // embedded videos are meaningful content.
+  const hasContent = documentHasContent(document);
 
   const canPublish =
     Boolean(communityId) &&
@@ -178,4 +177,40 @@ export function CreatePostForm() {
       </div>
     </div>
   );
+}
+
+
+function documentHasContent(
+  document: PostDocument | null,
+): boolean {
+  if (!document) return false;
+
+  function nodeHasContent(value: unknown): boolean {
+    if (!value || typeof value !== "object") return false;
+    const node = value as Record<string, unknown>;
+
+    if (typeof node.text === "string" && node.text.trim().length > 0) {
+      return true;
+    }
+
+    if (
+      node.type === "image" &&
+      typeof node.mediaId === "string" &&
+      node.mediaId.length > 0
+    ) {
+      return true;
+    }
+
+    if (
+      node.type === "youtube" &&
+      typeof node.videoId === "string" &&
+      node.videoId.length > 0
+    ) {
+      return true;
+    }
+
+    return Array.isArray(node.content) && node.content.some(nodeHasContent);
+  }
+
+  return document.content.some(nodeHasContent);
 }
