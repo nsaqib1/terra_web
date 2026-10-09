@@ -5,7 +5,7 @@ import {
   Check,
   Loader2,
   Plus,
-  Search,
+  Tags,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
@@ -210,7 +210,7 @@ export function TagPicker({
       )}
 
       <div ref={pickerRef} className="relative mt-3">
-        <Search
+        <Tags
           size={16}
           className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />

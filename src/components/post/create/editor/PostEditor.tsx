@@ -261,7 +261,17 @@ export function PostEditor({
               onImageClick={handleImageClick}
             />
 
-            <EditorContent editor={activeEditor} />
+            <div className="relative">
+              {activeEditor.isEmpty && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-4 top-4 z-10 max-w-[90%] text-[15px] leading-7 text-brand-brown-600/65"
+                >
+                  Share something worth discussing…
+                </div>
+              )}
+              <EditorContent editor={activeEditor} />
+            </div>
 
             <input
               ref={imageInputRef}
