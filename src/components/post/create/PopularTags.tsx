@@ -12,7 +12,7 @@ const POPULAR_TAG_LIMIT = 8;
 interface PopularTagsProps {
   communityId: string;
   selected: string[];
-  onToggle: (tagId: string) => void;
+  onToggle: (tag: Tag) => void;
 }
 
 export function PopularTags({ communityId, selected, onToggle }: PopularTagsProps) {
@@ -106,7 +106,7 @@ export function PopularTags({ communityId, selected, onToggle }: PopularTagsProp
                   type="button"
                   aria-pressed={active}
                   disabled={disabled}
-                  onClick={() => onToggle(tag.id)}
+                  onClick={() => onToggle(tag)}
                   className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors ${
                     active
                       ? "bg-brand-desert-light text-brand-brown-950"
@@ -131,7 +131,7 @@ export function PopularTags({ communityId, selected, onToggle }: PopularTagsProp
         <p className="mt-3 border-t pt-3 text-[11px] leading-4 text-muted-foreground">
           {atLimit
             ? "Remove a selected tag to add another."
-            : "Choose tags to add them to your post."}
+            : "Click a tag to insert it into your post."}
         </p>
       )}
     </aside>

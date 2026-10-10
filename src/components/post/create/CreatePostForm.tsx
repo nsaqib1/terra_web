@@ -2,7 +2,7 @@
 
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { extractErrorMessage } from "@/lib/api/errors";
@@ -10,8 +10,8 @@ import { postsApi } from "@/lib/api/posts";
 
 import { CommunitySelector } from "./CommunitySelector";
 import { PopularTags } from "./PopularTags";
-import { TagPicker } from "./TagPicker";
-import { PostEditor } from "./editor/PostEditor";
+import { PostEditor, type PostEditorHandle } from "./editor/PostEditor";
+import type { Tag } from "@/lib/api/types";
 import type { PostDocument } from "./editor/editor-types";
 
 const MAX_TAGS = 5;
@@ -23,6 +23,7 @@ export function CreatePostForm() {
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [document, setDocument] = useState<PostDocument | null>(null);
   const [pendingImageUploads, setPendingImageUploads] = useState(0);
+  const postEditorRef = useRef<PostEditorHandle>(null);
 
   const [isPending, setIsPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -43,16 +44,13 @@ export function CreatePostForm() {
     setTagIds([]);
   }
 
-  function toggleTag(tagId: string) {
-    setTagIds((current) => {
-      if (current.includes(tagId)) {
-        return current.filter((id) => id !== tagId);
-      }
-      if (current.length >= MAX_TAGS) {
-        return current;
-      }
-      return [...current, tagId];
-    });
+  function handlePopularTagToggle(tag: Tag) {
+    if (tagIds.includes(tag.id)) {
+      postEditorRef.current?.removeHashtag(tag.id);
+      return;
+    }
+    if (tagIds.length >= MAX_TAGS) return;
+    postEditorRef.current?.insertHashtag(tag);
   }
 
   async function handlePublish() {
@@ -88,15 +86,14 @@ export function CreatePostForm() {
               />
 
               <PostEditor
+                ref={postEditorRef}
                 value={document}
                 onChange={setDocument}
                 onImageUploadsChange={setPendingImageUploads}
-              />
-
-              <TagPicker
                 communityId={communityId}
-                selected={tagIds}
-                onToggle={toggleTag}
+                selectedTagIds={tagIds}
+                onTagIdsChange={setTagIds}
+                enableHashtags
               />
 
               <div className="border-t pt-5">
@@ -152,7 +149,7 @@ export function CreatePostForm() {
           <PopularTags
             communityId={communityId}
             selected={tagIds}
-            onToggle={toggleTag}
+            onToggle={handlePopularTagToggle}
           />
         </div>
       </div>
