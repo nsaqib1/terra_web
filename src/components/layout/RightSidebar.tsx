@@ -453,7 +453,7 @@ export function RightSidebar() {
   return (
     <aside className="hidden w-[280px] shrink-0 xl:block">
       <div className="sticky top-20 space-y-5">
-
+        {/* Global discovery widgets */}
         {/* Trending Discussions — Live */}
         <TrendingDiscussions />
 

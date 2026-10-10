@@ -98,18 +98,25 @@ export default function Home() {
   return (
     <ProtectedRoute>
       <OnboardingModal onComplete={() => loadFeed(1, currentSort)} />
-      <AppShell>
+      <AppShell
+        contextualSidebarContent={
+          <FeedSorting
+            currentSort={currentSort}
+            onSortChange={handleSortChange}
+            isLoading={isLoading}
+            variant="sidebar"
+          />
+        }
+      >
         <div className="mx-auto max-w-[740px] pb-12">
-          {/* Header & Controls */}
-          <div className="mb-6 space-y-4">
-            {/* Sorting Bar */}
-            <div className="hidden items-center justify-between border-b border-brand-sand-dark/50 pb-3 sm:flex">
-              <FeedSorting
-                currentSort={currentSort}
-                onSortChange={handleSortChange}
-                isLoading={isLoading}
-              />
-            </div>
+          {/* Feed controls */}
+          <div className={`space-y-4 ${selectedTag ? "mb-4" : "mb-4 2xl:mb-0"}`}>
+            <FeedSorting
+              currentSort={currentSort}
+              onSortChange={handleSortChange}
+              isLoading={isLoading}
+              variant="compact"
+            />
 
             {/* Active Tag Filter Tag */}
             {selectedTag && (
