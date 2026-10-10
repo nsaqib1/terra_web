@@ -9,10 +9,12 @@ import { extractErrorMessage } from "@/lib/api/errors";
 import { postsApi } from "@/lib/api/posts";
 
 import { CommunitySelector } from "./CommunitySelector";
-import { PostGuidelines } from "./PostGuidelines";
+import { PopularTags } from "./PopularTags";
 import { TagPicker } from "./TagPicker";
 import { PostEditor } from "./editor/PostEditor";
 import type { PostDocument } from "./editor/editor-types";
+
+const MAX_TAGS = 5;
 
 export function CreatePostForm() {
   const router = useRouter();
@@ -42,11 +44,15 @@ export function CreatePostForm() {
   }
 
   function toggleTag(tagId: string) {
-    setTagIds((current) =>
-      current.includes(tagId)
-        ? current.filter((id) => id !== tagId)
-        : [...current, tagId],
-    );
+    setTagIds((current) => {
+      if (current.includes(tagId)) {
+        return current.filter((id) => id !== tagId);
+      }
+      if (current.length >= MAX_TAGS) {
+        return current;
+      }
+      return [...current, tagId];
+    });
   }
 
   async function handlePublish() {
@@ -142,7 +148,13 @@ export function CreatePostForm() {
           </div>
         </main>
 
-        <PostGuidelines />
+        <div className="min-w-0">
+          <PopularTags
+            communityId={communityId}
+            selected={tagIds}
+            onToggle={toggleTag}
+          />
+        </div>
       </div>
     </div>
   );
