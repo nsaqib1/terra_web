@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { PlusCircle, RefreshCw, AlertCircle, Sparkles, CheckCircle2, Info, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { FeedPostCard } from "@/components/feed/FeedPostCard";
 import { FeedSorting } from "@/components/feed/FeedSorting";
-import { FeedPagination } from "@/components/feed/FeedPagination";
 import { FeedSkeleton } from "@/components/feed/FeedSkeleton";
 import { FeedEmptyState } from "@/components/feed/FeedEmptyState";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
@@ -19,9 +18,11 @@ const PAGE_SIZE = 10;
 
 export default function Home() {
   const [posts, setPosts] = useState<PostItem[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [totalItems, setTotalItems] = useState<number>(0);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const requestInFlightRef = useRef(false);
   const [currentSort, setCurrentSort] = useState<PostSortOption>("newest");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
@@ -37,67 +38,82 @@ export default function Home() {
   }, []);
 
   const loadFeed = useCallback(
-    async (page: number, sort: PostSortOption) => {
-      setIsLoading(true);
+    async (cursor: string | null, sort: PostSortOption, append = false) => {
+      if (requestInFlightRef.current) return;
+      requestInFlightRef.current = true;
       setErrorMessage(null);
+      if (append) setIsLoadingMore(true);
+      else {
+        setIsLoading(true);
+        setErrorMessage(null);
+      }
 
       try {
         const response = await postsApi.list({
-          page,
           limit: PAGE_SIZE,
           sort,
+          cursor: cursor ?? undefined,
+          cursorMode: true,
+          tag: selectedTag ?? undefined,
         });
-
-        setPosts(response.data || []);
-        setCurrentPage(response.meta?.page || page);
-        setTotalPages(response.meta?.totalPages || 1);
-        setTotalItems(response.meta?.total || 0);
+        const batch = response.data || [];
+        setPosts((current) => append ? [...current, ...batch.filter((item) => !current.some((existing) => existing.id === item.id))] : batch);
+        setNextCursor(response.meta?.nextCursor ?? null);
+        setHasMore(Boolean(response.meta?.hasNextPage && response.meta?.nextCursor));
       } catch (err: unknown) {
         const msg = extractErrorMessage(err) || "Failed to load discussions feed.";
         setErrorMessage(msg);
       } finally {
+        requestInFlightRef.current = false;
         setIsLoading(false);
+        setIsLoadingMore(false);
       }
     },
-    []
+    [selectedTag]
   );
 
-  // Initial fetch and fetch on sort or page change
+  // Initial load and refresh whenever the sorting mode changes.
   useEffect(() => {
-    loadFeed(currentPage, currentSort);
-  }, [loadFeed, currentPage, currentSort]);
+    setPosts([]);
+    setNextCursor(null);
+    setHasMore(true);
+    loadFeed(null, currentSort, false);
+  }, [loadFeed, currentSort, selectedTag]);
+
+  // Load the next batch automatically when the sentinel approaches the viewport.
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore || isLoading || isLoadingMore || errorMessage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && nextCursor && !requestInFlightRef.current) {
+          loadFeed(nextCursor, currentSort, true);
+        }
+      },
+      { rootMargin: "500px 0px", threshold: 0 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, isLoadingMore, errorMessage, nextCursor, currentSort, loadFeed]);
 
   const handleSortChange = (newSort: PostSortOption) => {
     if (newSort === currentSort) return;
     setCurrentSort(newSort);
-    setCurrentPage(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage === currentPage || newPage < 1 || newPage > totalPages) return;
-    setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleRefresh = () => {
-    loadFeed(currentPage, currentSort);
+    setPosts([]);
+    setNextCursor(null);
+    setHasMore(true);
+    loadFeed(null, currentSort, false);
   };
 
-  // Filter posts by tag if one is selected client-side
-  const displayedPosts = selectedTag
-    ? posts.filter((post) =>
-      post.tags?.some(
-        (t) =>
-          t.name.toLowerCase() === selectedTag.toLowerCase() ||
-          t.slug.toLowerCase() === selectedTag.toLowerCase()
-      )
-    )
-    : posts;
+  const displayedPosts = posts;
 
   return (
     <ProtectedRoute>
-      <OnboardingModal onComplete={() => loadFeed(1, currentSort)} />
+      <OnboardingModal onComplete={() => handleRefresh()} />
       <AppShell
         contextualSidebarContent={
           <FeedSorting
@@ -181,15 +197,17 @@ export default function Home() {
                 />
               ))}
 
-              {/* Pagination */}
-              <FeedPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                pageSize={PAGE_SIZE}
-                onPageChange={handlePageChange}
-                isLoading={isLoading}
-              />
+              <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
+              {isLoadingMore && <FeedSkeleton />}
+              {!hasMore && posts.length > 0 && (
+                <p className="py-6 text-center text-xs text-muted-foreground">You're all caught up.</p>
+              )}
+              {errorMessage && posts.length > 0 && (
+                <div className="py-4 text-center">
+                  <p className="mb-2 text-xs text-red-700">Couldn't load more discussions.</p>
+                  <button type="button" onClick={() => loadFeed(nextCursor, currentSort, true)} className="text-xs font-semibold text-brand-brown-800 hover:underline">Try again</button>
+                </div>
+              )}
             </div>
           )}
         </div>

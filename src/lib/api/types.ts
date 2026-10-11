@@ -391,6 +391,7 @@ export interface PaginatedResponse<T> {
     total: number;
     totalPages: number;
     hasNextPage?: boolean;
+    nextCursor?: string | null;
   };
 }
 
@@ -515,6 +516,9 @@ export interface GetPostsQuery {
   page?: number;
   limit?: number;
   sort?: PostSortOption;
+  cursor?: string;
+  cursorMode?: boolean;
+  tag?: string;
 }
 
 export interface CreatePostInput {

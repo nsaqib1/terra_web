@@ -19,6 +19,9 @@ export const postsApi = {
         page: query?.page,
         limit: query?.limit,
         sort: query?.sort,
+        cursor: query?.cursor,
+        cursorMode: query?.cursorMode,
+        tag: query?.tag,
       },
     });
   },
