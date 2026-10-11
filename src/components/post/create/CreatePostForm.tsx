@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -96,50 +96,62 @@ export function CreatePostForm() {
                 enableHashtags
               />
 
-              <div className="border-t pt-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="space-y-1">
-                    {pendingImageUploads > 0 && (
-                      <p className="text-[11px] font-medium text-brand-brown-800">
-                        Wait for the image upload to finish before publishing.
-                      </p>
-                    )}
-
+              <div className="flex flex-col gap-4 rounded-2xl border border-brand-sand-dark/70 bg-brand-cream/70 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-desert-light/70 text-brand-brown-800">
+                    <Send size={17} />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-semibold text-brand-brown-950">
+                      {canPublish
+                        ? "Ready to share?"
+                        : "Your post is taking shape"}
+                    </p>
+                    <p className="text-xs leading-relaxed text-brand-brown-600">
+                      {pendingImageUploads > 0
+                        ? "Finishing image uploads…"
+                        : !communityId
+                          ? "Choose a community to share your post."
+                          : !hasContent
+                            ? "Add some content to get your post ready."
+                            : "Your post will be shared with the selected community."}
+                    </p>
                     {submitError && (
-                      <p className="text-[11px] font-medium text-red-500">
+                      <p className="text-xs font-medium text-red-600">
                         {submitError}
                       </p>
                     )}
                   </div>
-
-                  <Button
-                    disabled={!canPublish}
-                    onClick={handlePublish}
-                    className="
-                      gap-2
-                      rounded-xl
-                      bg-brand-brown-950
-                      px-5
-                      font-semibold
-                      text-white
-                      shadow-none
-                      hover:bg-brand-brown-800
-                      disabled:opacity-50
-                    "
-                  >
-                    {isPending ? (
-                      <>
-                        <Loader2 size={15} className="animate-spin" />
-                        Publishing…
-                      </>
-                    ) : (
-                      <>
-                        Publish
-                        <ArrowRight size={15} />
-                      </>
-                    )}
-                  </Button>
                 </div>
+
+                <Button
+                  disabled={!canPublish}
+                  onClick={handlePublish}
+                  className="
+                    h-11 w-full
+                    gap-2
+                    rounded-xl
+                    bg-brand-brown-950
+                    px-6
+                    font-semibold
+                    text-white
+                    shadow-sm
+                    hover:bg-brand-brown-800
+                    sm:w-auto
+                  "
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      Publishing…
+                    </>
+                  ) : (
+                    <>
+                      Publish
+                      <ArrowRight size={15} />
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </div>
