@@ -82,46 +82,6 @@ export function EditPostForm({ post }: EditPostFormProps) {
 
   return (
     <div>
-      {/* Back breadcrumb */}
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/posts/${post.id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-brand-brown-950"
-        >
-          <ArrowLeft size={14} />
-          Back to post
-        </Link>
-
-        <Link
-          href="/posts/manage"
-          className="text-xs font-semibold text-muted-foreground transition-colors hover:text-brand-brown-950"
-        >
-          Manage all posts
-        </Link>
-      </div>
-
-      {/* Header */}
-      <div className="mt-5">
-        <div className="flex items-center gap-2">
-          <span className="rounded-md bg-brand-desert-light/70 px-2 py-0.5 text-xs font-bold text-brand-brown-800">
-            Editing Post
-          </span>
-          <span className="text-xs text-muted-foreground/60">•</span>
-          <span className="text-xs text-muted-foreground">
-            Posted in <strong>{post.community?.name}</strong>
-          </span>
-        </div>
-
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-brand-brown-950 sm:text-3xl">
-          Edit your post
-        </h1>
-
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-brown-600">
-          Make updates to your discussion or question. All edits will keep your existing comments,
-          upvotes, and citizen interactions intact.
-        </p>
-      </div>
-
       {/* Main Grid */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
         <main className="min-w-0">
