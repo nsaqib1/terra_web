@@ -1,25 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
+  ArrowRight,
   Check,
-  CheckCircle2,
   Info,
   Loader2,
-  Save,
+  Send,
   Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { extractErrorMessage } from "@/lib/api/errors";
 import { postsApi } from "@/lib/api/posts";
-import { PostItem } from "@/lib/api/types";
-import { PostEditor } from "@/components/post/create/editor/PostEditor";
-import { TagPicker } from "@/components/post/create/TagPicker";
+import type { PostItem, Tag } from "@/lib/api/types";
+import {
+  PostEditor,
+  type PostEditorHandle,
+} from "@/components/post/create/editor/PostEditor";
+import { PopularTags } from "@/components/post/create/PopularTags";
 import type { PostDocument } from "@/components/post/create/editor/editor-types";
+
+const MAX_TAGS = 5;
 
 interface EditPostFormProps {
   post: PostItem;
@@ -30,31 +34,37 @@ export function EditPostForm({ post }: EditPostFormProps) {
 
   const [document, setDocument] = useState<PostDocument | null>(post.document);
   const [pendingImageUploads, setPendingImageUploads] = useState(0);
-  const [tagIds, setTagIds] = useState<string[]>(
-    post.tags ? post.tags.map((t) => t.id) : []
-  );
+  const initialTagIds = post.tags?.map((tag) => tag.id) ?? [];
+  const [tagIds, setTagIds] = useState<string[]>(initialTagIds);
+  const preservedTagIdsRef = useRef(initialTagIds);
+  const postEditorRef = useRef<PostEditorHandle>(null);
 
   const [isPending, setIsPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // A post has content when it contains at least one node
-  const hasContent =
-    document !== null &&
-    document.content &&
-    document.content.length > 0;
+  const hasContent = documentHasContent(document);
 
   const canSave =
     hasContent &&
     !isPending &&
     pendingImageUploads === 0;
 
-  function toggleTag(tagId: string) {
-    setTagIds((current) =>
-      current.includes(tagId)
-        ? current.filter((id) => id !== tagId)
-        : [...current, tagId]
-    );
+  function handleEditorTagIdsChange(documentTagIds: string[]) {
+    setTagIds([...new Set([...preservedTagIdsRef.current, ...documentTagIds])]);
+  }
+
+  function handlePopularTagToggle(tag: Tag) {
+    if (tagIds.includes(tag.id)) {
+      preservedTagIdsRef.current = preservedTagIdsRef.current.filter(
+        (id) => id !== tag.id
+      );
+      setTagIds((current) => current.filter((id) => id !== tag.id));
+      postEditorRef.current?.removeHashtag(tag.id);
+      return;
+    }
+    if (tagIds.length >= MAX_TAGS) return;
+    postEditorRef.current?.insertHashtag(tag);
   }
 
   async function handleSave() {
@@ -82,12 +92,10 @@ export function EditPostForm({ post }: EditPostFormProps) {
 
   return (
     <div>
-      {/* Main Grid */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <main className="min-w-0">
-          <div className="-mx-4 rounded-none border-y border-brand-sand-dark/70 bg-white p-5 shadow-2xs sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
+          <div className="-mx-4 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
             <div className="space-y-6">
-              {/* Community Display (read-only) */}
               <div>
                 <label className="text-sm font-semibold text-brand-brown-900">
                   Community
@@ -109,90 +117,95 @@ export function EditPostForm({ post }: EditPostFormProps) {
                 </div>
               </div>
 
-              {/* Rich Editor */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-brand-brown-900">
-                  Post Content
-                </label>
                 <PostEditor
+                  ref={postEditorRef}
                   value={document}
                   onChange={setDocument}
                   onImageUploadsChange={setPendingImageUploads}
+                  communityId={post.community?.id || ""}
+                  selectedTagIds={tagIds}
+                  onTagIdsChange={handleEditorTagIdsChange}
+                  enableHashtags
                 />
               </div>
 
-              {/* Tag Picker */}
-              <TagPicker
-                communityId={post.community?.id || ""}
-                selected={tagIds}
-                onToggle={toggleTag}
-              />
-
-              {/* Footer Actions */}
-              <div className="border-t border-brand-sand-dark/60 pt-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="space-y-1">
-                    {submitError ? (
-                      <p className="text-xs font-semibold text-red-600">
+              <div className="flex flex-col gap-4 rounded-2xl border border-brand-sand-dark/70 bg-brand-cream/70 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-desert-light/70 text-brand-brown-800">
+                    <Send size={17} />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-semibold text-brand-brown-950">
+                      {submitSuccess
+                        ? "Changes saved"
+                        : canSave
+                          ? "Ready to save?"
+                          : "Your post is taking shape"}
+                    </p>
+                    <p className="text-xs leading-relaxed text-brand-brown-600">
+                      {pendingImageUploads > 0
+                        ? "Finishing image uploads…"
+                        : !hasContent
+                          ? "Add some content before saving your changes."
+                          : submitSuccess
+                            ? "Returning to your updated post…"
+                            : "Your changes will be shared with the selected community."}
+                    </p>
+                    {submitError && (
+                      <p className="text-xs font-medium text-red-600">
                         {submitError}
-                      </p>
-                    ) : submitSuccess ? (
-                      <p className="flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-                        <CheckCircle2 size={15} />
-                        Changes saved successfully! Redirecting…
-                      </p>
-                    ) : (
-                      <p className="text-[11px] leading-5 text-muted-foreground">
-                        {pendingImageUploads > 0
-                          ? "Wait for the image upload to finish before saving."
-                          : "Your changes will take effect immediately."}
                       </p>
                     )}
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-2.5">
-                    <Link href={`/posts/${post.id}`}>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={isPending}
-                        className="rounded-xl border-brand-sand-dark text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand/60"
-                      >
-                        Cancel
-                      </Button>
-                    </Link>
-
+                <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                  <Link href={`/posts/${post.id}`}>
                     <Button
-                      disabled={!canSave || isPending}
-                      onClick={handleSave}
-                      className="gap-2 rounded-xl bg-brand-brown-950 px-5 text-xs font-semibold text-white shadow-xs hover:bg-brand-brown-900 disabled:opacity-50"
+                      type="button"
+                      variant="outline"
+                      disabled={isPending}
+                      className="h-11 w-full rounded-xl border-brand-sand-dark px-5 font-semibold text-brand-brown-800 hover:bg-brand-sand/60 sm:w-auto"
                     >
-                      {isPending ? (
-                        <>
-                          <Loader2 size={15} className="animate-spin" />
-                          Saving Changes…
-                        </>
-                      ) : submitSuccess ? (
-                        <>
-                          <Check size={15} />
-                          Saved!
-                        </>
-                      ) : (
-                        <>
-                          <Save size={15} />
-                          Save Changes
-                        </>
-                      )}
+                      Cancel
                     </Button>
-                  </div>
+                  </Link>
+                  <Button
+                    disabled={!canSave || isPending}
+                    onClick={handleSave}
+                    className="h-11 w-full gap-2 rounded-xl bg-brand-brown-950 px-6 font-semibold text-white shadow-sm hover:bg-brand-brown-800 sm:w-auto"
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin" />
+                        Saving…
+                      </>
+                    ) : submitSuccess ? (
+                      <>
+                        <Check size={15} />
+                        Saved
+                      </>
+                    ) : (
+                      <>
+                        Save changes
+                        <ArrowRight size={15} />
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </main>
 
-        {/* Sidebar Info & Guidelines */}
         <aside className="space-y-4">
+          <PopularTags
+            communityId={post.community?.id || ""}
+            selected={tagIds}
+            onToggle={handlePopularTagToggle}
+          />
+
           <div className="-mx-4 rounded-none border-y border-brand-sand-dark/60 bg-white p-5 shadow-2xs sm:mx-0 sm:rounded-2xl sm:border">
             <h3 className="flex items-center gap-2 text-sm font-bold text-brand-brown-950">
               <Sparkles size={16} className="text-brand-desert-dark" />
@@ -234,4 +247,37 @@ export function EditPostForm({ post }: EditPostFormProps) {
       </div>
     </div>
   );
+}
+
+function documentHasContent(document: PostDocument | null): boolean {
+  if (!document) return false;
+
+  function nodeHasContent(value: unknown): boolean {
+    if (!value || typeof value !== "object") return false;
+    const node = value as Record<string, unknown>;
+
+    if (typeof node.text === "string" && node.text.trim().length > 0) {
+      return true;
+    }
+
+    if (
+      node.type === "image" &&
+      typeof node.mediaId === "string" &&
+      node.mediaId.length > 0
+    ) {
+      return true;
+    }
+
+    if (
+      node.type === "youtube" &&
+      typeof node.videoId === "string" &&
+      node.videoId.length > 0
+    ) {
+      return true;
+    }
+
+    return Array.isArray(node.content) && node.content.some(nodeHasContent);
+  }
+
+  return document.content.some(nodeHasContent);
 }
