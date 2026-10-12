@@ -1,12 +1,13 @@
 "use client";
 
 import {
-  ChevronDown,
   LayoutList,
   LogOut,
   Menu,
+  PenLine,
   Search,
   Shield,
+  Sparkles,
   User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -71,7 +72,7 @@ export function TopBar() {
             <Menu size={21} strokeWidth={2} />
           </button>
 
-          <div className="w-auto shrink-0 lg:w-[220px]">
+          <div className="w-auto shrink-0 lg:w-59.5">
             <div className="hidden sm:block">
               <Logo />
             </div>
@@ -88,7 +89,7 @@ export function TopBar() {
           </div>
 
           {/* Desktop search */}
-          <div className="hidden max-w-2xl flex-1 md:block">
+          <div className="hidden max-w-2xl flex-1 md:block xl:ml-[clamp(0px,calc((100vw-1346px)/2),127px)] 2xl:ml-0">
             <div className="relative">
               <Search
                 size={18}
@@ -127,97 +128,110 @@ export function TopBar() {
               <>
                 {user ? (
                   <>
+                    <Link
+                      href="/posts/create"
+                      className="inline-flex h-9 items-center gap-2 rounded-xl bg-brand-brown-950 px-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-brown-900"
+                    >
+                      <PenLine size={15} />
+                      <span className="hidden sm:inline">Create Post</span>
+                      <span className="sr-only sm:hidden">Create Post</span>
+                    </Link>
                     <NotificationBell />
                     <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowDropdown(!showDropdown)}
-                      className="ml-1 flex items-center gap-2 rounded-xl p-1 text-left transition-colors hover:bg-brand-sand/60"
-                    >
-                      <Avatar className="h-9 w-9 border border-brand-sand-dark">
-                        {user.avatarUrl && (
-                          <AvatarImage src={user.avatarUrl} alt={user.displayName} />
-                        )}
-                        <AvatarFallback className="bg-brand-desert text-xs font-bold text-brand-brown-950">
-                          {getInitials(user.displayName || user.username)}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="hidden text-left lg:block">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm font-semibold leading-none text-brand-brown-950">
-                            {user.displayName}
-                          </p>
-                          {user.role === "ADMIN" && (
-                            <span className="rounded-xs bg-amber-100 px-1 py-0.2 text-[8px] font-bold uppercase leading-none text-amber-800">
-                              Admin
-                            </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="ml-1 flex h-10 w-10 items-center justify-center rounded-full transition-shadow hover:ring-2 hover:ring-brand-desert-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-desert-dark"
+                        aria-label={`Open profile menu for ${user.displayName}`}
+                        aria-expanded={showDropdown}
+                        aria-haspopup="true"
+                      >
+                        <Avatar className="h-9 w-9 border border-brand-sand-dark">
+                          {user.avatarUrl && (
+                            <AvatarImage src={user.avatarUrl} alt={user.displayName} />
                           )}
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {user.points.toLocaleString()} points
-                        </p>
-                      </div>
+                          <AvatarFallback className="bg-brand-desert text-xs font-bold text-brand-brown-950">
+                            {getInitials(user.displayName || user.username)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
 
-                      <ChevronDown size={16} className="hidden text-muted-foreground lg:block" />
-                    </button>
-
-                    {showDropdown && (
-                      <div className="absolute right-0 top-12 z-50 w-48 rounded-xl border border-brand-sand-dark bg-white p-1.5 shadow-lg animate-in fade-in slide-in-from-top-2">
-                        <div className="border-b border-brand-sand/60 px-3 py-2 lg:hidden">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-semibold text-brand-brown-950">{user.displayName}</p>
-                            {user.role === "ADMIN" && (
-                              <span className="rounded-xs bg-amber-100 px-1 py-0.2 text-[8px] font-bold uppercase leading-none text-amber-800">
-                                Admin
-                              </span>
-                            )}
+                      {showDropdown && (
+                        <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-brand-sand-dark/80 bg-white p-1.5 shadow-xl shadow-brand-brown-950/10 animate-in fade-in slide-in-from-top-2">
+                          <div className="border-b border-brand-sand/70 bg-brand-cream/60 px-3.5 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 shrink-0 border border-brand-sand-dark">
+                                {user.avatarUrl && (
+                                  <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+                                )}
+                                <AvatarFallback className="bg-brand-desert text-xs font-bold text-brand-brown-950">
+                                  {getInitials(user.displayName || user.username)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex min-w-0 items-center gap-1.5">
+                                  <p className="truncate text-sm font-bold text-brand-brown-950">
+                                    {user.displayName}
+                                  </p>
+                                  {user.role === "ADMIN" && (
+                                    <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-amber-800">
+                                      Admin
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                  @{user.username}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-desert-light px-2.5 py-1 text-[11px] font-semibold text-brand-brown-900">
+                              <Sparkles size={13} />
+                              {user.points.toLocaleString()} points
+                            </div>
                           </div>
-                          <p className="text-xs text-muted-foreground">@{user.username}</p>
-                        </div>
 
-                        {user.role === "ADMIN" && (
+                          {user.role === "ADMIN" && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setShowDropdown(false)}
+                              className="mb-1 mt-1 flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-50"
+                            >
+                              <Shield size={15} className="text-amber-700" />
+                              Admin Console
+                            </Link>
+                          )}
+
                           <Link
-                            href="/admin"
+                            href="/posts/manage"
                             onClick={() => setShowDropdown(false)}
-                            className="mb-1 flex items-center gap-2 rounded-lg bg-amber-50/70 px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100/70"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-brown-800 transition-colors hover:bg-brand-sand"
                           >
-                            <Shield size={15} className="text-amber-700" />
-                            Admin Console
+                            <LayoutList size={15} />
+                            Manage Posts
                           </Link>
-                        )}
 
-                        <Link
-                          href="/posts/manage"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand"
-                        >
-                          <LayoutList size={15} />
-                          Manage Posts
-                        </Link>
+                          <Link
+                            href="/profile"
+                            onClick={() => setShowDropdown(false)}
+                            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-brown-800 transition-colors hover:bg-brand-sand"
+                          >
+                            <UserIcon size={15} />
+                            Profile
+                          </Link>
 
-                        <Link
-                          href="/profile"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand"
-                        >
-                          <UserIcon size={15} />
-                          Profile
-                        </Link>
-
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            setShowDropdown(false);
-                            await logout();
-                          }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
-                        >
-                          <LogOut size={15} />
-                          Log out
-                        </button>
-                      </div>
-                    )}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              setShowDropdown(false);
+                              await logout();
+                            }}
+                            className="mt-1 flex w-full items-center gap-2 rounded-xl border-t border-brand-sand/70 px-3 py-2.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
+                          >
+                            <LogOut size={15} />
+                            Log out
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </>
                 ) : (

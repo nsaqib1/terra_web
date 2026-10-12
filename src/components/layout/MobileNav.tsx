@@ -3,9 +3,7 @@
 import {
   Compass,
   Home,
-  LayoutList,
   LogOut,
-  PenLine,
   Plus,
   X,
   Wrench,
@@ -26,8 +24,6 @@ interface MobileNavProps {
 
 const navigation = [
   { label: "Home", icon: Home, href: "/" },
-  { label: "Create Post", icon: PenLine, href: "/posts/create" },
-  { label: "My Posts", icon: LayoutList, href: "/posts/manage" },
   { label: "Explore Communities", icon: Compass, href: "/communities" },
   { label: "Tools", icon: Wrench, href: "/tools" },
 ];
@@ -112,11 +108,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
           <nav className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
-              const active =
-                pathname === item.href ||
-                (item.href === "/posts/manage" &&
-                  pathname.startsWith("/posts/") &&
-                  pathname.endsWith("/edit"));
+              const active = pathname === item.href;
 
               return (
                 <Link

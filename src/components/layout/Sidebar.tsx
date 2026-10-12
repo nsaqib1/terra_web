@@ -5,8 +5,6 @@ import {
   FileText,
   Flame,
   Home,
-  LayoutList,
-  Pen,
   Plus,
   Settings,
   User,
@@ -31,16 +29,6 @@ const mainNavigation = [
     label: "Home",
     icon: Home,
     href: "/",
-  },
-  {
-    label: "Create Post",
-    icon: Pen,
-    href: "/posts/create",
-  },
-  {
-    label: "Manage Posts",
-    icon: LayoutList,
-    href: "/posts/manage",
   },
   {
     label: "Explore Communities",
@@ -138,11 +126,7 @@ export function Sidebar() {
         <nav className="space-y-1">
           {mainNavigation.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              pathname === item.href ||
-              (item.href === "/posts/manage" &&
-                pathname.startsWith("/posts/") &&
-                pathname.endsWith("/edit"));
+            const isActive = pathname === item.href;
 
             return (
               <Link
