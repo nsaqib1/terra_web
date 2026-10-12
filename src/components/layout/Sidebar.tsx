@@ -10,6 +10,7 @@ import {
   Plus,
   Settings,
   User,
+  Wrench,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -46,6 +47,7 @@ const mainNavigation = [
     icon: Compass,
     href: "/communities",
   },
+  { label: "Tools", icon: Wrench, href: "/tools" },
 ];
 
 function communityInitials(name: string): string {

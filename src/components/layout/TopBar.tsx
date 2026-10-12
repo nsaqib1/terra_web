@@ -23,6 +23,8 @@ import { NotificationBell } from "./NotificationBell";
 function getPageTitle(pathname: string): string {
   if (pathname === "/") return "Home";
   if (pathname === "/communities") return "Communities";
+  if (pathname === "/tools" || pathname.startsWith("/tools/")) return "Tools";
+  if (pathname === "/games" || pathname.startsWith("/games/")) return "Games";
   if (pathname === "/communities/propose") return "Propose Community";
   if (pathname === "/posts/create") return "Create Post";
   if (pathname === "/posts/manage") return "My Posts";

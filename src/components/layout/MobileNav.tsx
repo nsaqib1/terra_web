@@ -8,6 +8,7 @@ import {
   PenLine,
   Plus,
   X,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,6 +29,7 @@ const navigation = [
   { label: "Create Post", icon: PenLine, href: "/posts/create" },
   { label: "My Posts", icon: LayoutList, href: "/posts/manage" },
   { label: "Explore Communities", icon: Compass, href: "/communities" },
+  { label: "Tools", icon: Wrench, href: "/tools" },
 ];
 
 function communityInitials(name: string): string {

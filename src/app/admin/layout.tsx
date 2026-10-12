@@ -11,7 +11,7 @@ import {
   Shield,
   Tag,
   Files,
-  Gamepad2,
+  Gamepad2, Wrench,
   FileText,
   Ticket,
   Users,
@@ -63,6 +63,11 @@ const adminNavItems = [
     icon: Gamepad2,
   },
   {
+    label: "Tools",
+    href: "/admin/tools",
+    icon: Wrench,
+  },
+  {
     label: "Posts",
     href: "/admin/posts",
     icon: FileText,
@@ -95,6 +100,7 @@ export default function AdminLayout({
     if (pathname.startsWith("/admin/tags")) return "Tags";
     if (pathname.startsWith("/admin/resources")) return "Resources";
     if (pathname.startsWith("/admin/games")) return "Games";
+    if (pathname.startsWith("/admin/tools")) return "Tools";
     if (pathname.startsWith("/admin/posts")) return "Posts";
     return "Admin Console";
   };

@@ -18,6 +18,7 @@ import {
   PaginatedResponse,
   ReviewProposalInput,
   UpdateCommunityInput,
+  AdminTool, AdminToolQuery, CreateToolInput, UpdateToolInput, ToolVersion, CreateToolVersionInput,
 } from "./types";
 
 export const adminApi = {
@@ -167,6 +168,22 @@ export const adminApi = {
       formData,
     );
   },
+
+  async getTools(query?: AdminToolQuery): Promise<PaginatedResponse<AdminTool>> {
+    return apiClient.get<PaginatedResponse<AdminTool>>("/admin/tools", { params: query as Record<string, string | number | boolean | undefined> });
+  },
+  async getTool(id: string): Promise<AdminTool> { return apiClient.get<AdminTool>(`/admin/tools/${id}`); },
+  async createTool(data: CreateToolInput): Promise<AdminTool> { return apiClient.post<AdminTool>("/admin/tools", data); },
+  async updateTool(id: string, data: UpdateToolInput): Promise<AdminTool> { return apiClient.patch<AdminTool>(`/admin/tools/${id}`, data); },
+  async updateToolCommunities(id: string, communityIds: string[]): Promise<AdminTool> { return apiClient.put<AdminTool>(`/admin/tools/${id}/communities`, { communityIds }); },
+  async deleteTool(id: string): Promise<AdminTool> { return apiClient.delete<AdminTool>(`/admin/tools/${id}`); },
+  async publishTool(id: string): Promise<AdminTool> { return apiClient.post<AdminTool>(`/admin/tools/${id}/publish`); },
+  async unpublishTool(id: string): Promise<AdminTool> { return apiClient.post<AdminTool>(`/admin/tools/${id}/unpublish`); },
+  async getToolVersions(id: string): Promise<ToolVersion[]> { return apiClient.get<ToolVersion[]>(`/admin/tools/${id}/versions`); },
+  async createToolVersion(id: string, data: CreateToolVersionInput): Promise<ToolVersion> { return apiClient.post<ToolVersion>(`/admin/tools/${id}/versions`, data); },
+  async uploadToolBuild(id: string, versionId: string, file: File): Promise<ToolVersion> { const form = new FormData(); form.append("file", file); return apiClient.post<ToolVersion>(`/admin/tools/${id}/versions/${versionId}/build`, form); },
+  async publishToolVersion(id: string, versionId: string): Promise<AdminTool> { return apiClient.post<AdminTool>(`/admin/tools/${id}/versions/${versionId}/publish`); },
+  async archiveToolVersion(id: string, versionId: string): Promise<ToolVersion> { return apiClient.post<ToolVersion>(`/admin/tools/${id}/versions/${versionId}/archive`); },
 
   /**
    * Get citizen community proposals with status filter

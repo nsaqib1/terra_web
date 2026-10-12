@@ -776,3 +776,18 @@ export interface NotificationsResponse {
 export interface NotificationUnreadCountResponse {
   count: number;
 }
+
+
+export type ToolCategory = "DEVELOPER" | "PRODUCTIVITY" | "MEDIA" | "EDUCATION" | "ENGINEERING" | "OTHER";
+export type ToolType = "CLIENT" | "SERVER" | "HYBRID";
+export type ToolStatus = "DRAFT" | "PUBLISHED" | "UNPUBLISHED" | "ARCHIVED";
+export type ToolVersionStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+export interface ToolCommunity { id: string; name: string; slug: string; }
+export interface PublicTool { id: string; slug: string; title: string; description: string | null; thumbnailUrl: string | null; category: ToolCategory; type: ToolType; currentVersionId: string | null; communities: ToolCommunity[]; launchUrl: string | null; createdAt: string; updatedAt: string; }
+export interface ToolVersion { id: string; toolId: string; version: string; buildPath: string | null; status: ToolVersionStatus; releaseNotes: string | null; createdAt: string; updatedAt: string; publishedAt: string | null; }
+export interface AdminTool extends PublicTool { status: ToolStatus; deletedAt: string | null; versions: ToolVersion[]; }
+export interface CreateToolInput { title: string; slug: string; description?: string; thumbnailUrl?: string; category?: ToolCategory; type?: ToolType; communityIds?: string[]; }
+export interface UpdateToolInput { title?: string; slug?: string; description?: string; thumbnailUrl?: string; category?: ToolCategory; type?: ToolType; status?: ToolStatus; }
+export interface CreateToolVersionInput { version: string; releaseNotes?: string; }
+export interface ToolQuery { q?: string; category?: ToolCategory; type?: ToolType; communityId?: string; }
+export interface AdminToolQuery { search?: string; status?: ToolStatus; category?: ToolCategory; type?: ToolType; communityId?: string; page?: number; limit?: number; }
