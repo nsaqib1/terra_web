@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { extractErrorMessage } from "@/lib/api/errors";
 import { postsApi } from "@/lib/api/posts";
+import { useCreatePostCommunity } from "@/context/CreatePostCommunityContext";
 
 import { CommunitySelector } from "./CommunitySelector";
 import { PopularTags } from "./PopularTags";
@@ -16,16 +17,10 @@ import type { PostDocument } from "./editor/editor-types";
 
 const MAX_TAGS = 5;
 
-interface CreatePostFormProps {
-  initialCommunityId?: string;
-}
-
-export function CreatePostForm({
-  initialCommunityId = "",
-}: CreatePostFormProps) {
+export function CreatePostForm() {
   const router = useRouter();
+  const { communityId, setCommunityId } = useCreatePostCommunity();
 
-  const [communityId, setCommunityId] = useState<string>(initialCommunityId);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [document, setDocument] = useState<PostDocument | null>(null);
   const [pendingImageUploads, setPendingImageUploads] = useState(0);

@@ -18,6 +18,7 @@ import { Logo } from "@/components/brand/Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useCreatePostCommunity } from "@/context/CreatePostCommunityContext";
 import { MobileNav } from "./MobileNav";
 import { NotificationBell } from "./NotificationBell";
 import { CommunitySelector } from "@/components/post/create/CommunitySelector";
@@ -43,6 +44,7 @@ export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { setCommunityId } = useCreatePostCommunity();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCommunityPicker, setShowCommunityPicker] = useState(false);
@@ -131,15 +133,17 @@ export function TopBar() {
               <>
                 {user ? (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => setShowCommunityPicker(true)}
-                      className="inline-flex h-9 items-center gap-2 rounded-xl bg-brand-brown-950 px-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-brown-900"
-                    >
-                      <PenLine size={15} />
-                      <span className="hidden sm:inline">Create Post</span>
-                      <span className="sr-only sm:hidden">Create Post</span>
-                    </button>
+                    {pathname !== "/posts/create" && (
+                      <button
+                        type="button"
+                        onClick={() => setShowCommunityPicker(true)}
+                        className="inline-flex h-9 items-center gap-2 rounded-xl bg-brand-brown-950 px-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-brown-900"
+                      >
+                        <PenLine size={15} />
+                        <span className="hidden sm:inline">Create Post</span>
+                        <span className="sr-only sm:hidden">Create Post</span>
+                      </button>
+                    )}
                     <NotificationBell />
                     <div className="relative">
                       <button
@@ -252,10 +256,9 @@ export function TopBar() {
           <CommunitySelector
             value=""
             onChange={(communityId) => {
+              setCommunityId(communityId);
               setShowCommunityPicker(false);
-              router.push(
-                `/posts/create?communityId=${encodeURIComponent(communityId)}`,
-              );
+              router.push("/posts/create");
             }}
             onClose={() => setShowCommunityPicker(false)}
             allowCloseWithoutSelection
