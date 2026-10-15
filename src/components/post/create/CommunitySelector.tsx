@@ -2,7 +2,14 @@
 
 import { Check, ChevronDown, Compass, Search, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  useEffect,
+  useCallback,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 
 import {
@@ -17,6 +24,7 @@ interface CommunitySelectorProps {
   value: string;
   onChange: (id: string) => void;
   onClose: () => void;
+  allowCloseWithoutSelection?: boolean;
 }
 
 /**
@@ -30,6 +38,10 @@ const AVATAR_PALETTES = [
   { bg: "bg-yellow-100 text-yellow-950 border-yellow-200/90" },
   { bg: "bg-rose-100 text-rose-950 border-rose-200/90" },
 ];
+
+const subscribeToNothing = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 function getPalette(seed: string) {
   let hash = 0;
@@ -52,8 +64,13 @@ export function CommunitySelector({
   value,
   onChange,
   onClose,
+  allowCloseWithoutSelection = false,
 }: CommunitySelectorProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    subscribeToNothing,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
   // Show modal immediately if no community is selected yet
   const [isRendered, setIsRendered] = useState(!value);
   const [isVisible, setIsVisible] = useState(false);
@@ -67,13 +84,28 @@ export function CommunitySelector({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Can the user close/cancel the modal? Only if a community is already selected.
-  const canClose = Boolean(value);
+  const canClose = Boolean(value) || allowCloseWithoutSelection;
+
+  // Close modal with smooth exit transition
+  const closeModal = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(() => {
+      setIsRendered(false);
+    }, 200);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    if (value) {
+      closeModal();
+      return;
+    }
+
+    onClose();
+  }, [value, closeModal, onClose]);
 
   // Client-only portal mount guard + smooth initial entrance if mandatory
   useEffect(() => {
-    setMounted(true);
     if (!value) {
-      setIsRendered(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setIsVisible(true);
@@ -127,14 +159,6 @@ export function CommunitySelector({
     });
   }
 
-  // Close modal with smooth exit transition
-  function closeModal() {
-    setIsVisible(false);
-    setTimeout(() => {
-      setIsRendered(false);
-    }, 200);
-  }
-
   // Focus search input smoothly without jumping
   useEffect(() => {
     if (isVisible) {
@@ -145,23 +169,53 @@ export function CommunitySelector({
     }
   }, [isVisible]);
 
-  // Lock background body scroll and prevent page shift
+  // Keep the page and scrollbar in place while preventing background scrolling.
   useEffect(() => {
     if (!isRendered) return;
 
-    const originalOverflow = document.body.style.overflow;
-    const originalPaddingRight = document.body.style.paddingRight;
-
-    const scrollbarWidth =
-      window.innerWidth - document.documentElement.clientWidth;
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    function preventBackgroundScroll(event: WheelEvent | TouchEvent) {
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest("[data-community-modal-scroll]")
+      ) {
+        return;
+      }
+      event.preventDefault();
     }
-    document.body.style.overflow = "hidden";
+
+    function preventBackgroundKeyboardScroll(event: KeyboardEvent) {
+      if (
+        ["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(
+          event.key,
+        )
+      ) {
+        const target = event.target;
+        const isEditable =
+          target instanceof HTMLElement &&
+          (target.isContentEditable ||
+            ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+        if (isEditable && !["PageDown", "PageUp"].includes(event.key)) {
+          return;
+        }
+        if (
+          target instanceof Element &&
+          target.closest("[data-community-modal-scroll]")
+        ) {
+          return;
+        }
+        event.preventDefault();
+      }
+    }
+
+    document.addEventListener("wheel", preventBackgroundScroll, { passive: false });
+    document.addEventListener("touchmove", preventBackgroundScroll, { passive: false });
+    document.addEventListener("keydown", preventBackgroundKeyboardScroll);
 
     return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.paddingRight = originalPaddingRight;
+      document.removeEventListener("wheel", preventBackgroundScroll);
+      document.removeEventListener("touchmove", preventBackgroundScroll);
+      document.removeEventListener("keydown", preventBackgroundKeyboardScroll);
     };
   }, [isRendered]);
 
@@ -171,13 +225,13 @@ export function CommunitySelector({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        closeModal();
+        handleClose();
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isRendered, canClose]);
+  }, [isRendered, canClose, handleClose]);
 
   const selected = communities.find((community) => community.id === value);
   const filtered = communities.filter((community) => {
@@ -192,15 +246,6 @@ export function CommunitySelector({
   function chooseCommunity(id: string) {
     onChange(id);
     closeModal();
-  }
-
-  function handleClose() {
-    if (canClose) {
-      closeModal();
-      return;
-    }
-
-    onClose();
   }
 
   return (
@@ -285,7 +330,7 @@ export function CommunitySelector({
         isRendered &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden p-3 sm:p-5 md:p-6"
+            className="fixed inset-0 z-100 flex items-center justify-center overflow-hidden p-3 sm:p-5 md:p-6"
             style={{
               position: "fixed",
               top: 0,
@@ -309,7 +354,7 @@ export function CommunitySelector({
                 right: 0,
               }}
               onClick={() => {
-                if (canClose) closeModal();
+                if (canClose) handleClose();
               }}
               aria-hidden="true"
             />
@@ -346,7 +391,7 @@ export function CommunitySelector({
                     )}
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                    {canClose
+                    {value
                       ? "Switch the community for your post"
                       : "Choose where to publish your post to get started"}
                   </p>
@@ -356,7 +401,9 @@ export function CommunitySelector({
                   type="button"
                   onClick={handleClose}
                   aria-label={
-                    canClose ? "Close modal" : "Return to previous page"
+                    value || allowCloseWithoutSelection
+                      ? "Close modal"
+                      : "Return to previous page"
                   }
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-brand-brown-700 transition hover:bg-brand-sand active:scale-95"
                 >
@@ -396,7 +443,10 @@ export function CommunitySelector({
               </div>
 
               {/* Streamlined Communities Grid */}
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-3 sm:px-7 sm:py-4">
+              <div
+                data-community-modal-scroll
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-3 sm:px-7 sm:py-4"
+              >
                 {isLoading ? (
                   <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
                     {Array.from({ length: 6 }).map((_, index) => (
@@ -534,4 +584,3 @@ export function CommunitySelector({
     </>
   );
 }
-

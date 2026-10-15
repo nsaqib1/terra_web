@@ -16,10 +16,16 @@ import type { PostDocument } from "./editor/editor-types";
 
 const MAX_TAGS = 5;
 
-export function CreatePostForm() {
+interface CreatePostFormProps {
+  initialCommunityId?: string;
+}
+
+export function CreatePostForm({
+  initialCommunityId = "",
+}: CreatePostFormProps) {
   const router = useRouter();
 
-  const [communityId, setCommunityId] = useState<string>("");
+  const [communityId, setCommunityId] = useState<string>(initialCommunityId);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [document, setDocument] = useState<PostDocument | null>(null);
   const [pendingImageUploads, setPendingImageUploads] = useState(0);

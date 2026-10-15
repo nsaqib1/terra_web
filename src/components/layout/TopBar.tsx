@@ -11,7 +11,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Logo } from "@/components/brand/Logo";
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { MobileNav } from "./MobileNav";
 import { NotificationBell } from "./NotificationBell";
+import { CommunitySelector } from "@/components/post/create/CommunitySelector";
 
 function getPageTitle(pathname: string): string {
   if (pathname === "/") return "Home";
@@ -40,9 +41,11 @@ function getPageTitle(pathname: string): string {
 
 export function TopBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCommunityPicker, setShowCommunityPicker] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -128,14 +131,15 @@ export function TopBar() {
               <>
                 {user ? (
                   <>
-                    <Link
-                      href="/posts/create"
+                    <button
+                      type="button"
+                      onClick={() => setShowCommunityPicker(true)}
                       className="inline-flex h-9 items-center gap-2 rounded-xl bg-brand-brown-950 px-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-brown-900"
                     >
                       <PenLine size={15} />
                       <span className="hidden sm:inline">Create Post</span>
                       <span className="sr-only sm:hidden">Create Post</span>
-                    </Link>
+                    </button>
                     <NotificationBell />
                     <div className="relative">
                       <button
@@ -242,6 +246,22 @@ export function TopBar() {
           </div>
         </div>
       </header>
+
+      {showCommunityPicker && (
+        <div className="hidden">
+          <CommunitySelector
+            value=""
+            onChange={(communityId) => {
+              setShowCommunityPicker(false);
+              router.push(
+                `/posts/create?communityId=${encodeURIComponent(communityId)}`,
+              );
+            }}
+            onClose={() => setShowCommunityPicker(false)}
+            allowCloseWithoutSelection
+          />
+        </div>
+      )}
 
       <MobileNav open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </>
