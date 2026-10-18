@@ -102,7 +102,7 @@ function EditableProfileHeader({
         <div className="-mt-14 sm:-mt-16">
           <div className="flex flex-col sm:flex-row sm:items-end gap-5">
             {/* Avatar with click & hover to edit */}
-            <div className="relative shrink-0 group">
+            <div className="relative w-fit shrink-0 self-start group">
               <div
                 onClick={onOpenAvatarModal}
                 className="relative cursor-pointer rounded-full overflow-hidden"
@@ -143,7 +143,7 @@ function EditableProfileHeader({
                 id="profile-change-avatar"
                 type="button"
                 onClick={onOpenAvatarModal}
-                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-brand-brown-950 text-white shadow-md transition-all hover:bg-brand-desert-dark hover:scale-110 active:scale-95"
+                className="absolute -right-1 bottom-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-brand-brown-950 text-white shadow-md transition-all hover:bg-brand-desert-dark hover:scale-110 active:scale-95 sm:right-1"
                 aria-label="Change profile picture"
                 title="Change profile picture (Crop, Rotate, Enhance)"
               >
@@ -872,12 +872,12 @@ export default function ProfilePage() {
     setProfileData((prev) =>
       prev
         ? {
-            ...prev,
-            user: {
-              ...prev.user,
-              coverUrl: newCoverUrl,
-            },
-          }
+          ...prev,
+          user: {
+            ...prev.user,
+            coverUrl: newCoverUrl,
+          },
+        }
         : null,
     );
   };
