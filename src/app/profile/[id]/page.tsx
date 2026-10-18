@@ -209,9 +209,16 @@ export default function PublicProfilePage() {
         ========================================================= */}
         <section className="-mx-4 overflow-hidden rounded-none border-y border-brand-sand-dark bg-white shadow-xs sm:mx-0 sm:rounded-3xl sm:border">
           {/* Banner */}
-          <div className="relative h-40 sm:h-48 w-full bg-gradient-to-r from-[#e8cba2] via-[#e2b781] to-[#cf985e]">
+          <div
+            className="relative h-40 sm:h-48 w-full bg-linear-to-r from-[#e8cba2] via-[#e2b781] to-[#cf985e] bg-cover bg-center"
+            style={
+              user.coverUrl
+                ? { backgroundImage: `url("${user.coverUrl}")` }
+                : undefined
+            }
+          >
             <div
-              className="absolute inset-0 opacity-25"
+              className={`absolute inset-0 ${user.coverUrl ? "opacity-0" : "opacity-25"}`}
               style={{
                 backgroundImage:
                   "radial-gradient(#2f291f 1px, transparent 1px), radial-gradient(#2f291f 1px, #e2b781 1px)",

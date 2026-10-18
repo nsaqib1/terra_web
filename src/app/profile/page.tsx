@@ -48,27 +48,34 @@ function EditableProfileHeader({
   displayName,
   username,
   avatarUrl,
+  coverUrl,
   bio,
   location,
   website,
   joinedDate,
   onOpenAvatarModal,
+  onOpenCoverModal,
 }: {
   displayName: string;
   username: string;
   avatarUrl: string | null;
+  coverUrl: string | null;
   bio: string;
   location: string;
   website: string;
   joinedDate: string;
   onOpenAvatarModal?: () => void;
+  onOpenCoverModal?: () => void;
 }) {
   return (
     <section className="-mx-4 overflow-hidden rounded-none border-y border-brand-sand-dark bg-white shadow-xs sm:mx-0 sm:rounded-3xl sm:border">
       {/* Cover */}
-      <div className="relative h-40 sm:h-48 w-full bg-gradient-to-r from-[#e8cba2] via-[#e2b781] to-[#cf985e]">
+      <div
+        className="relative h-40 sm:h-48 w-full bg-linear-to-r from-[#e8cba2] via-[#e2b781] to-[#cf985e] bg-cover bg-center"
+        style={coverUrl ? { backgroundImage: `url("${coverUrl}")` } : undefined}
+      >
         <div
-          className="absolute inset-0 opacity-25"
+          className={`absolute inset-0 ${coverUrl ? "opacity-0" : "opacity-25"}`}
           style={{
             backgroundImage:
               "radial-gradient(#2f291f 1px, transparent 1px), radial-gradient(#2f291f 1px, #e2b781 1px)",
@@ -81,6 +88,7 @@ function EditableProfileHeader({
         <button
           id="profile-change-cover"
           type="button"
+          onClick={onOpenCoverModal}
           className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl bg-white/85 text-brand-brown-950 shadow-sm backdrop-blur-md transition-colors hover:bg-white"
           aria-label="Change cover photo"
           title="Change cover photo"
@@ -793,6 +801,7 @@ export default function ProfilePage() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
 
   const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);
 
@@ -838,6 +847,7 @@ export default function ProfilePage() {
   const displayName = form.displayName || profileData?.user.displayName || user?.displayName || "";
   const username = form.username || profileData?.user.username || user?.username || "";
   const avatarUrl = profileData?.user.avatarUrl || user?.avatarUrl || null;
+  const coverUrl = profileData?.user.coverUrl ?? user?.coverUrl ?? null;
   const bio = form.bio || profileData?.user.bio || user?.bio || "";
   const location = form.location || profileData?.user.location || user?.location || "";
   const website = form.website || profileData?.user.website || user?.website || "";
@@ -855,6 +865,20 @@ export default function ProfilePage() {
           },
         }
         : null
+    );
+  };
+
+  const handleCoverUpdated = (newCoverUrl: string | null) => {
+    setProfileData((prev) =>
+      prev
+        ? {
+            ...prev,
+            user: {
+              ...prev.user,
+              coverUrl: newCoverUrl,
+            },
+          }
+        : null,
     );
   };
 
@@ -911,10 +935,12 @@ export default function ProfilePage() {
           displayName={displayName}
           username={username}
           avatarUrl={avatarUrl}
+          coverUrl={coverUrl}
           bio={bio}
           location={location}
           website={website}
           onOpenAvatarModal={() => setIsAvatarModalOpen(true)}
+          onOpenCoverModal={() => setIsCoverModalOpen(true)}
           joinedDate={
             createdAt
               ? new Date(createdAt).toLocaleDateString("en-US", {
@@ -1014,9 +1040,17 @@ export default function ProfilePage() {
       <AvatarUploadModal
         isOpen={isAvatarModalOpen}
         onClose={() => setIsAvatarModalOpen(false)}
-        currentAvatarUrl={avatarUrl}
-        onAvatarUpdated={handleAvatarUpdated}
+        currentImageUrl={avatarUrl}
+        onImageUpdated={handleAvatarUpdated}
         userDisplayName={displayName}
+      />
+      <AvatarUploadModal
+        isOpen={isCoverModalOpen}
+        onClose={() => setIsCoverModalOpen(false)}
+        currentImageUrl={coverUrl}
+        onImageUpdated={handleCoverUpdated}
+        userDisplayName={displayName}
+        variant="cover"
       />
     </AppShell>
   );

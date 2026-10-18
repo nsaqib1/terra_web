@@ -43,9 +43,10 @@ const API_BASE = API_URL.replace(/\/+$/, "");
 interface AvatarUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentAvatarUrl: string | null;
-  onAvatarUpdated: (newAvatarUrl: string | null) => void;
+  currentImageUrl: string | null;
+  onImageUpdated: (newImageUrl: string | null) => void;
   userDisplayName?: string;
+  variant?: "avatar" | "cover";
 }
 
 type FilterPreset = "normal" | "warm" | "vivid" | "mono" | "cool";
@@ -67,15 +68,19 @@ const DEFAULT_FILTERS: FilterSettings = {
 export function AvatarUploadModal({
   isOpen,
   onClose,
-  currentAvatarUrl,
-  onAvatarUpdated,
+  currentImageUrl,
+  onImageUpdated,
   userDisplayName = "User",
+  variant = "avatar",
 }: AvatarUploadModalProps) {
   const { setUser } = useAuth();
+  const isCover = variant === "cover";
 
   // Selected image source (Data URL or Object URL)
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [imageFileName, setImageFileName] = useState<string>("avatar.webp");
+  const [imageFileName, setImageFileName] = useState<string>(
+    isCover ? "cover.webp" : "avatar.webp",
+  );
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   // Transform states
@@ -110,7 +115,10 @@ export function AvatarUploadModal({
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Size of crop area inside container
-  const CROP_SIZE = 280;
+  const CROP_WIDTH = isCover ? 420 : 280;
+  const CROP_HEIGHT = isCover ? 140 : 280;
+  const PREVIEW_WIDTH = 160;
+  const PREVIEW_HEIGHT = isCover ? 54 : 160;
 
   // Reset transforms when new image is loaded
   const resetTransforms = useCallback(() => {
@@ -141,7 +149,9 @@ export function AvatarUploadModal({
         return;
       }
 
-      setImageFileName(file.name.replace(/\.[^/.]+$/, "") + ".webp");
+      setImageFileName(
+        `${file.name.replace(/\.[^/.]+$/, "")}-${isCover ? "cover" : "avatar"}.webp`,
+      );
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -159,7 +169,7 @@ export function AvatarUploadModal({
       };
       reader.readAsDataURL(file);
     },
-    [resetTransforms],
+    [isCover, resetTransforms],
   );
 
   // Handle global paste event for quick screenshots/copies
@@ -205,14 +215,18 @@ export function AvatarUploadModal({
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDraggingCanvas(true);
-    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    const rect = e.currentTarget.getBoundingClientRect();
+    const scale = CROP_WIDTH / rect.width;
+    dragStartPos.current = { x: e.clientX * scale, y: e.clientY * scale };
     panStartPos.current = { ...pan };
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDraggingCanvas) return;
-    const dx = e.clientX - dragStartPos.current.x;
-    const dy = e.clientY - dragStartPos.current.y;
+    const scale =
+      CROP_WIDTH / e.currentTarget.getBoundingClientRect().width;
+    const dx = e.clientX * scale - dragStartPos.current.x;
+    const dy = e.clientY * scale - dragStartPos.current.y;
     setPan({
       x: panStartPos.current.x + dx,
       y: panStartPos.current.y + dy,
@@ -234,9 +248,11 @@ export function AvatarUploadModal({
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1) {
       setIsDraggingCanvas(true);
+      const rect = e.currentTarget.getBoundingClientRect();
+      const scale = CROP_WIDTH / rect.width;
       dragStartPos.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
+        x: e.touches[0].clientX * scale,
+        y: e.touches[0].clientY * scale,
       };
       panStartPos.current = { ...pan };
     } else if (e.touches.length === 2) {
@@ -255,8 +271,10 @@ export function AvatarUploadModal({
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1 && isDraggingCanvas) {
-      const dx = e.touches[0].clientX - dragStartPos.current.x;
-      const dy = e.touches[0].clientY - dragStartPos.current.y;
+      const scale =
+        CROP_WIDTH / e.currentTarget.getBoundingClientRect().width;
+      const dx = e.touches[0].clientX * scale - dragStartPos.current.x;
+      const dy = e.touches[0].clientY * scale - dragStartPos.current.y;
       setPan({
         x: panStartPos.current.x + dx,
         y: panStartPos.current.y + dy,
@@ -313,15 +331,15 @@ export function AvatarUploadModal({
     if (!ctx) return;
 
     const img = imageElementRef.current;
-    canvas.width = CROP_SIZE;
-    canvas.height = CROP_SIZE;
+    canvas.width = CROP_WIDTH;
+    canvas.height = CROP_HEIGHT;
 
-    ctx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+    ctx.clearRect(0, 0, CROP_WIDTH, CROP_HEIGHT);
 
     ctx.save();
 
     // Center transform point
-    ctx.translate(CROP_SIZE / 2 + pan.x, CROP_SIZE / 2 + pan.y);
+    ctx.translate(CROP_WIDTH / 2 + pan.x, CROP_HEIGHT / 2 + pan.y);
 
     // Rotation (90deg step + fine angle)
     const totalAngle = ((rotation + fineAngle) * Math.PI) / 180;
@@ -337,7 +355,10 @@ export function AvatarUploadModal({
     ctx.filter = getFilterCSS(filters);
 
     // Draw image centered
-    const baseScale = Math.max(CROP_SIZE / img.width, CROP_SIZE / img.height);
+    const baseScale = Math.max(
+      CROP_WIDTH / img.width,
+      CROP_HEIGHT / img.height,
+    );
     const renderWidth = img.width * baseScale;
     const renderHeight = img.height * baseScale;
 
@@ -356,15 +377,23 @@ export function AvatarUploadModal({
       const pCanvas = previewCanvasRef.current;
       const pCtx = pCanvas.getContext("2d");
       if (pCtx) {
-        pCanvas.width = 160;
-        pCanvas.height = 160;
-        pCtx.clearRect(0, 0, 160, 160);
+        pCanvas.width = PREVIEW_WIDTH;
+        pCanvas.height = PREVIEW_HEIGHT;
+        pCtx.clearRect(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
         pCtx.save();
-        pCtx.beginPath();
-        pCtx.arc(80, 80, 80, 0, Math.PI * 2);
-        pCtx.closePath();
-        pCtx.clip();
-        pCtx.drawImage(canvas, 0, 0, 160, 160);
+        if (!isCover) {
+          pCtx.beginPath();
+          pCtx.arc(
+            PREVIEW_WIDTH / 2,
+            PREVIEW_HEIGHT / 2,
+            PREVIEW_WIDTH / 2,
+            0,
+            Math.PI * 2,
+          );
+          pCtx.closePath();
+          pCtx.clip();
+        }
+        pCtx.drawImage(canvas, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
         pCtx.restore();
       }
     }
@@ -377,7 +406,11 @@ export function AvatarUploadModal({
     flipV,
     pan,
     filters,
-    CROP_SIZE,
+    CROP_WIDTH,
+    CROP_HEIGHT,
+    PREVIEW_WIDTH,
+    PREVIEW_HEIGHT,
+    isCover,
   ]);
 
   // Export high resolution 512x512 canvas blob
@@ -389,10 +422,11 @@ export function AvatarUploadModal({
         return;
       }
 
-      const OUTPUT_SIZE = 512;
+      const OUTPUT_WIDTH = isCover ? 1500 : 512;
+      const OUTPUT_HEIGHT = isCover ? 500 : 512;
       const exportCanvas = document.createElement("canvas");
-      exportCanvas.width = OUTPUT_SIZE;
-      exportCanvas.height = OUTPUT_SIZE;
+      exportCanvas.width = OUTPUT_WIDTH;
+      exportCanvas.height = OUTPUT_HEIGHT;
       const ctx = exportCanvas.getContext("2d");
 
       if (!ctx) {
@@ -403,13 +437,13 @@ export function AvatarUploadModal({
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
 
-      // Scale pan from viewport size (CROP_SIZE) to OUTPUT_SIZE
-      const scaleMultiplier = OUTPUT_SIZE / CROP_SIZE;
+      // Scale pan from the editor viewport to the exported image.
+      const scaleMultiplier = OUTPUT_WIDTH / CROP_WIDTH;
 
       ctx.save();
       ctx.translate(
-        OUTPUT_SIZE / 2 + pan.x * scaleMultiplier,
-        OUTPUT_SIZE / 2 + pan.y * scaleMultiplier,
+        OUTPUT_WIDTH / 2 + pan.x * scaleMultiplier,
+        OUTPUT_HEIGHT / 2 + pan.y * scaleMultiplier,
       );
 
       const totalAngle = ((rotation + fineAngle) * Math.PI) / 180;
@@ -419,7 +453,7 @@ export function AvatarUploadModal({
       ctx.filter = getFilterCSS(filters);
 
       const baseScale =
-        Math.max(OUTPUT_SIZE / img.width, OUTPUT_SIZE / img.height);
+        Math.max(OUTPUT_WIDTH / img.width, OUTPUT_HEIGHT / img.height);
       const renderWidth = img.width * baseScale;
       const renderHeight = img.height * baseScale;
 
@@ -464,63 +498,68 @@ export function AvatarUploadModal({
       const uploadedMedia = await mediaApi.upload(croppedFile);
 
       // 3. Construct direct media URL
-      const newAvatarUrl = `${API_BASE}/media/${uploadedMedia.id}`;
+      const newImageUrl = `${API_BASE}/media/${uploadedMedia.id}`;
 
       // 4. Update user profile
-      const updated = await usersApi.updateProfile({
-        avatarUrl: newAvatarUrl,
-      });
+      const updated = await usersApi.updateProfile(
+        isCover ? { coverUrl: newImageUrl } : { avatarUrl: newImageUrl },
+      );
 
       // 5. Update global AuthContext user
       setUser((prev) =>
         prev
           ? {
             ...prev,
-            avatarUrl: updated.user.avatarUrl,
+            ...(isCover
+              ? { coverUrl: updated.user.coverUrl }
+              : { avatarUrl: updated.user.avatarUrl }),
           }
           : null,
       );
 
       // 6. Notify parent component
-      onAvatarUpdated(updated.user.avatarUrl);
+      onImageUpdated(
+        isCover ? updated.user.coverUrl : updated.user.avatarUrl,
+      );
 
       onClose();
     } catch (err: any) {
-      console.error("Avatar upload failed:", err);
+      console.error(`${isCover ? "Cover" : "Avatar"} upload failed:`, err);
       setErrorMessage(
         err?.message ||
-        "Failed to upload and update profile picture. Please try again.",
+        `Failed to upload and update profile ${isCover ? "cover" : "picture"}. Please try again.`,
       );
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Remove avatar
-  const handleRemoveAvatar = async () => {
-    if (!currentAvatarUrl) return;
+  // Remove the current profile image.
+  const handleRemoveImage = async () => {
+    if (!currentImageUrl) return;
     setIsRemoving(true);
     setErrorMessage(null);
 
     try {
-      const updated = await usersApi.updateProfile({
-        avatarUrl: null,
-      });
+      await usersApi.updateProfile(
+        isCover ? { coverUrl: null } : { avatarUrl: null },
+      );
 
       setUser((prev) =>
         prev
           ? {
             ...prev,
-            avatarUrl: null,
+            ...(isCover ? { coverUrl: null } : { avatarUrl: null }),
           }
           : null,
       );
 
-      onAvatarUpdated(null);
+      onImageUpdated(null);
       onClose();
     } catch (err: any) {
       setErrorMessage(
-        err?.message || "Failed to remove profile picture. Please try again.",
+        err?.message ||
+        `Failed to remove profile ${isCover ? "cover" : "picture"}. Please try again.`,
       );
     } finally {
       setIsRemoving(false);
@@ -541,7 +580,7 @@ export function AvatarUploadModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="avatar-modal-title"
+        aria-labelledby="profile-image-modal-title"
         className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-brand-sand-dark bg-white shadow-2xl animate-in zoom-in-95 duration-200 max-h-[92vh]"
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -553,13 +592,13 @@ export function AvatarUploadModal({
             </div>
             <div>
               <h2
-                id="avatar-modal-title"
+                id="profile-image-modal-title"
                 className="text-base font-bold text-brand-brown-950"
               >
-                Profile Picture
+                {isCover ? "Profile Cover" : "Profile Picture"}
               </h2>
               <p className="text-xs text-brand-brown-600">
-                Crop, rotate, and style your avatar photo
+                Crop, rotate, and enhance your {isCover ? "cover photo" : "avatar"}
               </p>
             </div>
           </div>
@@ -615,7 +654,7 @@ export function AvatarUploadModal({
                 </div>
 
                 <h3 className="mt-4 text-sm font-bold text-brand-brown-950">
-                  Upload a new photo
+                  Upload a new {isCover ? "cover image" : "photo"}
                 </h3>
                 <p className="mt-1 text-xs text-brand-brown-600 max-w-sm">
                   Drag and drop your image here, or{" "}
@@ -633,21 +672,27 @@ export function AvatarUploadModal({
                 </div>
               </div>
 
-              {/* Current avatar preview & removal */}
-              {currentAvatarUrl && (
+              {/* Current profile image preview & removal */}
+              {currentImageUrl && (
                 <div className="flex items-center justify-between rounded-2xl border border-brand-sand-dark/70 bg-brand-sand/30 p-4">
                   <div className="flex items-center gap-3">
                     <img
-                      src={currentAvatarUrl}
-                      alt={userDisplayName}
-                      className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-xs"
+                      src={currentImageUrl}
+                      alt={isCover ? "Current profile cover" : userDisplayName}
+                      className={`object-cover ring-2 ring-white shadow-xs ${
+                        isCover
+                          ? "h-12 w-24 rounded-lg"
+                          : "h-12 w-12 rounded-full"
+                      }`}
                     />
                     <div>
                       <p className="text-xs font-bold text-brand-brown-900">
-                        Current Profile Picture
+                        Current Profile {isCover ? "Cover" : "Picture"}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        Active on your public profile & posts
+                        {isCover
+                          ? "Shown across the top of your profile"
+                          : "Active on your public profile & posts"}
                       </p>
                     </div>
                   </div>
@@ -655,7 +700,7 @@ export function AvatarUploadModal({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleRemoveAvatar}
+                    onClick={handleRemoveImage}
                     disabled={isRemoving}
                     className="h-8 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 text-xs font-semibold gap-1.5"
                   >
@@ -705,7 +750,11 @@ export function AvatarUploadModal({
                 <div className="flex flex-col items-center">
                   <div
                     className="relative overflow-hidden rounded-2xl border-2 border-brand-sand-dark bg-stone-900 shadow-inner select-none cursor-grab active:cursor-grabbing touch-none"
-                    style={{ width: CROP_SIZE, height: CROP_SIZE }}
+                    style={{
+                      width: isCover ? "min(100%, 420px)" : CROP_WIDTH,
+                      height: isCover ? "auto" : CROP_HEIGHT,
+                      aspectRatio: `${CROP_WIDTH} / ${CROP_HEIGHT}`,
+                    }}
                     onWheel={handleWheel}
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
@@ -720,73 +769,88 @@ export function AvatarUploadModal({
                       className="absolute inset-0 block w-full h-full pointer-events-none"
                     />
 
-                    {/* Circular Mask Overlay with Rule-of-Thirds Grid */}
+                    {/* Crop boundary and rule-of-thirds grid */}
                     <div className="pointer-events-none absolute inset-0">
                       <svg
                         className="w-full h-full"
-                        viewBox={`0 0 ${CROP_SIZE} ${CROP_SIZE}`}
+                        viewBox={`0 0 ${CROP_WIDTH} ${CROP_HEIGHT}`}
                       >
-                        <defs>
-                          <mask id="avatar-circle-mask">
+                        {isCover ? (
+                          <rect
+                            x="2"
+                            y="2"
+                            width={CROP_WIDTH - 4}
+                            height={CROP_HEIGHT - 4}
+                            rx="10"
+                            fill="none"
+                            stroke="rgba(255, 255, 255, 0.75)"
+                            strokeWidth="2"
+                            strokeDasharray="6 4"
+                          />
+                        ) : (
+                          <>
+                            <defs>
+                              <mask id="avatar-circle-mask">
+                                <rect
+                                  width={CROP_WIDTH}
+                                  height={CROP_HEIGHT}
+                                  fill="white"
+                                />
+                                <circle
+                                  cx={CROP_WIDTH / 2}
+                                  cy={CROP_HEIGHT / 2}
+                                  r={CROP_WIDTH / 2 - 4}
+                                  fill="black"
+                                />
+                              </mask>
+                            </defs>
                             <rect
-                              width={CROP_SIZE}
-                              height={CROP_SIZE}
-                              fill="white"
+                              width={CROP_WIDTH}
+                              height={CROP_HEIGHT}
+                              fill="rgba(0, 0, 0, 0.55)"
+                              mask="url(#avatar-circle-mask)"
                             />
                             <circle
-                              cx={CROP_SIZE / 2}
-                              cy={CROP_SIZE / 2}
-                              r={CROP_SIZE / 2 - 4}
-                              fill="black"
+                              cx={CROP_WIDTH / 2}
+                              cy={CROP_HEIGHT / 2}
+                              r={CROP_WIDTH / 2 - 4}
+                              fill="none"
+                              stroke="rgba(255, 255, 255, 0.75)"
+                              strokeWidth="2"
+                              strokeDasharray="4 3"
                             />
-                          </mask>
-                        </defs>
-                        <rect
-                          width={CROP_SIZE}
-                          height={CROP_SIZE}
-                          fill="rgba(0, 0, 0, 0.55)"
-                          mask="url(#avatar-circle-mask)"
-                        />
-                        <circle
-                          cx={CROP_SIZE / 2}
-                          cy={CROP_SIZE / 2}
-                          r={CROP_SIZE / 2 - 4}
-                          fill="none"
-                          stroke="rgba(255, 255, 255, 0.75)"
-                          strokeWidth="2"
-                          strokeDasharray="4 3"
-                        />
+                          </>
+                        )}
 
-                        {/* Grid lines inside circle */}
                         <line
-                          x1={CROP_SIZE / 3}
+                          x1={CROP_WIDTH / 3}
                           y1="0"
-                          x2={CROP_SIZE / 3}
-                          y2={CROP_SIZE}
+                          x2={CROP_WIDTH / 3}
+                          y2={CROP_HEIGHT}
                           stroke="rgba(255, 255, 255, 0.15)"
                           strokeWidth="1"
                         />
                         <line
-                          x1={(CROP_SIZE * 2) / 3}
+                          x1={(CROP_WIDTH * 2) / 3}
                           y1="0"
-                          x2={(CROP_SIZE * 2) / 3}
-                          y2={CROP_SIZE}
+                          x2={(CROP_WIDTH * 2) / 3}
+                          y2={CROP_HEIGHT}
                           stroke="rgba(255, 255, 255, 0.15)"
                           strokeWidth="1"
                         />
                         <line
                           x1="0"
-                          y1={CROP_SIZE / 3}
-                          x2={CROP_SIZE}
-                          y2={CROP_SIZE / 3}
+                          y1={CROP_HEIGHT / 3}
+                          x2={CROP_WIDTH}
+                          y2={CROP_HEIGHT / 3}
                           stroke="rgba(255, 255, 255, 0.15)"
                           strokeWidth="1"
                         />
                         <line
                           x1="0"
-                          y1={(CROP_SIZE * 2) / 3}
-                          x2={CROP_SIZE}
-                          y2={(CROP_SIZE * 2) / 3}
+                          y1={(CROP_HEIGHT * 2) / 3}
+                          x2={CROP_WIDTH}
+                          y2={(CROP_HEIGHT * 2) / 3}
                           stroke="rgba(255, 255, 255, 0.15)"
                           strokeWidth="1"
                         />
@@ -795,7 +859,9 @@ export function AvatarUploadModal({
 
                     {/* Hint badge */}
                     <div className="pointer-events-none absolute bottom-2.5 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-2.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-xs">
-                      Drag to reposition • Scroll to zoom
+                      {isCover
+                        ? "Drag to frame your cover • Scroll to zoom"
+                        : "Drag to reposition • Scroll to zoom"}
                     </div>
                   </div>
                 </div>
@@ -807,7 +873,9 @@ export function AvatarUploadModal({
                       Live Preview
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      How you appear across Terramids
+                      {isCover
+                        ? "How your profile banner will appear"
+                        : "How you appear across Terramids"}
                     </p>
                   </div>
 
@@ -816,70 +884,73 @@ export function AvatarUploadModal({
                     <div className="relative">
                       <canvas
                         ref={previewCanvasRef}
-                        className="h-20 w-20 rounded-full border-2 border-white shadow-md object-cover bg-white"
+                        className={`border-2 border-white shadow-md object-cover bg-white ${
+                          isCover
+                            ? "h-auto w-full max-w-40 aspect-3/1 rounded-lg"
+                            : "h-20 w-20 rounded-full"
+                        }`}
                       />
-                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-desert text-[9px] font-bold text-brand-brown-950 shadow-xs">
-                        80
-                      </span>
+                      {!isCover && (
+                        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-desert text-[9px] font-bold text-brand-brown-950 shadow-xs">
+                          80
+                        </span>
+                      )}
                     </div>
 
                     {/* Small preview comparison */}
-                    <div className="flex items-center gap-3 pt-2">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className="h-10 w-10 overflow-hidden rounded-full border border-white shadow-xs bg-white"
-                          style={{
-                            backgroundImage: `url(${imageSrc})`,
-                          }}
-                        >
-                          <canvas
-                            className="h-full w-full object-cover"
-                            ref={(el) => {
-                              if (el && previewCanvasRef.current) {
-                                const ctx = el.getContext("2d");
-                                el.width = 40;
-                                el.height = 40;
-                                ctx?.drawImage(
-                                  previewCanvasRef.current,
-                                  0,
-                                  0,
-                                  40,
-                                  40,
-                                );
-                              }
-                            }}
-                          />
+                    {!isCover && (
+                      <div className="flex items-center gap-3 pt-2">
+                        <div className="flex flex-col items-center">
+                          <div className="h-10 w-10 overflow-hidden rounded-full border border-white shadow-xs bg-white">
+                            <canvas
+                              className="h-full w-full object-cover"
+                              ref={(el) => {
+                                if (el && previewCanvasRef.current) {
+                                  const ctx = el.getContext("2d");
+                                  el.width = 40;
+                                  el.height = 40;
+                                  ctx?.drawImage(
+                                    previewCanvasRef.current,
+                                    0,
+                                    0,
+                                    40,
+                                    40,
+                                  );
+                                }
+                              }}
+                            />
+                          </div>
+                          <span className="text-[9px] text-muted-foreground mt-1">
+                            40px
+                          </span>
                         </div>
-                        <span className="text-[9px] text-muted-foreground mt-1">
-                          40px
-                        </span>
-                      </div>
 
-                      <div className="flex flex-col items-center">
-                        <div className="h-6 w-6 overflow-hidden rounded-full border border-white shadow-xs bg-white">
-                          <canvas
-                            className="h-full w-full object-cover"
-                            ref={(el) => {
-                              if (el && previewCanvasRef.current) {
-                                const ctx = el.getContext("2d");
-                                el.width = 24;
-                                el.height = 24;
-                                ctx?.drawImage(
-                                  previewCanvasRef.current,
-                                  0,
-                                  0,
-                                  24,
-                                  24,
-                                );
-                              }
-                            }}
-                          />
+                        <div className="flex flex-col items-center">
+                          <div className="h-6 w-6 overflow-hidden rounded-full border border-white shadow-xs bg-white">
+                            <canvas
+                              className="h-full w-full object-cover"
+                              ref={(el) => {
+                                if (el && previewCanvasRef.current) {
+                                  const ctx = el.getContext("2d");
+                                  el.width = 24;
+                                  el.height = 24;
+                                  ctx?.drawImage(
+                                    previewCanvasRef.current,
+                                    0,
+                                    0,
+                                    24,
+                                    24,
+                                  );
+                                }
+                              }}
+                            />
+                          </div>
+                          <span className="text-[9px] text-muted-foreground mt-1">
+                            24px
+                          </span>
                         </div>
-                        <span className="text-[9px] text-muted-foreground mt-1">
-                          24px
-                        </span>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   <button
@@ -887,7 +958,7 @@ export function AvatarUploadModal({
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full text-center text-[11px] font-semibold text-brand-desert-dark hover:underline"
                   >
-                    Choose another photo
+                    Choose another {isCover ? "image" : "photo"}
                   </button>
                 </div>
               </div>
@@ -1223,12 +1294,12 @@ export function AvatarUploadModal({
               {isSaving ? (
                 <>
                   <Loader2 size={15} className="animate-spin text-white" />
-                  Saving Avatar...
+                  Saving {isCover ? "Cover" : "Avatar"}...
                 </>
               ) : (
                 <>
                   <Check size={15} />
-                  Apply & Save Photo
+                  Apply & Save {isCover ? "Cover" : "Photo"}
                 </>
               )}
             </Button>

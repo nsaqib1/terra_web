@@ -6,6 +6,7 @@ export interface User {
   displayName: string;
   email: string;
   avatarUrl: string | null;
+  coverUrl?: string | null;
   bio?: string | null;
   location?: string | null;
   website?: string | null;
@@ -20,6 +21,7 @@ export interface UserProfile {
   username: string;
   displayName: string;
   avatarUrl: string | null;
+  coverUrl: string | null;
   bio: string | null;
   location: string | null;
   website: string | null;
@@ -45,6 +47,7 @@ export interface UpdateProfileInput {
   location?: string | null;
   website?: string | null;
   avatarUrl?: string | null;
+  coverUrl?: string | null;
 }
 
 export interface UserCommunityItem {
