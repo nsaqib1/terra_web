@@ -363,42 +363,6 @@ function ProfileInfoTab({
           description="Update the information shown on your public profile."
         />
 
-        {/* Profile Picture Management Card */}
-        <div className="my-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-brand-sand-dark/70 bg-brand-cream/30 p-4 sm:p-5">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 rounded-full border-2 border-white bg-white shadow-xs">
-              {avatarUrl && (
-                <AvatarImage
-                  src={avatarUrl}
-                  alt={displayName}
-                  className="rounded-full object-cover"
-                />
-              )}
-              <AvatarFallback className="rounded-full bg-brand-desert text-lg font-bold text-brand-brown-950">
-                {getInitials(displayName || "User")}
-              </AvatarFallback>
-            </Avatar>
-
-            <div>
-              <h4 className="text-sm font-bold text-brand-brown-950">
-                Profile Photo
-              </h4>
-              <p className="text-xs text-brand-brown-600 mt-0.5">
-                Crop, rotate, zoom, and apply custom lighting filters.
-              </p>
-            </div>
-          </div>
-
-          <Button
-            type="button"
-            onClick={onOpenAvatarModal}
-            className="h-9 rounded-xl bg-brand-brown-950 px-4 text-xs font-bold text-white hover:bg-brand-brown-800 transition-all gap-1.5 shadow-2xs"
-          >
-            <Camera size={14} />
-            Change Photo
-          </Button>
-        </div>
-
         {errorMessage && (
           <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-800">
             {errorMessage}
@@ -595,8 +559,8 @@ function SecurityTab({ email }: { email?: string }) {
         {/* Expand/Collapse Container */}
         <div
           className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${activeForm === "email"
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none"
             }`}
         >
           <div className="overflow-hidden">
@@ -689,8 +653,8 @@ function SecurityTab({ email }: { email?: string }) {
         {/* Expand/Collapse Container */}
         <div
           className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${activeForm === "password"
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0 pointer-events-none"
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none"
             }`}
         >
           <div className="overflow-hidden">
@@ -999,8 +963,8 @@ export default function ProfilePage() {
                     type="button"
                     onClick={() => setActiveTab(id)}
                     className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${activeTab === id
-                        ? "bg-brand-brown-950 text-white shadow-sm"
-                        : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
+                      ? "bg-brand-brown-950 text-white shadow-sm"
+                      : "text-brand-brown-700 hover:bg-brand-sand/60 hover:text-brand-brown-950"
                       }`}
                   >
                     <span className="flex items-center gap-2.5">
