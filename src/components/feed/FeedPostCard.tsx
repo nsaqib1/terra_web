@@ -8,6 +8,7 @@ import { votesApi } from "@/lib/api/votes";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { cachePostForNavigation } from "@/lib/api/postNavigationCache";
+import { useLanguage } from "@/context/LanguageContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -345,28 +346,29 @@ function FeedMediaPreviewCard({
   );
 }
 
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(dateString: string, language: "EN" | "BN"): string {
   try {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
+    const locale = language === "BN" ? "bn-BD" : "en-US";
     if (diffInSeconds < 60) {
-      return "just now";
+      return language === "BN" ? "এইমাত্র" : "just now";
     }
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
+      return language === "BN" ? `${new Intl.NumberFormat(locale).format(diffInMinutes)} মিনিট আগে` : `${diffInMinutes}m ago`;
     }
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
+      return language === "BN" ? `${new Intl.NumberFormat(locale).format(diffInHours)} ঘণ্টা আগে` : `${diffInHours}h ago`;
     }
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) {
-      return `${diffInDays}d ago`;
+      return language === "BN" ? `${new Intl.NumberFormat(locale).format(diffInDays)} দিন আগে` : `${diffInDays}d ago`;
     }
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(locale, {
       month: "short",
       day: "numeric",
       year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
@@ -407,16 +409,17 @@ export function FeedPostCard({
 }: FeedPostCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { language, t } = useLanguage();
 
   const [score, setScore] = useState<number>(post.score ?? 0);
   const [currentVote, setCurrentVote] = useState<VoteValue | null>(null);
   const [isVoting, setIsVoting] = useState<boolean>(false);
 
   const previewContent = getPostPreviewContent(post.document, post.media);
-  const authorName = post.author?.displayName || post.author?.username || "Anonymous";
+  const authorName = post.author?.displayName || post.author?.username || t("common.anonymous");
   const authorUsername = post.author?.username || "unknown";
-  const relativeTime = formatRelativeTime(post.createdAt);
-  const communityName = post.community?.name || "General";
+  const relativeTime = formatRelativeTime(post.createdAt, language);
+  const communityName = post.community?.name || t("common.general");
   const communitySlug = post.community?.slug || "";
   const communityInitials = getCommunityInitials(communityName);
   const authorInitials = getAuthorInitials(authorName);
@@ -490,7 +493,7 @@ export function FeedPostCard({
       setCurrentVote(prevVote);
       setScore(prevScore);
       if (onErrorToast) {
-        onErrorToast("Failed to record vote. Please try again.");
+        onErrorToast(t("common.voteFailed"));
       }
     } finally {
       setIsVoting(false);
@@ -566,7 +569,7 @@ export function FeedPostCard({
             </div>
 
             <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-              <span>Posted by</span>
+              <span>{t("common.postedBy")}</span>
               <Link
                 href={`/profile/${post.author?.id || authorUsername}`}
                 onClick={(e) => e.stopPropagation()}
@@ -615,7 +618,7 @@ export function FeedPostCard({
           >
             {previewContent.text.length > 0
               ? previewContent.text
-              : "No text preview available."}
+              : t("common.noTextPreview")}
           </div>
         )}
 
@@ -634,7 +637,7 @@ export function FeedPostCard({
           >
             <button
               type="button"
-              aria-label="Upvote"
+              aria-label={t("common.upvote")}
               onClick={(e) => handleVote(e, "UP")}
               className={`
                 flex items-center justify-center rounded-lg p-1.5 transition-colors
@@ -653,7 +656,7 @@ export function FeedPostCard({
 
             <button
               type="button"
-              aria-label="Downvote"
+              aria-label={t("common.downvote")}
               onClick={(e) => handleVote(e, "DOWN")}
               className={`
                 flex items-center justify-center rounded-lg p-1.5 transition-colors

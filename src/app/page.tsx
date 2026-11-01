@@ -13,10 +13,12 @@ import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { postsApi } from "@/lib/api/posts";
 import { PostItem, PostSortOption } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PAGE_SIZE = 10;
 
 export default function Home() {
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -61,7 +63,7 @@ export default function Home() {
         setNextCursor(response.meta?.nextCursor ?? null);
         setHasMore(Boolean(response.meta?.hasNextPage && response.meta?.nextCursor));
       } catch (err: unknown) {
-        const msg = extractErrorMessage(err) || "Failed to load discussions feed.";
+        const msg = extractErrorMessage(err) || t("common.unableToLoadDiscussions");
         setErrorMessage(msg);
       } finally {
         requestInFlightRef.current = false;
@@ -69,7 +71,7 @@ export default function Home() {
         setIsLoadingMore(false);
       }
     },
-    [selectedTag]
+    [selectedTag, t]
   );
 
   // Initial load and refresh whenever the sorting mode changes.
@@ -137,14 +139,14 @@ export default function Home() {
             {/* Active Tag Filter Tag */}
             {selectedTag && (
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs text-muted-foreground">Filtering by tag:</span>
+                <span className="text-xs text-muted-foreground">{t("common.filteringByTag")}</span>
                 <span className="inline-flex items-center gap-1 rounded-lg bg-brand-desert-light px-2.5 py-1 text-xs font-bold text-brand-brown-900">
                   #{selectedTag}
                   <button
                     type="button"
                     onClick={() => setSelectedTag(null)}
                     className="ml-1 rounded-full p-0.5 hover:bg-brand-sand-dark/40"
-                    aria-label="Clear tag filter"
+                    aria-label={t("common.clearTagFilter")}
                   >
                     <X size={12} />
                   </button>
@@ -154,7 +156,7 @@ export default function Home() {
                   onClick={() => setSelectedTag(null)}
                   className="text-xs text-brand-brown-700 hover:underline"
                 >
-                  Clear filter
+                  {t("common.clearFilter")}
                 </button>
               </div>
             )}
@@ -166,7 +168,7 @@ export default function Home() {
           ) : errorMessage ? (
             <div className="-mx-4 rounded-none border-y border-red-200 bg-red-50/70 p-6 text-center backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border">
               <AlertCircle size={28} className="mx-auto text-red-600 mb-2" />
-              <h3 className="text-sm font-bold text-red-950">Unable to load discussions</h3>
+              <h3 className="text-sm font-bold text-red-950">{t("common.unableToLoadDiscussions")}</h3>
               <p className="mt-1 text-xs text-red-700 max-w-md mx-auto">{errorMessage}</p>
               <button
                 type="button"
@@ -178,7 +180,7 @@ export default function Home() {
                 "
               >
                 <RefreshCw size={13} />
-                <span>Try Again</span>
+                <span>{t("common.tryAgain")}</span>
               </button>
             </div>
           ) : displayedPosts.length === 0 ? (
@@ -200,12 +202,12 @@ export default function Home() {
               <div ref={sentinelRef} aria-hidden="true" className="h-1 w-full" />
               {isLoadingMore && <FeedSkeleton />}
               {!hasMore && posts.length > 0 && (
-                <p className="py-6 text-center text-xs text-muted-foreground">You're all caught up.</p>
+                <p className="py-6 text-center text-xs text-muted-foreground">{t("common.caughtUp")}</p>
               )}
               {errorMessage && posts.length > 0 && (
                 <div className="py-4 text-center">
-                  <p className="mb-2 text-xs text-red-700">Couldn't load more discussions.</p>
-                  <button type="button" onClick={() => loadFeed(nextCursor, currentSort, true)} className="text-xs font-semibold text-brand-brown-800 hover:underline">Try again</button>
+                  <p className="mb-2 text-xs text-red-700">{t("common.couldNotLoadMore")}</p>
+                  <button type="button" onClick={() => loadFeed(nextCursor, currentSort, true)} className="text-xs font-semibold text-brand-brown-800 hover:underline">{t("common.tryAgain")}</button>
                 </div>
               )}
             </div>
@@ -233,7 +235,7 @@ export default function Home() {
               type="button"
               onClick={() => setToast(null)}
               className="ml-2 rounded-lg p-1 hover:bg-white/10"
-              aria-label="Dismiss toast"
+              aria-label={t("common.dismiss")}
             >
               <X size={13} />
             </button>

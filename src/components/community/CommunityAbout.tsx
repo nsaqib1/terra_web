@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CalendarDays,
   ChevronRight,
@@ -6,8 +8,10 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function CommunityAbout() {
+  const { t } = useLanguage();
   return (
     <aside className="space-y-4">
 
@@ -15,32 +19,30 @@ export function CommunityAbout() {
       <section className="rounded-2xl border bg-white p-5">
 
         <h2 className="text-sm font-bold text-brand-brown-950">
-          About this community
+          {t("common.aboutCommunity")}
         </h2>
 
         <p className="mt-2 text-xs leading-5 text-brand-brown-600">
-          A shared home for people interested in artificial intelligence,
-          machine learning, intelligent systems, and the ideas shaping
-          their future.
+          {t("common.aboutDescription")}
         </p>
 
         <div className="mt-4 space-y-3 border-t pt-4">
 
           <InfoRow
             icon={<ShieldCheck size={15} />}
-            label="Community status"
-            value="Platform protected"
+            label={t("common.communityStatus")}
+            value={t("common.platformProtected")}
           />
 
           <InfoRow
             icon={<CalendarDays size={15} />}
-            label="Established"
+            label={t("common.established")}
             value="August 2026"
           />
 
           <InfoRow
             icon={<UserRound size={15} />}
-            label="First citizen"
+            label={t("common.firstCitizen")}
             value="Alex Morgan"
           />
 
@@ -58,14 +60,12 @@ export function CommunityAbout() {
           />
 
           <h2 className="text-sm font-bold text-brand-brown-950">
-            Governance
+            {t("common.governance")}
           </h2>
         </div>
 
         <p className="mt-2 text-xs leading-5 text-brand-brown-600">
-          This community is currently protected by the platform. As it
-          matures, citizens may become eligible to establish a community
-          governance model.
+          {t("common.governanceDescription")}
         </p>
 
         <button
@@ -78,7 +78,7 @@ export function CommunityAbout() {
             hover:bg-brand-desert-light
           "
         >
-          Learn about governance
+          {t("common.learnGovernance")}
           <ChevronRight size={14} />
         </button>
 
@@ -94,19 +94,18 @@ export function CommunityAbout() {
           />
 
           <h2 className="text-sm font-bold text-brand-brown-950">
-            Community history
+            {t("common.communityHistory")}
           </h2>
         </div>
 
         <div className="mt-4 border-l-2 border-brand-desert-light pl-4">
 
           <p className="text-xs font-semibold text-brand-brown-900">
-            Community established
+            {t("common.communityEstablished")}
           </p>
 
           <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
-            Artificial Intelligence was recognized as a canonical community
-            in August 2026.
+            {t("common.historyDescription")}
           </p>
 
         </div>
@@ -119,7 +118,7 @@ export function CommunityAbout() {
             hover:text-brand-brown-950
           "
         >
-          View full history
+          {t("common.viewFullHistory")}
           <ChevronRight size={13} />
         </button>
 
@@ -137,7 +136,7 @@ export function CommunityAbout() {
         "
       >
         <Flag size={13} />
-        Report community
+        {t("common.reportCommunity")}
       </button>
 
     </aside>

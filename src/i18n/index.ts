@@ -33,6 +33,68 @@ export type TranslationKey =
   | "common.latestActivity"
   | "common.justNow"
   | "common.unreadNotifications"
+  | "common.postedBy"
+  | "common.anonymous"
+  | "common.general"
+  | "common.noTextPreview"
+  | "common.upvote"
+  | "common.downvote"
+  | "common.dismiss"
+  | "common.filteringByTag"
+  | "common.clearFilter"
+  | "common.clearTagFilter"
+  | "common.unableToLoadDiscussions"
+  | "common.tryAgain"
+  | "common.caughtUp"
+  | "common.couldNotLoadMore"
+  | "common.sort"
+  | "common.sortDiscussions"
+  | "common.newest"
+  | "common.topRated"
+  | "common.mostDiscussed"
+  | "common.oldest"
+  | "common.noDiscussionsFound"
+  | "common.noMatchingDiscussions"
+  | "common.noDiscussionsYet"
+  | "common.clearFilterAction"
+  | "common.startDiscussion"
+  | "common.exploreCommunitiesAction"
+  | "common.minutesAgo"
+  | "common.hoursAgo"
+  | "common.daysAgo"
+  | "common.discussions"
+  | "common.knowledge"
+  | "common.citizens"
+  | "common.governance"
+  | "common.canonical"
+  | "common.citizen"
+  | "common.becomeCitizen"
+  | "common.established"
+  | "common.aboutDescription"
+  | "common.governanceDescription"
+  | "common.historyDescription"
+  | "common.aboutCommunity"
+  | "common.communityStatus"
+  | "common.platformProtected"
+  | "common.firstCitizen"
+  | "common.learnGovernance"
+  | "common.communityHistory"
+  | "common.communityEstablished"
+  | "common.viewFullHistory"
+  | "common.reportCommunity"
+  | "common.discussion"
+  | "common.addContribution"
+  | "common.contributionHint"
+  | "common.contributionPlaceholder"
+  | "common.addImage"
+  | "common.addLink"
+  | "common.contribute"
+  | "common.helpful"
+  | "common.comments"
+  | "common.save"
+  | "common.share"
+  | "common.voteFailed"
+
   | "pages.proposeCommunity"
   | "pages.myPosts"
   | "pages.editPost"
@@ -41,9 +103,12 @@ export type TranslationKey =
 
 const dictionaries = { EN: en, BN: bn };
 
-export function translate(language: Language, key: TranslationKey): string {
+export function translate(language: Language, key: TranslationKey, params?: Record<string, string | number>): string {
   const [group, item] = key.split(".") as ["common" | "pages", string];
   const dictionary = dictionaries[language] as unknown as Record<string, Record<string, string>>;
   const english = dictionaries.EN as unknown as Record<string, Record<string, string>>;
-  return dictionary[group]?.[item] ?? english[group]?.[item] ?? key;
+  const value = dictionary[group]?.[item] ?? english[group]?.[item] ?? key;
+  return value.replace(/\{(\w+)\}/g, (match, name: string) =>
+    params?.[name] === undefined ? match : String(params[name]),
+  );
 }

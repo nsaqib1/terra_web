@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import {
   ChevronRight,
   ShieldCheck,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DiscussionHeaderProps {
   community: string;
@@ -21,6 +24,7 @@ export function DiscussionHeader({
   time,
   tags,
 }: DiscussionHeaderProps) {
+  const { t } = useLanguage();
   return (
     <header className="rounded-2xl border bg-white p-5 sm:p-7">
 
@@ -44,7 +48,7 @@ export function DiscussionHeader({
         />
 
         <span className="text-muted-foreground">
-          Discussion
+          {t("common.discussion")}
         </span>
 
       </div>

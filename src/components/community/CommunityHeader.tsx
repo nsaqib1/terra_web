@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CommunityHeaderProps {
   name: string;
@@ -26,6 +27,7 @@ export function CommunityHeader({
   established,
   joined = false,
 }: CommunityHeaderProps) {
+  const { t } = useLanguage();
   return (
     <section className="overflow-hidden rounded-2xl border bg-white">
       {/* Brand strip */}
@@ -70,7 +72,7 @@ export function CommunityHeader({
                   "
                 >
                   <ShieldCheck size={12} />
-                  Canonical
+                  {t("common.canonical")}
                 </span>
               </div>
 
@@ -95,10 +97,10 @@ export function CommunityHeader({
             {joined ? (
               <>
                 <Check size={16} />
-                Citizen
+                {t("common.citizen")}
               </>
             ) : (
-              "Become a Citizen"
+              t("common.becomeCitizen")
             )}
           </Button>
 
@@ -110,18 +112,18 @@ export function CommunityHeader({
           <Stat
             icon={<Users size={15} />}
             value={citizens}
-            label="Citizens"
+            label={t("common.citizens")}
           />
 
           <Stat
             value={discussions}
-            label="Discussions"
+            label={t("common.discussions")}
           />
 
           <Stat
             icon={<CalendarDays size={15} />}
             value={established}
-            label="Established"
+            label={t("common.established")}
           />
 
         </div>

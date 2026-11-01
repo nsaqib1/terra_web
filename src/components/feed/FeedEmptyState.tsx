@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { MessageSquareDashed, PlusCircle, Compass } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface FeedEmptyStateProps {
   onResetFilter?: () => void;
@@ -10,6 +11,7 @@ interface FeedEmptyStateProps {
 }
 
 export function FeedEmptyState({ onResetFilter, hasFilter }: FeedEmptyStateProps) {
+  const { t } = useLanguage();
   return (
     <div className="-mx-4 flex flex-col items-center justify-center rounded-none border-y border-dashed border-brand-sand-dark/80 bg-white/60 px-6 py-16 text-center backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-sand text-brand-brown-700 shadow-inner">
@@ -17,13 +19,13 @@ export function FeedEmptyState({ onResetFilter, hasFilter }: FeedEmptyStateProps
       </div>
 
       <h3 className="mt-4 text-lg font-bold text-brand-brown-950">
-        No discussions found
+        {t("common.noDiscussionsFound")}
       </h3>
 
       <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
         {hasFilter
-          ? "There are no discussions matching your current filter. Try resetting your filter or creating a new discussion."
-          : "There are no discussions in the feed yet. Be the first to start a conversation in a community!"}
+          ? t("common.noMatchingDiscussions")
+          : t("common.noDiscussionsYet")}
       </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -37,7 +39,7 @@ export function FeedEmptyState({ onResetFilter, hasFilter }: FeedEmptyStateProps
               hover:bg-brand-sand hover:text-brand-brown-950
             "
           >
-            Clear Filter
+            {t("common.clearFilterAction")}
           </button>
         )}
 
@@ -50,7 +52,7 @@ export function FeedEmptyState({ onResetFilter, hasFilter }: FeedEmptyStateProps
           "
         >
           <PlusCircle size={15} />
-          <span>Start Discussion</span>
+          <span>{t("common.startDiscussion")}</span>
         </Link>
 
         <Link
@@ -62,7 +64,7 @@ export function FeedEmptyState({ onResetFilter, hasFilter }: FeedEmptyStateProps
           "
         >
           <Compass size={15} />
-          <span>Explore Communities</span>
+          <span>{t("common.exploreCommunitiesAction")}</span>
         </Link>
       </div>
     </div>

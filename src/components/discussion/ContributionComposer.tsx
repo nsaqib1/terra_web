@@ -8,8 +8,10 @@ import {
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function ContributionComposer() {
+  const { t } = useLanguage();
   const [value, setValue] = useState("");
 
   return (
@@ -33,11 +35,11 @@ export function ContributionComposer() {
 
         <div>
           <p className="text-xs font-bold text-brand-brown-950">
-            Add a contribution
+            {t("common.addContribution")}
           </p>
 
           <p className="text-[10px] text-muted-foreground">
-            Share an answer, experience, resource, or useful perspective.
+            {t("common.contributionHint")}
           </p>
         </div>
 
@@ -46,7 +48,7 @@ export function ContributionComposer() {
       <textarea
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        placeholder="What would you like to contribute?"
+        placeholder={t("common.contributionPlaceholder")}
         rows={5}
         className="
           mt-4
@@ -77,7 +79,7 @@ export function ContributionComposer() {
               hover:bg-brand-sand
               hover:text-brand-brown-950
             "
-            aria-label="Add image"
+            aria-label={t("common.addImage")}
           >
             <Image size={17} />
           </button>
@@ -89,7 +91,7 @@ export function ContributionComposer() {
               hover:bg-brand-sand
               hover:text-brand-brown-950
             "
-            aria-label="Add link"
+            aria-label={t("common.addLink")}
           >
             <Link2 size={17} />
           </button>
@@ -109,7 +111,7 @@ export function ContributionComposer() {
             hover:bg-brand-desert-dark
           "
         >
-          Contribute
+          {t("common.contribute")}
           <Send size={14} />
         </Button>
 

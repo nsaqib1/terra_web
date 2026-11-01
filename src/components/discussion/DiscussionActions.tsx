@@ -5,6 +5,7 @@ import {
   MessageCircle,
   Share2,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DiscussionActionsProps {
   helpful: number;
@@ -15,6 +16,7 @@ export function DiscussionActions({
   helpful,
   comments,
 }: DiscussionActionsProps) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-wrap items-center gap-2 border-t pt-4">
 
@@ -29,7 +31,7 @@ export function DiscussionActions({
           hover:text-brand-brown-950
         "
       >
-        ↑ {helpful} Helpful
+        ↑ {helpful} {t("common.helpful")}
       </button>
 
       <button
@@ -44,7 +46,7 @@ export function DiscussionActions({
         "
       >
         <MessageCircle size={15} />
-        {comments} Comments
+        {comments} {t("common.comments")}
       </button>
 
       <div className="ml-auto flex items-center gap-1">
@@ -61,7 +63,7 @@ export function DiscussionActions({
           "
         >
           <Bookmark size={15} />
-          Save
+          {t("common.save")}
         </button>
 
         <button
@@ -76,7 +78,7 @@ export function DiscussionActions({
           "
         >
           <Share2 size={15} />
-          Share
+          {t("common.share")}
         </button>
 
       </div>

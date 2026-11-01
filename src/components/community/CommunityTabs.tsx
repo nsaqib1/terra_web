@@ -6,6 +6,7 @@ import {
   Shield,
   Users,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const tabs = [
   {
@@ -33,6 +34,13 @@ interface CommunityTabsProps {
 export function CommunityTabs({
   active = "Discussions",
 }: CommunityTabsProps) {
+  const { t } = useLanguage();
+  const labels: Record<string, string> = {
+    Discussions: t("common.discussions"),
+    Knowledge: t("common.knowledge"),
+    Citizens: t("common.citizens"),
+    Governance: t("common.governance"),
+  };
   return (
     <div className="overflow-x-auto border-b">
       <div className="flex min-w-max">
@@ -43,7 +51,7 @@ export function CommunityTabs({
 
           return (
             <button
-              key={tab.label}
+              key={labels[tab.label] ?? tab.label}
               className={`
                 relative flex items-center gap-2
                 px-4 py-3.5
@@ -57,7 +65,7 @@ export function CommunityTabs({
             >
               <Icon size={16} strokeWidth={1.8} />
 
-              {tab.label}
+              {labels[tab.label] ?? tab.label}
 
               {isActive && (
                 <span
