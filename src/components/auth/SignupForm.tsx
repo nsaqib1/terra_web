@@ -23,14 +23,15 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { invitesApi } from "@/lib/api/invites";
+import { usersApi } from "@/lib/api/users";
 import { extractErrorMessage } from "@/lib/api/errors";
 import { PasswordStrength } from "./PasswordStrength";
 
 export function SignupForm() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signup } = useAuth();
+  const { signup, setUser } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -175,13 +176,26 @@ export function SignupForm() {
     setIsSubmitting(true);
 
     try {
-      await signup({
+      const createdUser = await signup({
         displayName: form.name.trim(),
         username: form.username.trim().toLowerCase(),
         email: form.email.trim().toLowerCase(),
         password: form.password,
         inviteCode: form.inviteCode.trim() ? form.inviteCode.trim().toUpperCase() : undefined,
       });
+
+      // Carry the guest's selected language into their new account.
+      if (createdUser.preferredLanguage !== language) {
+        try {
+          const preference = await usersApi.updateProfile({ preferredLanguage: language });
+          setUser((current) => current
+            ? { ...current, preferredLanguage: preference.user.preferredLanguage ?? language }
+            : current);
+        } catch (preferenceError) {
+          // Account creation should not fail because saving a language preference failed.
+          console.error("Failed to save signup language preference", preferenceError);
+        }
+      }
 
       setIsSuccess(true);
       setTimeout(() => {

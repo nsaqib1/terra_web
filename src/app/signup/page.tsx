@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,61 +13,29 @@ import {
   MessageCircle,
   Network,
   Shield,
-  Sparkles,
   Users,
 } from "lucide-react";
 
 import { SignupForm } from "@/components/auth/SignupForm";
+import { GuestLanguageSelector } from "@/components/layout/GuestLanguageSelector";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PROBLEMS = [
-  {
-    icon: Network,
-    title: "Communities are scattered",
-    description:
-      "The people, conversations, and knowledge around one interest are spread across dozens of places in the same platform",
-  },
-  {
-    icon: Landmark,
-    title: "Good communities disappear",
-    description:
-      "Groups often depend on a founder, moderator, platform, or algorithm. When that changes, the community can change with it.",
-  },
-  {
-    icon: BookOpen,
-    title: "Knowledge gets buried",
-    description:
-      "Years of useful answers and experience disappear into feeds instead of becoming a lasting body of community knowledge.",
-  },
-];
+  { icon: Network, titleKey: "landing.problemOneTitle", descriptionKey: "landing.problemOneDescription" },
+  { icon: Landmark, titleKey: "landing.problemTwoTitle", descriptionKey: "landing.problemTwoDescription" },
+  { icon: BookOpen, titleKey: "landing.problemThreeTitle", descriptionKey: "landing.problemThreeDescription" },
+] as const;
 
 const PRINCIPLES = [
-  {
-    icon: Globe2,
-    title: "One community for one interest",
-    description:
-      "Instead of endless duplicate groups, each meaningful subject can have a permanent Community.",
-  },
-  {
-    icon: Users,
-    title: "Built by its members",
-    description:
-      "Communities aren't personal properties. The people who contribute help shape their culture and future.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Knowledge over noise",
-    description:
-      "Posts, conversations, Tags, and contribution history are designed to create something useful that lasts.",
-  },
-  {
-    icon: Shield,
-    title: "Protected for the long term",
-    description:
-      "Terramids provides the infrastructure and safeguards that help Communities remain discoverable and continuous.",
-  },
-];
+  { icon: Globe2, titleKey: "landing.principleOneTitle", descriptionKey: "landing.principleOneDescription" },
+  { icon: Users, titleKey: "landing.principleTwoTitle", descriptionKey: "landing.principleTwoDescription" },
+  { icon: MessageCircle, titleKey: "landing.principleThreeTitle", descriptionKey: "landing.principleThreeDescription" },
+  { icon: Shield, titleKey: "landing.principleFourTitle", descriptionKey: "landing.principleFourDescription" },
+] as const;
 
 export default function SignupPage() {
+  const { t } = useLanguage();
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-brand-cream text-brand-brown-950">
       {/* ================================================================
@@ -118,10 +88,11 @@ export default function SignupPage() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <GuestLanguageSelector />
             <div className="hidden items-center gap-2 rounded-full border border-brand-desert-dark/15 bg-white/70 px-3 py-1.5 text-xs font-bold text-brand-brown-700 shadow-sm backdrop-blur sm:flex">
               <span className="h-1.5 w-1.5 rounded-full bg-brand-desert-dark" />
-              Currently in beta
+              {t("landing.betaStatus")}
             </div>
 
             <Link
@@ -135,7 +106,7 @@ export default function SignupPage() {
                 hover:bg-white
               "
             >
-              Sign in
+              {t("landing.signIn")}
             </Link>
           </div>
         </header>
@@ -155,21 +126,18 @@ export default function SignupPage() {
                 lg:text-6xl
               "
             >
-              Next Generation
+              {t("landing.heroTitleFirst")}
               <span className="block text-brand-desert-dark">
-                Community Platform
+                {t("landing.heroTitleSecond")}
               </span>
             </h1>
 
             <p className="mt-7 max-w-2xl text-lg leading-8 text-brand-brown-600 sm:text-xl">
-              Your interests deserve somewhere better than a disappearing feed,
-              a private group, or another fragmented corner of the internet.
+              {t("landing.heroLead")}
             </p>
 
             <p className="mt-4 max-w-2xl text-base leading-7 text-brand-brown-600">
-              Terramids is building permanent digital Communities around the
-              subjects people care about — places where knowledge can grow,
-              conversations can continue, and people can contribute for years.
+              {t("landing.heroDescription")}
             </p>
 
             {/* Compact promise */}
@@ -178,21 +146,21 @@ export default function SignupPage() {
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-desert/30">
                   <Check className="h-3 w-3" />
                 </span>
-                One community for one interest
+                {t("landing.promiseOne")}
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-desert/30">
                   <Check className="h-3 w-3" />
                 </span>
-                Built by it's members
+                {t("landing.promiseTwo")}
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-desert/30">
                   <Check className="h-3 w-3" />
                 </span>
-                Made to last
+                {t("landing.promiseThree")}
               </div>
             </div>
 
@@ -204,7 +172,7 @@ export default function SignupPage() {
                 transition-colors hover:text-brand-desert-dark
               "
             >
-              See what we're building
+              {t("landing.seeBuilding")}
               <ArrowDown className="h-4 w-4" />
             </a>
           </div>
@@ -227,10 +195,10 @@ export default function SignupPage() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-brown-600">
-                  Early access
+                  {t("landing.earlyAccess")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-brand-brown-900">
-                  Help build what comes next.
+                  {t("landing.earlyAccessDescription")}
                 </p>
               </div>
 
@@ -240,7 +208,7 @@ export default function SignupPage() {
             <Suspense
               fallback={
                 <div className="flex min-h-[400px] items-center justify-center text-sm text-brand-brown-600">
-                  Loading signup...
+                  {t("landing.loadingSignup")}
                 </div>
               }
             >
@@ -260,15 +228,15 @@ export default function SignupPage() {
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10 lg:py-28">
           <div className="max-w-2xl">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-desert-dark">
-              Why Terramids
+              {t("landing.whyEyebrow")}
             </p>
 
             <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-              We think the way we build communities online is broken.
+              {t("landing.whyTitle")}
             </h2>
 
             <p className="mt-5 text-base leading-7 text-brand-brown-600 sm:text-lg">
-              Existing platforms make it easy for anyone to create a new community. The result is a fragmented internet — countless groups discussing the same things, with people and knowledge scattered between them.
+              {t("landing.whyDescription")}
             </p>
           </div>
 
@@ -278,7 +246,7 @@ export default function SignupPage() {
 
               return (
                 <article
-                  key={problem.title}
+                  key={problem.titleKey}
                   className="
                     rounded-3xl border border-brand-sand-dark
                     bg-white p-6
@@ -293,11 +261,11 @@ export default function SignupPage() {
                   </div>
 
                   <h3 className="mt-6 text-lg font-extrabold tracking-tight">
-                    {problem.title}
+                    {t(problem.titleKey)}
                   </h3>
 
                   <p className="mt-3 text-sm leading-6 text-brand-brown-600">
-                    {problem.description}
+                    {t(problem.descriptionKey)}
                   </p>
                 </article>
               );
@@ -314,23 +282,20 @@ export default function SignupPage() {
           <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-24">
             <div className="lg:sticky lg:top-10">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-desert-dark">
-                A different model
+                {t("landing.modelEyebrow")}
               </p>
 
               <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-                One permanent home for every meaningful interest.
+                {t("landing.modelTitle")}
               </h2>
 
               <p className="mt-5 text-base leading-7 text-brand-brown-600">
-                Instead of creating another group, channel, or server every time
-                people want to gather, Terramids gives an interest a persistent
-                place on the internet.
+                {t("landing.modelDescription")}
               </p>
 
               <div className="mt-8 rounded-3xl border border-brand-desert/30 bg-brand-desert/10 p-5">
                 <p className="text-sm font-bold leading-6 text-brand-brown-900">
-                  “The goal isn't to create more places to post. It's to create
-                  places worth returning to.”
+                  {t("landing.modelQuote")}
                 </p>
               </div>
             </div>
@@ -341,7 +306,7 @@ export default function SignupPage() {
 
                 return (
                   <article
-                    key={principle.title}
+                    key={principle.titleKey}
                     className="
                       rounded-3xl border border-brand-sand-dark
                       bg-white p-6
@@ -352,11 +317,11 @@ export default function SignupPage() {
                     </div>
 
                     <h3 className="mt-5 font-extrabold tracking-tight">
-                      {principle.title}
+                      {t(principle.titleKey)}
                     </h3>
 
                     <p className="mt-2.5 text-sm leading-6 text-brand-brown-600">
-                      {principle.description}
+                      {t(principle.descriptionKey)}
                     </p>
                   </article>
                 );
@@ -374,21 +339,18 @@ export default function SignupPage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_auto]">
             <div className="max-w-3xl">
               <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-desert">
-                Your place in it
+                {t("landing.joinEyebrow")}
               </p>
 
               <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
-                Don't just consume the internet.
+                {t("landing.joinTitleFirst")}
                 <span className="block text-brand-desert">
-                  Help build somewhere worth staying.
+                  {t("landing.joinTitleSecond")}
                 </span>
               </h2>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-white/65 sm:text-lg">
-                Join a Community around something you care about. Ask questions.
-                Share what you know. Help someone else. Over time, your
-                contributions become part of something larger than a single post
-                or a single moment.
+                {t("landing.joinDescription")}
               </p>
             </div>
 
@@ -405,7 +367,7 @@ export default function SignupPage() {
                 hover:bg-brand-desert-light
               "
             >
-              Join the beta
+              {t("landing.joinBeta")}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -418,7 +380,7 @@ export default function SignupPage() {
       <footer className="bg-brand-brown-950 px-5 pb-8 text-white/45 sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>
-            Terramids — permanent digital communities.
+            {t("landing.footerDescription")}
           </p>
 
           <div className="flex items-center gap-4">
@@ -426,14 +388,14 @@ export default function SignupPage() {
               href="/login"
               className="transition hover:text-white"
             >
-              Sign in
+              {t("landing.signIn")}
             </Link>
 
             <Link
               href="/"
               className="transition hover:text-white"
             >
-              Home
+              {t("landing.home")}
             </Link>
           </div>
         </div>

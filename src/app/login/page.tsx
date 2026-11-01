@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/auth/LoginForm";
+import { GuestLanguageSelector } from "@/components/layout/GuestLanguageSelector";
 
 export default function LoginPage() {
   return (
@@ -10,6 +11,10 @@ export default function LoginPage() {
         text-brand-brown-950
       "
     >
+      <div className="absolute right-5 top-5 z-20 sm:right-8 sm:top-8">
+        <GuestLanguageSelector />
+      </div>
+
       {/* Soft ambient background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
