@@ -12,7 +12,7 @@ const STORAGE_KEY = "terramids-language";
 interface LanguageContextValue {
   language: Language;
   setLanguage: (language: Language) => Promise<void>;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   isLanguageSaving: boolean;
 }
 
@@ -68,7 +68,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     language,
     setLanguage,
-    t: (key: TranslationKey) => translate(language, key),
+    t: (key: TranslationKey, params?: Record<string, string | number>) => translate(language, key, params),
     isLanguageSaving,
   }), [language, setLanguage, isLanguageSaving]);
 

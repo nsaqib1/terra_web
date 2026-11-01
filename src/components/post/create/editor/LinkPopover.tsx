@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { Link2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -12,6 +14,7 @@ interface LinkPopoverProps {
 export function LinkPopover({
   editor,
 }: LinkPopoverProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
 
@@ -75,13 +78,13 @@ export function LinkPopover({
         type="button"
         aria-label={
           active
-            ? "Edit link"
-            : "Add link"
+            ? t("common.editLink")
+            : t("common.addLink")
         }
         title={
           active
-            ? "Edit link"
-            : "Add link"
+            ? t("common.editLink")
+            : t("common.addLink")
         }
         onMouseDown={(event) => {
           event.preventDefault();
@@ -113,8 +116,8 @@ export function LinkPopover({
         >
           <p className="mb-2 text-xs font-semibold text-brand-brown-950">
             {active
-              ? "Edit link"
-              : "Add link"}
+              ? t("common.editLink")
+              : t("common.addLink")}
           </p>
 
           <input
@@ -133,7 +136,7 @@ export function LinkPopover({
                 setOpen(false);
               }
             }}
-            placeholder="https://example.com"
+            placeholder={t("common.linkUrlPlaceholder")}
             className="
               h-9 w-full rounded-lg
               border bg-white
@@ -158,8 +161,7 @@ export function LinkPopover({
                   hover:bg-red-50
                 "
               >
-                <Trash2 size={13} />
-                Remove
+                <Trash2 size={13} />{t("common.remove")}
               </button>
             ) : (
               <span />
@@ -177,8 +179,7 @@ export function LinkPopover({
                   text-muted-foreground
                   hover:bg-brand-sand
                 "
-              >
-                Cancel
+              >{t("common.cancel")}
               </button>
 
               <button
@@ -193,8 +194,8 @@ export function LinkPopover({
                 "
               >
                 {active
-                  ? "Save"
-                  : "Add"}
+                  ? t("common.save")
+                  : t("common.add")}
               </button>
             </div>
           </div>

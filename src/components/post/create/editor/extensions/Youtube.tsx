@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { useEffect, useMemo, useState } from "react";
 import { Check, Pencil, X } from "lucide-react";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
@@ -85,6 +87,7 @@ function YoutubeNodeView({
     updateAttributes,
     deleteNode,
 }: NodeViewProps) {
+    const { t } = useLanguage();
     const currentSrc =
         typeof node.attrs.src === "string"
             ? node.attrs.src
@@ -144,14 +147,14 @@ function YoutubeNodeView({
 
         if (!trimmed) {
             setError(
-                "Paste a YouTube video URL.",
+                t("common.pasteYoutubeUrl"),
             );
             return;
         }
 
         if (!nextVideoId) {
             setError(
-                "Please enter a valid YouTube video URL.",
+                t("common.validYoutubeUrl"),
             );
             return;
         }
@@ -195,7 +198,7 @@ function YoutubeNodeView({
 									text-brand-brown-800
 								"
                             >
-                                YouTube URL
+                                {t("common.youtubeUrl")}
                             </label>
                         </div>
 
@@ -214,7 +217,7 @@ function YoutubeNodeView({
                                 onKeyDown={(event) => {
                                     if (
                                         event.key ===
-                                        "Enter"
+                                        t("common.enter")
                                     ) {
                                         event.preventDefault();
                                         saveEditing();
@@ -222,7 +225,7 @@ function YoutubeNodeView({
 
                                     if (
                                         event.key ===
-                                        "Escape"
+                                        t("common.escape")
                                     ) {
                                         event.preventDefault();
                                         cancelEditing();
@@ -250,8 +253,8 @@ function YoutubeNodeView({
                                 }}
                                 onClick={saveEditing}
                                 disabled={!videoId}
-                                aria-label="Save YouTube video"
-                                title="Save"
+                                aria-label={t("common.saveYoutubeVideo")}
+                                title={t("common.save")}
                                 className="
 									flex h-9 w-9
 									shrink-0
@@ -275,8 +278,8 @@ function YoutubeNodeView({
                                     event.preventDefault();
                                 }}
                                 onClick={cancelEditing}
-                                aria-label="Cancel editing"
-                                title="Cancel"
+                                aria-label={t("common.cancelEditing")}
+                                title={t("common.cancel")}
                                 className="
 									flex h-9 w-9
 									shrink-0
@@ -304,7 +307,7 @@ function YoutubeNodeView({
                         {thumbnailUrl ? (
                             <img
                                 src={thumbnailUrl}
-                                alt="YouTube video"
+                                alt={t("common.youtubeThumbnail")}
                                 draggable={false}
                                 className="
 									block
@@ -338,8 +341,8 @@ function YoutubeNodeView({
                                 <button
                                     type="button"
                                     onClick={startEditing}
-                                    aria-label="Edit YouTube video"
-                                    title="Edit"
+                                    aria-label={t("common.edit")}
+                                    title={t("common.edit")}
                                     className="
 										flex h-8 w-8
 										items-center
@@ -357,8 +360,8 @@ function YoutubeNodeView({
                                 <button
                                     type="button"
                                     onClick={deleteNode}
-                                    aria-label="Remove YouTube video"
-                                    title="Remove"
+                                    aria-label={t("common.removeYoutubeVideo")}
+                                    title={t("common.remove")}
                                     className="
 										flex h-8 w-8
 										items-center

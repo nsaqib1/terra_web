@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { Check, RefreshCw, Tags } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -16,6 +18,7 @@ interface PopularTagsProps {
 }
 
 export function PopularTags({ communityId, selected, onToggle }: PopularTagsProps) {
+  const { t } = useLanguage();
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -60,14 +63,14 @@ export function PopularTags({ communityId, selected, onToggle }: PopularTagsProp
       <div className="flex items-center justify-between border-b pb-3">
         <div className="flex items-center gap-2">
           <Tags size={15} className="text-brand-desert-dark" />
-          <h2 className="text-sm font-bold text-brand-brown-950">Popular tags</h2>
+          <h2 className="text-sm font-bold text-brand-brown-950">{t("common.popularTags")}</h2>
         </div>
         {communityId && hasError && (
           <button
             type="button"
             onClick={() => setRetryCount((count) => count + 1)}
-            title="Retry loading popular tags"
-            aria-label="Retry loading popular tags"
+            title={t("common.retryPopularTags")}
+            aria-label={t("common.retryPopularTags")}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-brand-brown-600 transition-colors hover:bg-brand-sand hover:text-brand-brown-950"
           >
             <RefreshCw size={13} />
@@ -78,21 +81,21 @@ export function PopularTags({ communityId, selected, onToggle }: PopularTagsProp
       <div className="mt-3">
         {!communityId ? (
           <p className="py-2 text-xs leading-5 text-muted-foreground">
-            Select a community to see its popular tags.
+            {t("common.selectCommunityForTags")}
           </p>
         ) : isLoading ? (
-          <div className="space-y-2.5 py-1" aria-label="Loading popular tags">
+          <div className="space-y-2.5 py-1" aria-label={t("common.loadingPopularTags")}>
             {[0, 1, 2, 3, 4].map((item) => (
               <div key={item} className="h-8 animate-pulse rounded-lg bg-brand-sand/70" />
             ))}
           </div>
         ) : hasError ? (
           <p role="alert" className="py-2 text-xs leading-5 text-red-600">
-            Couldn’t load popular tags. Try again.
+            {t("common.couldNotLoadPopularTags")}
           </p>
         ) : tags.length === 0 ? (
           <p className="py-2 text-xs leading-5 text-muted-foreground">
-            No tags yet. Create one while writing your post.
+            {t("common.noTagsYet")}
           </p>
         ) : (
           <div className="space-y-1">
@@ -130,8 +133,8 @@ export function PopularTags({ communityId, selected, onToggle }: PopularTagsProp
       {communityId && !isLoading && !hasError && tags.length > 0 && (
         <p className="mt-3 border-t pt-3 text-[11px] leading-4 text-muted-foreground">
           {atLimit
-            ? "Remove a selected tag to add another."
-            : "Click a tag to insert it into your post."}
+            ? t("common.removeTagToAdd")
+            : t("common.clickTagToInsert")}
         </p>
       )}
     </aside>

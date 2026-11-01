@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { Check, ChevronDown, Compass, Search, X } from "lucide-react";
 import Link from "next/link";
 import {
@@ -66,6 +68,7 @@ export function CommunitySelector({
   onClose,
   allowCloseWithoutSelection = false,
 }: CommunitySelectorProps) {
+  const { t } = useLanguage();
   const mounted = useSyncExternalStore(
     subscribeToNothing,
     getClientSnapshot,
@@ -129,7 +132,7 @@ export function CommunitySelector({
         const data = await (refresh ? refreshJoinedCommunities() : loadJoinedCommunities());
         if (!cancelled) setCommunities(data);
       } catch {
-        if (!cancelled) setError("Could not load communities.");
+        if (!cancelled) setError(t("common.loadCommunitiesFailed"));
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -253,7 +256,7 @@ export function CommunitySelector({
       {/* Trigger Button in the Form */}
       <div className="relative">
         <label className="block text-xs font-semibold uppercase tracking-wider text-brand-brown-700">
-          Community
+          {t("common.community")}
         </label>
         <button
           type="button"
@@ -298,7 +301,7 @@ export function CommunitySelector({
                 </p>
               </div>
               <span className="rounded-lg bg-brand-sand/80 px-2.5 py-1 text-xs font-medium text-brand-brown-800 transition group-hover:bg-brand-sand">
-                Change
+                {t("common.change")}
               </span>
             </div>
           ) : (
@@ -308,10 +311,10 @@ export function CommunitySelector({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-brand-brown-800">
-                  Select a community
+                  {t("common.selectCommunity")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Required to publish your post
+                  {t("common.requiredToPublish")}
                 </p>
               </div>
             </div>
@@ -382,7 +385,7 @@ export function CommunitySelector({
                       id={titleId}
                       className="text-lg font-bold tracking-tight text-brand-brown-950 sm:text-xl"
                     >
-                      Select a community
+                      {t("common.selectCommunity")}
                     </h2>
                     {communities.length > 0 && (
                       <span className="rounded-full bg-brand-sand px-2.5 py-0.5 text-xs font-semibold text-brand-brown-700">
@@ -392,8 +395,8 @@ export function CommunitySelector({
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                     {value
-                      ? "Switch the community for your post"
-                      : "Choose where to publish your post to get started"}
+                      ? t("common.switchCommunityForPost")
+                      : t("common.choosePublishCommunity")}
                   </p>
                 </div>
 
@@ -402,8 +405,8 @@ export function CommunitySelector({
                   onClick={handleClose}
                   aria-label={
                     value || allowCloseWithoutSelection
-                      ? "Close modal"
-                      : "Return to previous page"
+                      ? t("common.closeModal")
+                      : t("common.returnPreviousPage")
                   }
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-brand-brown-700 transition hover:bg-brand-sand active:scale-95"
                 >
@@ -422,8 +425,8 @@ export function CommunitySelector({
                     ref={searchInputRef}
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search by community name or handle..."
-                    aria-label="Search communities"
+                    placeholder={t("common.searchCommunityNameHandle")}
+                    aria-label={t("common.searchCommunities")}
                     className="h-11 w-full rounded-xl border border-brand-sand bg-brand-cream/80 pl-10 pr-10 text-sm text-brand-brown-950 outline-none transition placeholder:text-muted-foreground focus:border-brand-desert focus:bg-white focus:ring-2 focus:ring-brand-desert/20"
                   />
                   {search.trim().length > 0 && (
@@ -433,7 +436,7 @@ export function CommunitySelector({
                         setSearch("");
                         searchInputRef.current?.focus({ preventScroll: true });
                       }}
-                      aria-label="Clear search"
+                      aria-label={t("common.clearSearch")}
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition hover:bg-brand-sand hover:text-brand-brown-950"
                     >
                       <X size={14} />
@@ -472,12 +475,12 @@ export function CommunitySelector({
                         setError(null);
                         refreshJoinedCommunities()
                           .then((data) => setCommunities(data))
-                          .catch(() => setError("Could not load communities."))
+                          .catch(() => setError(t("common.loadCommunitiesFailed")))
                           .finally(() => setIsLoading(false));
                       }}
                       className="mt-3 rounded-lg border border-brand-sand bg-white px-3 py-1.5 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand"
                     >
-                      Try again
+                      {t("common.tryAgain")}
                     </button>
                   </div>
                 ) : filtered.length > 0 ? (
@@ -534,13 +537,13 @@ export function CommunitySelector({
                     </div>
                     <p className="mt-3 text-sm font-semibold text-brand-brown-950">
                       {search.trim()
-                        ? `No matches for "${search.trim()}"`
-                        : "You haven’t joined any communities yet"}
+                        ? t("common.noCommunityMatches", { query: search.trim() })
+                        : t("common.notJoinedCommunities")}
                     </p>
                     <p className="mt-1 max-w-sm text-xs text-muted-foreground">
                       {search.trim()
-                        ? "Check your spelling or try searching for another community name."
-                        : "You must join a community before you can publish a post."}
+                        ? t("common.checkSpellingCommunity")
+                        : t("common.mustJoinToPublish")}
                     </p>
                     {search.trim() ? (
                       <button
@@ -551,14 +554,13 @@ export function CommunitySelector({
                         }}
                         className="mt-4 rounded-xl border border-brand-sand bg-white px-3.5 py-1.5 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand"
                       >
-                        Clear search filter
+                        {t("common.clearSearchFilter")}
                       </button>
                     ) : (
                       <Link
                         href="/communities"
                         className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-brand-brown-950 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-brand-brown-800"
-                      >
-                        Join communities
+                      >{t("common.joinCommunities")}
                       </Link>
                     )}
                   </div>
@@ -572,8 +574,7 @@ export function CommunitySelector({
                     type="button"
                     onClick={closeModal}
                     className="rounded-xl border border-brand-sand bg-white px-4 py-1.5 text-xs font-semibold text-brand-brown-800 transition hover:bg-brand-sand active:scale-95"
-                  >
-                    Cancel
+                  >{t("common.cancel")}
                   </button>
                 </div>
               )}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import {
   Bold,
   Code2,
@@ -32,6 +34,7 @@ export function EditorToolbar({
   editor,
   onImageClick,
 }: EditorToolbarProps) {
+  const { t } = useLanguage();
 
   const {
     isBold,
@@ -86,7 +89,7 @@ export function EditorToolbar({
       "
     >
       <ToolbarButton
-        label="Undo"
+        label={t("common.undo")}
         disabled={!editor.can().undo()}
         onClick={() =>
           editor.chain().focus().undo().run()
@@ -96,7 +99,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Redo"
+        label={t("common.redo")}
         disabled={!editor.can().redo()}
         onClick={() =>
           editor.chain().focus().redo().run()
@@ -108,7 +111,7 @@ export function EditorToolbar({
       <Divider />
 
       <ToolbarButton
-        label="Heading 1"
+        label={t("common.heading1")}
         active={headingLevel === 1}
         onClick={() =>
           editor
@@ -124,7 +127,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Heading 2"
+        label={t("common.heading2")}
         active={headingLevel === 2}
         onClick={() =>
           editor
@@ -140,7 +143,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Heading 3"
+        label={t("common.heading3")}
         active={headingLevel === 3}
         onClick={() =>
           editor
@@ -158,7 +161,7 @@ export function EditorToolbar({
       <Divider />
 
       <ToolbarButton
-        label="Bold"
+        label={t("common.bold")}
         active={isBold}
         onClick={() =>
           editor
@@ -172,7 +175,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Italic"
+        label={t("common.italic")}
         active={isItalic}
         onClick={() =>
           editor
@@ -186,7 +189,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Underline"
+        label={t("common.underline")}
         active={isUnderline}
         onClick={() =>
           editor
@@ -200,7 +203,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Strikethrough"
+        label={t("common.strikethrough")}
         active={isStrike}
         onClick={() =>
           editor
@@ -214,7 +217,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Inline code"
+        label={t("common.inlineCode")}
         active={isCode}
         onClick={() =>
           editor
@@ -230,7 +233,7 @@ export function EditorToolbar({
       <Divider />
 
       <ToolbarButton
-        label="Bullet list"
+        label={t("common.bulletList")}
         active={isBulletList}
         onClick={() =>
           editor
@@ -244,7 +247,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Numbered list"
+        label={t("common.numberedList")}
         active={isOrderedList}
         onClick={() =>
           editor
@@ -258,7 +261,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        label="Quote"
+        label={t("common.quote")}
         active={isBlockquote}
         onClick={() =>
           editor
@@ -276,7 +279,7 @@ export function EditorToolbar({
       <LinkPopover editor={editor} />
 
       <ToolbarButton
-        label="Add image"
+        label={t("common.addImage")}
         onClick={onImageClick}
       >
         <Image size={15} />

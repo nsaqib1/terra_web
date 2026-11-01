@@ -369,7 +369,9 @@ function formatRelativeTime(dateString: string, language: "EN" | "BN"): string {
       return language === "BN" ? `${new Intl.NumberFormat(locale).format(diffInDays)} দিন আগে` : `${diffInDays}d ago`;
     }
     return date.toLocaleDateString(locale, {
-      month: "short",
+      // Bengali short month names are often truncated (e.g. "অক্টো").
+      // Use the full month name for a more natural Bangla date.
+      month: language === "BN" ? "long" : "short",
       day: "numeric",
       year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
     });

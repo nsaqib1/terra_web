@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import {
   createContext,
   useContext,
@@ -52,6 +54,7 @@ export function PostImageNodeView({
   updateAttributes,
   deleteNode,
 }: NodeViewProps) {
+  const { t } = useLanguage();
   const uploadContext = useContext(
     PostImageUploadContext,
   );
@@ -117,8 +120,8 @@ export function PostImageNodeView({
         >
           <button
             type="button"
-            aria-label="Change image"
-            title="Change image"
+            aria-label={t("common.changeImage")}
+            title={t("common.changeImage")}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => inputRef.current?.click()}
             className="
@@ -131,8 +134,8 @@ export function PostImageNodeView({
           </button>
           <button
             type="button"
-            aria-label="Delete image"
-            title="Delete image"
+            aria-label={t("common.deleteImage")}
+            title={t("common.deleteImage")}
             onMouseDown={(event) => event.preventDefault()}
             onClick={handleDelete}
             className="
@@ -178,7 +181,7 @@ export function PostImageNodeView({
           >
             <Loader2 size={28} className="animate-spin" />
             <span className="text-xs font-semibold">
-              Uploading image...
+              {t("common.uploadingImage")}
             </span>
           </div>
         )}

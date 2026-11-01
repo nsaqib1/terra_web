@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { ArrowRight, Loader2, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -18,6 +20,7 @@ import type { PostDocument } from "./editor/editor-types";
 const MAX_TAGS = 5;
 
 export function CreatePostForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const { communityId, setCommunityId } = useCreatePostCommunity();
 
@@ -105,17 +108,17 @@ export function CreatePostForm() {
                   <div className="min-w-0 space-y-1">
                     <p className="text-sm font-semibold text-brand-brown-950">
                       {canPublish
-                        ? "Ready to share?"
-                        : "Your post is taking shape"}
+                        ? t("common.postReady")
+                        : t("common.postTakingShape")}
                     </p>
                     <p className="text-xs leading-relaxed text-brand-brown-600">
                       {pendingImageUploads > 0
-                        ? "Finishing image uploads…"
+                        ? t("common.finishingUploads")
                         : !communityId
-                          ? "Choose a community to share your post."
+                          ? t("common.chooseCommunityFirst")
                           : !hasContent
-                            ? "Add some content to get your post ready."
-                            : "Your post will be shared with the selected community."}
+                            ? t("common.addContentFirst")
+                            : t("common.postWillBeShared")}
                     </p>
                     {submitError && (
                       <p className="text-xs font-medium text-red-600">
@@ -144,11 +147,11 @@ export function CreatePostForm() {
                   {isPending ? (
                     <>
                       <Loader2 size={15} className="animate-spin" />
-                      Publishing…
+                      {t("common.publishing")}
                     </>
                   ) : (
                     <>
-                      Publish
+                      {t("common.publish")}
                       <ArrowRight size={15} />
                     </>
                   )}

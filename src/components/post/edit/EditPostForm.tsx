@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +32,7 @@ interface EditPostFormProps {
 }
 
 export function EditPostForm({ post }: EditPostFormProps) {
+  const { t, language } = useLanguage();
   const router = useRouter();
 
   const [document, setDocument] = useState<PostDocument | null>(post.document);
@@ -98,7 +101,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
             <div className="space-y-6">
               <div>
                 <label className="text-sm font-semibold text-brand-brown-900">
-                  Community
+                  {t("common.community")}
                 </label>
                 <div className="mt-2 flex items-center justify-between rounded-xl border border-brand-sand-dark/60 bg-brand-sand/20 px-4 py-3">
                   <div className="flex items-center gap-2.5">
@@ -110,7 +113,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
                         {post.community?.name}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        Posts cannot change their parent community once published.
+                        {t("common.communityCannotChange")}
                       </p>
                     </div>
                   </div>
@@ -138,19 +141,19 @@ export function EditPostForm({ post }: EditPostFormProps) {
                   <div className="min-w-0 space-y-1">
                     <p className="text-sm font-semibold text-brand-brown-950">
                       {submitSuccess
-                        ? "Changes saved"
+                        ? t("common.changesSaved")
                         : canSave
-                          ? "Ready to save?"
-                          : "Your post is taking shape"}
+                          ? t("common.readyToSave")
+                          : t("common.postTakingShape")}
                     </p>
                     <p className="text-xs leading-relaxed text-brand-brown-600">
                       {pendingImageUploads > 0
-                        ? "Finishing image uploads…"
+                        ? t("common.finishingUploads")
                         : !hasContent
-                          ? "Add some content before saving your changes."
+                          ? t("common.addContentBeforeSaving")
                           : submitSuccess
-                            ? "Returning to your updated post…"
-                            : "Your changes will be shared with the selected community."}
+                            ? t("common.returningUpdatedPost")
+                            : t("common.changesSharedCommunity")}
                     </p>
                     {submitError && (
                       <p className="text-xs font-medium text-red-600">
@@ -167,8 +170,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
                       variant="outline"
                       disabled={isPending}
                       className="h-11 w-full rounded-xl border-brand-sand-dark px-5 font-semibold text-brand-brown-800 hover:bg-brand-sand/60 sm:w-auto"
-                    >
-                      Cancel
+                    >{t("common.cancel")}
                     </Button>
                   </Link>
                   <Button
@@ -179,16 +181,16 @@ export function EditPostForm({ post }: EditPostFormProps) {
                     {isPending ? (
                       <>
                         <Loader2 size={15} className="animate-spin" />
-                        Saving…
+                        {t("common.saving")}
                       </>
                     ) : submitSuccess ? (
                       <>
                         <Check size={15} />
-                        Saved
+                        {t("common.saved")}
                       </>
                     ) : (
                       <>
-                        Save changes
+                        {t("common.saveChanges")}
                         <ArrowRight size={15} />
                       </>
                     )}
@@ -209,21 +211,21 @@ export function EditPostForm({ post }: EditPostFormProps) {
           <div className="-mx-4 rounded-none border-y border-brand-sand-dark/60 bg-white p-5 shadow-2xs sm:mx-0 sm:rounded-2xl sm:border">
             <h3 className="flex items-center gap-2 text-sm font-bold text-brand-brown-950">
               <Sparkles size={16} className="text-brand-desert-dark" />
-              Editing Tips
+              {t("common.editingTips")}
             </h3>
 
             <ul className="mt-3 space-y-2.5 text-xs text-brand-brown-700">
               <li className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-desert-dark" />
-                <span>Keep edits focused so existing comments and discussions remain relevant.</span>
+                <span>{t("common.keepEditsFocused")}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-desert-dark" />
-                <span>You can add or update tags to better categorize the post for citizens.</span>
+                <span>{t("common.updateTagsTip")}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-desert-dark" />
-                <span>Formatting, bold text, code blocks, and media images are all preserved.</span>
+                <span>{t("common.formattingPreserved")}</span>
               </li>
             </ul>
           </div>
@@ -232,13 +234,9 @@ export function EditPostForm({ post }: EditPostFormProps) {
             <div className="flex items-start gap-2.5">
               <Info size={16} className="text-brand-brown-700 mt-0.5 shrink-0" />
               <div className="text-xs text-brand-brown-700">
-                <p className="font-semibold text-brand-brown-950">Post History</p>
+                <p className="font-semibold text-brand-brown-950">{t("common.postHistory")}</p>
                 <p className="mt-1">
-                  Originally posted {new Date(post.createdAt).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}.
+                  {t("common.originallyPosted", { date: new Date(post.createdAt).toLocaleDateString(language === "BN" ? "bn-BD" : "en-US", { month: "long", day: "numeric", year: "numeric" }) })}
                 </p>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/context/LanguageContext";
 import {
   Bookmark,
   CheckCircle2,
@@ -6,6 +7,7 @@ import {
 } from "lucide-react";
 
 export function PostGuidelines() {
+  const { t } = useLanguage();
   return (
     <aside className="space-y-4">
       <section className="-mx-4 rounded-none border-y bg-white p-5 sm:mx-0 sm:rounded-2xl sm:border">
@@ -16,27 +18,27 @@ export function PostGuidelines() {
           />
 
           <h2 className="text-sm font-bold text-brand-brown-950">
-            Write a useful post
+            {t("common.writeUsefulPost")}
           </h2>
         </div>
 
         <div className="mt-4 space-y-4">
           <Guideline
             icon={<Search size={14} />}
-            title="Search first"
-            description="See whether this community already has a post on the same question."
+            title={t("common.searchFirst")}
+            description={t("common.searchFirstDescription")}
           />
 
           <Guideline
             icon={<Bookmark size={14} />}
-            title="Mark the context"
-            description="Choose a few relevant topics. If the right one does not exist, create it for this community."
+            title={t("common.markContext")}
+            description={t("common.markContextDescription")}
           />
 
           <Guideline
             icon={<CheckCircle2 size={14} />}
-            title="Say enough"
-            description="Skip the title. Put the whole thought in the post so others can respond."
+            title={t("common.sayEnough")}
+            description={t("common.sayEnoughDescription")}
           />
         </div>
       </section>
@@ -55,13 +57,11 @@ export function PostGuidelines() {
         </div>
 
         <h2 className="mt-3 text-sm font-bold text-brand-brown-950">
-          Build the community&apos;s history
+          {t("common.buildCommunityHistory")}
         </h2>
 
         <p className="mt-2 text-[11px] leading-5 text-brand-brown-700">
-          Useful posts stay with the community. They become part of a
-          permanent home for this subject — not a post that vanishes in a
-          personal feed.
+          {t("common.communityHistoryDescription")}
         </p>
       </section>
     </aside>

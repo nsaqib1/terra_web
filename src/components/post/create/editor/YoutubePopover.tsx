@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, Video, X } from "lucide-react";
 import type { Editor } from "@tiptap/react";
@@ -57,6 +59,7 @@ function extractYoutubeVideoId(value: string): string | null {
 export function YoutubePopover({
 	editor,
 }: YoutubePopoverProps) {
+	const { t } = useLanguage();
 	const [open, setOpen] = useState(false);
 	const [url, setUrl] = useState("");
 	const [error, setError] = useState("");
@@ -93,14 +96,14 @@ export function YoutubePopover({
 		const trimmed = url.trim();
 
 		if (!trimmed) {
-			setError("Paste a YouTube video URL.");
+			setError(t("common.pasteYoutubeUrl"));
 			return;
 		}
 
 		const extractedVideoId = extractYoutubeVideoId(trimmed);
 
 		if (!extractedVideoId) {
-			setError("Please enter a valid YouTube video URL.");
+			setError(t("common.validYoutubeUrl"));
 			return;
 		}
 
@@ -115,7 +118,7 @@ export function YoutubePopover({
 			.run();
 
 		if (!inserted) {
-			setError("We couldn't add this video. Please try again.");
+			setError(t("common.addVideoFailed"));
 			return;
 		}
 
@@ -126,8 +129,8 @@ export function YoutubePopover({
 		<>
 			<button
 				type="button"
-				aria-label="Add YouTube video"
-				title="Add YouTube video"
+				aria-label={t("common.addYoutubeVideo")}
+				title={t("common.addYoutubeVideo")}
 				onMouseDown={(event) => {
 					event.preventDefault();
 				}}
@@ -177,12 +180,12 @@ export function YoutubePopover({
 										id="youtube-dialog-title"
 										className="text-sm font-bold text-brand-brown-950"
 									>
-										Add YouTube video
+										{t("common.addYoutubeVideo")}
 									</h2>
 								</div>
 
 								<p className="mt-2 text-xs leading-relaxed text-brand-brown-600">
-									Share a useful video with your community.
+									{t("common.youtubeVideoDescription")}
 								</p>
 							</div>
 
@@ -195,7 +198,7 @@ export function YoutubePopover({
 									hover:bg-brand-sand
 									hover:text-brand-brown-950
 								"
-								aria-label="Close"
+								aria-label={t("common.close")}
 							>
 								<X size={17} />
 							</button>
@@ -210,7 +213,7 @@ export function YoutubePopover({
 									text-brand-brown-800
 								"
 							>
-								YouTube URL
+								{t("common.youtubeUrl")}
 							</label>
 
 							<input
@@ -270,7 +273,7 @@ export function YoutubePopover({
 
 									<img
 										src={thumbnailUrl}
-										alt="YouTube video thumbnail"
+										alt={t("common.youtubeThumbnail")}
 										className={`
 											block aspect-video w-full object-cover
 											transition-opacity duration-200
@@ -282,7 +285,7 @@ export function YoutubePopover({
 										onError={() => {
 											setThumbnailLoaded(false);
 											setError(
-												"We couldn't load the video preview.",
+												t("common.videoPreviewFailed"),
 											);
 										}}
 									/>
@@ -290,7 +293,7 @@ export function YoutubePopover({
 							)}
 
 							<p className="mt-2 text-[10px] text-muted-foreground">
-								You can paste a regular YouTube link or a youtu.be link.
+								{t("common.youtubeLinkHelp")}
 							</p>
 						</div>
 
@@ -305,7 +308,7 @@ export function YoutubePopover({
 									hover:bg-brand-sand/60
 								"
 							>
-								Cancel
+								{t("common.cancel")}
 							</button>
 
 							<button

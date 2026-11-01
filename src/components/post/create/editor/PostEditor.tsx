@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import {
   EditorContent,
@@ -63,6 +65,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
   enableHashtags = false,
 }, ref) {
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
   const [imageSelectionError, setImageSelectionError] =
     useState<string | null>(null);
   const [knownTagsById, setKnownTagsById] = useState<Record<string, Tag>>({});
@@ -188,9 +191,9 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
     const nextIds = uniqueIds.slice(0, MAX_POST_TAGS);
 
     if (uniqueIds.length > MAX_POST_TAGS) {
-      setTagNotice(`Only ${MAX_POST_TAGS} unique tags can be attached to a post. Extra hashtags remain in the text.`);
+      setTagNotice(t("common.onlyFiveTags", { count: MAX_POST_TAGS }));
     } else {
-      setTagNotice((current) => current?.startsWith("Only ") ? null : current);
+      setTagNotice(null);
     }
 
     if (nextIds.length !== lastReportedTagIdsRef.current.length || nextIds.some((id, index) => id !== lastReportedTagIdsRef.current[index])) {
@@ -316,7 +319,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
     if (!activeEditor || !enableHashtags) return;
     const isAlreadySelected = selectedTagIdsRef.current.includes(tag.id);
     if (!isAlreadySelected && selectedTagIdsRef.current.length >= MAX_POST_TAGS) {
-      setTagNotice(`A post can have up to ${MAX_POST_TAGS} tags. Remove one before adding another.`);
+      setTagNotice(t("common.maxTagsReached", { count: MAX_POST_TAGS }));
       return;
     }
     rememberTags([tag]);
@@ -389,7 +392,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
           if (exact && editorRef.current) syncDocumentHashtags(editorRef.current);
         })
         .catch(() => {
-          if (!cancelled) setSuggestionsError("Couldn’t load tag suggestions.");
+          if (!cancelled) setSuggestionsError(t("common.couldNotLoadTagSuggestions"));
         })
         .finally(() => {
           if (!cancelled) setSuggestionsLoading(false);
@@ -527,7 +530,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
       ].includes(file.type)
     ) {
       setImageSelectionError(
-        "Please choose a JPEG, PNG, or WebP image.",
+        t("common.jpegPngWebpOnly"),
       );
       return;
     }
@@ -586,7 +589,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
         {
           uploading: false,
           uploadError:
-            "We couldn't upload this image. Choose another image to try again.",
+            t("common.imageUploadFailed"),
         },
       );
 
@@ -621,13 +624,13 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
           const activeTags = response.data.filter((item) => item.status === "ACTIVE");
           rememberTags(activeTags);
           setSuggestionTags(activeTags);
-          setTagNotice("A matching tag already exists. Choose it from the suggestions.");
+          setTagNotice(t("common.matchingTagExists"));
           setSuggestionsError(null);
         } catch {
-          setSuggestionsError("This tag already exists. Try searching for it again.");
+          setSuggestionsError(t("common.tagAlreadyExists"));
         }
       } else {
-        setSuggestionsError(message || "Couldn’t create this tag.");
+        setSuggestionsError(message || t("common.couldNotCreateTag"));
       }
     } finally {
       setCreatingTag(false);
@@ -699,7 +702,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
           </div>
 
           {enableHashtags && selectedTagIds.length > 0 && (
-            <div className="mt-3" aria-label="Selected post tags">
+            <div className="mt-3" aria-label={t("common.selectPostTags")}>
               <div className="flex flex-wrap gap-2">
                 {selectedTagIds.map((tagId) => {
                   const tag = knownTagsById[tagId];
@@ -707,7 +710,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
                   return (
                     <span key={tagId} className="inline-flex items-center gap-1.5 rounded-full border border-brand-desert/60 bg-brand-desert-light px-3 py-1.5 text-xs font-semibold text-brand-brown-950">
                       <span title={tag.name}>#{tag.slug}</span>
-                      <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => removeHashtag(tagId)} aria-label={`Remove hashtag ${tag.name}`} className="rounded-full p-0.5 hover:bg-white/70">
+                      <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => removeHashtag(tagId)} aria-label={t("common.removeHashtag", { name: tag.name })} className="rounded-full p-0.5 hover:bg-white/70">
                         <X size={12} />
                       </button>
                     </span>
@@ -721,19 +724,19 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
           {imageSelectionError && <p className="mt-2 text-xs text-red-600" role="alert">{imageSelectionError}</p>}
 
           <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
-            {activeEditor.getText().trim() ? `${activeEditor.getText().length} characters` : ""}
+            {activeEditor.getText().trim() ? `${activeEditor.getText().length} ${t("common.characters")}` : ""}
           </p>
 
           {enableHashtags && hashtagSearch && (
             <div
               ref={suggestionMenuRef}
               role="listbox"
-              aria-label="Hashtag suggestions"
+              aria-label={t("common.hashtagSuggestions")}
               className="fixed z-[100] max-h-72 w-[300px] overflow-y-auto rounded-xl border border-brand-sand-dark/70 bg-white shadow-[0_14px_36px_rgba(72,64,48,0.18)]"
               style={{ left: hashtagSearch.left, top: hashtagSearch.above ? undefined : hashtagSearch.top, bottom: hashtagSearch.above ? hashtagSearch.bottom ?? undefined : undefined }}
             >
               <div className="flex items-center justify-between border-b px-3 py-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Community tags</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("common.communityTags")}</span>
                 {suggestionsLoading && <Loader2 size={13} className="animate-spin text-muted-foreground" />}
               </div>
               {suggestionsError ? (
@@ -750,7 +753,7 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
                 );
               })}
               {!suggestionsLoading && suggestionTags.length === 0 && !suggestionsError && !hashtagSearch.query && (
-                <p className="px-3 py-3 text-xs text-muted-foreground">No tags yet. Type a name to create one.</p>
+                <p className="px-3 py-3 text-xs text-muted-foreground">{t("common.noTagsTypeCreate")}</p>
               )}
               {(() => {
                 const exact = suggestionTags.find((tag) => normalizeSlug(tag.slug) === normalizeSlug(hashtagSearch.query));
@@ -761,11 +764,11 @@ export const PostEditor = forwardRef<PostEditorHandle, PostEditorProps>(function
                 return (
                   <button type="button" role="option" aria-selected={index === activeSuggestionIndex} disabled={disabled} onMouseDown={(event) => event.preventDefault()} onClick={() => void createHashtagFromQuery()} className={`flex w-full items-center gap-2.5 border-t bg-brand-cream/40 px-3 py-3 text-left hover:bg-brand-desert-light/50 ${index === activeSuggestionIndex ? "ring-1 ring-inset ring-brand-desert" : ""} disabled:cursor-not-allowed disabled:opacity-50`}>
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-desert-light text-brand-brown-900">{creatingTag ? <Loader2 size={14} className="animate-spin" /> : <Plus size={15} />}</span>
-                    <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-brand-brown-950">{creatingTag ? "Creating tag…" : `Create #${hashtagSearch.query}`}</span><span className="block text-[10px] text-muted-foreground">Add it to this community</span></span>
+                    <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-brand-brown-950">{creatingTag ? t("common.creatingTag") : t("common.createTag", { query: hashtagSearch.query })}</span><span className="block text-[10px] text-muted-foreground">{t("common.addToCommunity")}</span></span>
                   </button>
                 );
               })()}
-              {selectedTagIds.length >= MAX_POST_TAGS && <p className="border-t px-3 py-2 text-[10px] text-muted-foreground">Remove a tag before adding another.</p>}
+              {selectedTagIds.length >= MAX_POST_TAGS && <p className="border-t px-3 py-2 text-[10px] text-muted-foreground">{t("common.removeTagBeforeAdding")}</p>}
             </div>
           )}
         </div>
