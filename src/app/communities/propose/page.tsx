@@ -18,6 +18,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { communitiesApi } from "@/lib/api/communities";
 import { extractErrorMessage } from "@/lib/api/errors";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import type { CommunityProposal } from "@/lib/api/types";
 
 // ---------------------------------------------------------------------------
@@ -36,6 +37,8 @@ function toSlug(value: string): string {
 }
 
 function CharCount({
+  t,
+  language,
   current,
   min,
   max,
@@ -43,6 +46,8 @@ function CharCount({
   current: number;
   min: number;
   max: number;
+  t: (key: any, params?: Record<string, string | number>) => string;
+  language: "EN" | "BN";
 }) {
   const ok = current >= min;
   return (
@@ -54,9 +59,9 @@ function CharCount({
             : "text-amber-600"
         }`}
     >
-      {current}/{max}
+      {current.toLocaleString(language === "BN" ? "bn-BD" : "en-US")}/{max.toLocaleString(language === "BN" ? "bn-BD" : "en-US")}
       {current > 0 && current < min && (
-        <span className="ml-1 opacity-75">({min - current} more needed)</span>
+        <span className="ml-1 opacity-75">({(min - current).toLocaleString(language === "BN" ? "bn-BD" : "en-US")} {t("common.charactersMoreNeeded")})</span>
       )}
     </span>
   );
@@ -66,7 +71,7 @@ function CharCount({
 // Success screen
 // ---------------------------------------------------------------------------
 
-function SuccessScreen({ proposal }: { proposal: CommunityProposal }) {
+function SuccessScreen({ proposal, t }: { proposal: CommunityProposal; t: (key: any, params?: Record<string, string | number>) => string }) {
   return (
     <div className="mx-auto max-w-xl text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-desert-light to-brand-desert shadow-sm">
@@ -74,27 +79,26 @@ function SuccessScreen({ proposal }: { proposal: CommunityProposal }) {
       </div>
 
       <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-desert-dark">
-        Proposal submitted
+        {t("common.proposalSubmitted")}
       </p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight text-brand-brown-950">
-        {proposal.proposedName} is on its way.
+        {t("common.proposalOnItsWay", { name: proposal.proposedName })}
       </h1>
       <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-brand-brown-600">
-        Your proposal has been submitted for platform review. We will verify it
-        meets our standards and does not duplicate an existing community.
+        {t("common.proposalReviewCopy")}
       </p>
 
       <div className="mx-auto mt-8 grid max-w-sm gap-3 text-left sm:grid-cols-2">
         {[
           {
             icon: <Clock3 size={16} />,
-            title: "Under review",
-            body: "The platform team will evaluate your proposal.",
+            title: t("common.underReview"),
+            body: t("common.proposalEvaluation"),
           },
           {
             icon: <Users size={16} />,
-            title: "First citizen",
-            body: "If approved, you become its founding citizen.",
+            title: t("common.firstCitizen"),
+            body: t("common.foundingCitizenCopy"),
           },
         ].map(({ icon, title, body }) => (
           <div key={title} className="rounded-2xl border bg-white p-4 shadow-xs">
@@ -112,14 +116,14 @@ function SuccessScreen({ proposal }: { proposal: CommunityProposal }) {
           href="/communities"
           className="inline-flex items-center gap-2 rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-brown-800 transition-colors"
         >
-          Explore communities
+          {t("common.exploreCommunities")}
           <ArrowRight size={14} />
         </Link>
         <Link
           href="/"
           className="rounded-xl border bg-white px-5 py-2.5 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand transition-colors"
         >
-          Return home
+          {t("common.returnHome")}
         </Link>
       </div>
     </div>
@@ -132,6 +136,7 @@ function SuccessScreen({ proposal }: { proposal: CommunityProposal }) {
 
 export default function ProposeCommunityPage() {
   const { isAuthenticated } = useAuth();
+  const { t, language } = useLanguage();
 
   const nameId = useId();
   const slugId = useId();
@@ -183,7 +188,7 @@ export default function ProposeCommunityPage() {
       });
       setSubmitted(result);
     } catch (err) {
-      setError(extractErrorMessage(err) || "Failed to submit proposal. Please try again.");
+      setError(extractErrorMessage(err) || t("common.proposalSubmitFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -193,7 +198,7 @@ export default function ProposeCommunityPage() {
     return (
       <AppShell>
         <div className="mx-auto max-w-[900px] py-12">
-          <SuccessScreen proposal={submitted} />
+          <SuccessScreen proposal={submitted} t={t} />
         </div>
       </AppShell>
     );
@@ -208,20 +213,19 @@ export default function ProposeCommunityPage() {
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-brand-brown-950 transition-colors"
         >
           <ArrowLeft size={14} />
-          Communities
+          {t("common.communities")}
         </Link>
 
         <div className="mt-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-desert/40 bg-brand-desert-light/60 px-3 py-1 text-[11px] font-semibold text-brand-brown-700">
             <Sparkles size={12} className="text-brand-desert-dark" />
-            Community Proposal
+            {t("common.communityProposal")}
           </div>
           <h1 className="mt-3 text-2xl font-bold tracking-tight text-brand-brown-950 sm:text-3xl">
-            Propose a new community
+            {t("common.proposeNewCommunity")}
           </h1>
           <p className="mt-2 max-w-lg text-sm leading-6 text-brand-brown-600">
-            Help create a permanent home for a subject that deserves its own
-            dedicated space on the platform.
+            {t("common.proposalIntro")}
           </p>
         </div>
 
@@ -229,11 +233,11 @@ export default function ProposeCommunityPage() {
           <div className="mt-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
             <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-600" />
             <div>
-              <p className="text-xs font-bold text-amber-900">Sign in required</p>
+              <p className="text-xs font-bold text-amber-900">{t("common.signInRequired")}</p>
               <p className="mt-0.5 text-[11px] text-amber-800">
-                You must be logged in to submit a community proposal.{" "}
+                {t("common.proposalLoginRequired")}{" "}
                 <Link href="/login" className="font-semibold underline underline-offset-2">
-                  Log in
+                  {t("common.logIn")}
                 </Link>
               </p>
             </div>
@@ -247,18 +251,18 @@ export default function ProposeCommunityPage() {
             <div className="rounded-2xl border bg-white p-5 shadow-xs">
               <div className="flex items-center justify-between">
                 <label htmlFor={nameId} className="text-sm font-bold text-brand-brown-950">
-                  Community name
+                  {t("common.communityName")}
                 </label>
-                <CharCount current={name.length} min={3} max={100} />
+                <CharCount current={name.length} min={3} max={100} t={t} language={language} />
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                Clear, enduring subject — not a temporary event.
+                {t("common.communityNameHint")}
               </p>
               <input
                 id={nameId}
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g. Urban Gardening"
+                placeholder={t("common.communityNamePlaceholder")}
                 maxLength={100}
                 required
                 className="mt-3 h-11 w-full rounded-xl border bg-brand-cream/60 px-3.5 text-sm text-brand-brown-950 outline-none placeholder:text-brand-brown-600/40 focus:border-brand-desert-dark focus:bg-white focus:ring-2 focus:ring-brand-desert-light/60 transition-all"
@@ -269,14 +273,14 @@ export default function ProposeCommunityPage() {
             <div className="rounded-2xl border bg-white p-5 shadow-xs">
               <div className="flex items-center justify-between">
                 <label htmlFor={slugId} className="text-sm font-bold text-brand-brown-950">
-                  URL slug
+                  {t("common.urlSlug")}
                 </label>
                 {slugEdited && (
-                  <span className="text-[10px] text-brand-brown-600">edited manually</span>
+                  <span className="text-[10px] text-brand-brown-600">{t("common.editedManually")}</span>
                 )}
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                Auto-generated. Lowercase, numbers, hyphens only.
+                {t("common.slugHint")}
               </p>
               <div className="relative mt-3">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
@@ -294,7 +298,7 @@ export default function ProposeCommunityPage() {
               </div>
               {slug && !slugOk && (
                 <p className="mt-1.5 text-[11px] text-rose-600">
-                  Must be at least 2 characters: lowercase, numbers, hyphens.
+                  {t("common.slugMinLength")}
                 </p>
               )}
             </div>
@@ -304,18 +308,18 @@ export default function ProposeCommunityPage() {
           <div className="-mx-4 rounded-none border-y bg-white p-5 shadow-xs sm:mx-0 sm:rounded-2xl sm:border">
             <div className="flex items-center justify-between">
               <label htmlFor={descId} className="text-sm font-bold text-brand-brown-950">
-                Short description
+                {t("common.shortDescription")}
               </label>
-              <CharCount current={description.length} min={20} max={180} />
+              <CharCount current={description.length} min={20} max={180} t={t} language={language} />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Shown beneath the community name. What is this community about?
+              {t("common.shortDescriptionHint")}
             </p>
             <input
               id={descId}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="A community for people who grow food and plants in cities."
+              placeholder={t("common.shortDescriptionPlaceholder")}
               maxLength={180}
               required
               className="mt-3 h-11 w-full rounded-xl border bg-brand-cream/60 px-3.5 text-sm text-brand-brown-950 outline-none placeholder:text-brand-brown-600/40 focus:border-brand-desert-dark focus:bg-white focus:ring-2 focus:ring-brand-desert-light/60 transition-all"
@@ -326,19 +330,18 @@ export default function ProposeCommunityPage() {
           <div className="rounded-2xl border bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
               <label htmlFor={reasonId} className="text-sm font-bold text-brand-brown-950">
-                Why does this community need to exist?
+                {t("common.whyCommunityExists")}
               </label>
-              <CharCount current={reason.length} min={20} max={2000} />
+              <CharCount current={reason.length} min={20} max={2000} t={t} language={language} />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Explain the subject, who would benefit, what belongs here, and why it
-              deserves its own canonical community.
+              {t("common.whyCommunityHint")}
             </p>
             <textarea
               id={reasonId}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="This community is for people interested in growing food and plants in urban environments — balconies, rooftops, indoor spaces, and shared city plots. It focuses on practical knowledge, community experiences, and sustainable urban food systems..."
+              placeholder={t("common.whyCommunityPlaceholder")}
               rows={7}
               maxLength={2000}
               required
@@ -346,9 +349,9 @@ export default function ProposeCommunityPage() {
             />
             <div className="mt-3 flex flex-wrap gap-2">
               {[
-                "What subject does it represent?",
-                "Who would participate?",
-                "What contributions belong here?",
+                t("common.subjectItRepresents"),
+                t("common.whoParticipates"),
+                t("common.contributionsBelong"),
               ].map((hint) => (
                 <span
                   key={hint}
@@ -371,8 +374,7 @@ export default function ProposeCommunityPage() {
           {/* Footer bar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border bg-white px-5 py-4 shadow-xs">
             <p className="max-w-xs text-[11px] leading-5 text-muted-foreground">
-              Proposing a community does not give you administrative control.
-              Approved communities belong to their citizens.
+              {t("common.proposalNoAdmin")}
             </p>
 
             <button
@@ -384,11 +386,11 @@ export default function ProposeCommunityPage() {
               {isSubmitting ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
-                  Submitting…
+                  {t("common.submittingProposal")}
                 </>
               ) : (
                 <>
-                  Submit Proposal
+                  {t("common.submitProposal")}
                   <ArrowRight size={15} />
                 </>
               )}

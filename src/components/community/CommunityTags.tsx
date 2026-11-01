@@ -1,10 +1,14 @@
+"use client";
+
 import { Hash } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CommunityTagsProps {
   tags: string[];
 }
 
 export function CommunityTags({ tags }: CommunityTagsProps) {
+  const { t } = useLanguage();
   return (
     <section className="rounded-2xl border bg-white p-5">
 
@@ -12,7 +16,7 @@ export function CommunityTags({ tags }: CommunityTagsProps) {
         <Hash size={16} className="text-brand-desert-dark" />
 
         <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-brand-brown-700">
-          Popular contexts
+          {t("common.popularContexts")}
         </h2>
       </div>
 

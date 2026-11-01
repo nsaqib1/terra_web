@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { communitiesApi } from "@/lib/api/communities";
 import { CommunityDetail } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
+import { useLanguage } from "@/context/LanguageContext";
 
 function getCommunityInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -27,6 +28,7 @@ function formatCount(count?: number | null): string {
 }
 
 export default function CommunitiesPage() {
+  const { t, language } = useLanguage();
   const [communities, setCommunities] = useState<CommunityDetail[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -39,12 +41,12 @@ export default function CommunitiesPage() {
       setCommunities(data || []);
     } catch (err: any) {
       setErrorMessage(
-        extractErrorMessage(err) || "Failed to load communities."
+        extractErrorMessage(err) || t("common.loadCommunitiesFailed")
       );
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadCommunities();
@@ -57,10 +59,10 @@ export default function CommunitiesPage() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between border-b pb-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-brand-brown-950">
-              Communities
+              {t("common.communityDirectoryTitle")}
             </h1>
             <p className="mt-1 text-xs text-brand-brown-700">
-              Explore topic hubs or propose a new space for your community.
+              {t("common.communityDirectorySubtitle")}
             </p>
           </div>
 
@@ -69,7 +71,7 @@ export default function CommunitiesPage() {
             className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
           >
             <Plus size={16} />
-            <span>Propose a Community</span>
+            <span>{t("common.proposeCommunity")}</span>
           </Link>
         </div>
 
@@ -82,7 +84,7 @@ export default function CommunitiesPage() {
             />
             <input
               type="text"
-              placeholder="Search Communities by name, topic, or tag..."
+              placeholder={t("common.communitySearchPlaceholder")}
               className="w-full rounded-xl border bg-white py-2.5 pl-10 pr-4 text-xs font-medium text-brand-brown-950 placeholder-muted-foreground outline-none focus:border-brand-brown-700 transition-colors"
             />
           </div>
@@ -154,7 +156,7 @@ export default function CommunitiesPage() {
 
                     {/* Description */}
                     <p className="mt-3 text-xs leading-relaxed text-brand-brown-800 line-clamp-2">
-                      {community.description || "No description provided."}
+                      {community.description || t("common.communityDescriptionMissing")}
                     </p>
                   </div>
 
@@ -167,7 +169,7 @@ export default function CommunitiesPage() {
                           <strong className="text-brand-brown-950">
                             {membersFormatted}
                           </strong>
-                          <span>Members</span>
+                          <span>{t("common.members")}</span>
                         </span>
                         <span>•</span>
                         <span className="flex items-center gap-1">
@@ -175,7 +177,7 @@ export default function CommunitiesPage() {
                           <strong className="text-brand-brown-950">
                             {postsFormatted}
                           </strong>
-                          <span>Posts</span>
+                          <span>{t("common.posts")}</span>
                         </span>
                       </div>
                     </div>
@@ -190,10 +192,10 @@ export default function CommunitiesPage() {
               <Compass size={24} />
             </div>
             <h3 className="mt-3 text-base font-bold text-brand-brown-950">
-              No communities found
+              {t("common.noCommunitiesFound")}
             </h3>
             <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
-              There are no active communities available at the moment.
+              {t("common.noActiveCommunities")}
             </p>
           </div>
         )}

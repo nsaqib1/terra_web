@@ -1,11 +1,15 @@
+"use client";
+
 import {
   ArrowRight,
   CheckCircle2,
   FilePlus2,
 } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function CommunityProposalCard() {
+  const { t } = useLanguage();
   return (
     <section
       className="
@@ -36,20 +40,18 @@ export function CommunityProposalCard() {
         </div>
 
         <h2 className="mt-4 text-lg font-bold text-brand-brown-950">
-          Can't find a community for your interest?
+          {t("common.cantFindCommunity")}
         </h2>
 
         <p className="mt-2 max-w-xl text-xs leading-5 text-brand-brown-700">
-          Propose a new canonical community. Our team reviews proposals
-          to prevent duplicates and make sure each community has a clear,
-          meaningful purpose.
+          {t("common.proposalCardDescription")}
         </p>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           {[
-            "Check for duplicates",
-            "Define the community scope",
-            "Open it to everyone",
+            t("common.checkDuplicates"),
+            t("common.defineCommunityScope"),
+            t("common.openToEveryone"),
           ].map((item) => (
             <div
               key={item}
@@ -80,7 +82,7 @@ export function CommunityProposalCard() {
             hover:bg-brand-brown-800
           "
         >
-          Propose a Community
+          {t("common.proposeCommunity")}
           <ArrowRight size={14} />
         </Link>
 

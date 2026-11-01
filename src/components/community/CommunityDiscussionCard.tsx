@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/context/LanguageContext";
 import {
   Bookmark,
   MessageCircle,
@@ -26,6 +29,7 @@ export function CommunityDiscussionCard({
   comments,
   verified = false,
 }: CommunityDiscussionCardProps) {
+  const { t } = useLanguage();
   return (
     <article
       className="
@@ -124,7 +128,7 @@ export function CommunityDiscussionCard({
             hover:text-brand-brown-950
           "
         >
-          ↑ {helpful} Helpful
+          ↑ {helpful} {t("common.helpful")}
         </button>
 
         <button
@@ -150,7 +154,7 @@ export function CommunityDiscussionCard({
               hover:bg-brand-sand
               hover:text-brand-brown-950
             "
-            aria-label="Save"
+            aria-label={t("common.save")}
           >
             <Bookmark size={15} />
           </button>
@@ -162,7 +166,7 @@ export function CommunityDiscussionCard({
               hover:bg-brand-sand
               hover:text-brand-brown-950
             "
-            aria-label="Share"
+            aria-label={t("common.share")}
           >
             <Share2 size={15} />
           </button>

@@ -25,6 +25,7 @@ import { tagsApi } from "@/lib/api/tags";
 import { postsApi } from "@/lib/api/posts";
 import { CommunityDetail, PostItem, Tag } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
+import { useLanguage } from "@/context/LanguageContext";
 
 function getCommunityInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -44,12 +45,12 @@ function formatCount(count?: number | null): string {
   return String(count);
 }
 
-function formatMemberSince(dateString?: string | null): string {
+function formatMemberSince(dateString?: string | null, language: "EN" | "BN" = "EN"): string {
   if (!dateString) return "";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
+    return date.toLocaleDateString(language === "BN" ? "bn-BD" : "en-US", {
+      month: language === "BN" ? "long" : "short",
       day: "numeric",
       year: "numeric",
     });
@@ -64,6 +65,7 @@ export default function CommunityPage() {
   const slug = params?.slug as string;
 
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { t, language } = useLanguage();
 
   // Data states
   const [community, setCommunity] = useState<CommunityDetail | null>(null);
@@ -124,12 +126,12 @@ export default function CommunityPage() {
       }
     } catch (err: any) {
       setErrorMessage(
-        extractErrorMessage(err) || "Failed to load community details."
+        extractErrorMessage(err) || t("common.failedCommunityDetails")
       );
     } finally {
       setIsLoadingCommunity(false);
     }
-  }, [slug]);
+  }, [slug, t]);
 
   useEffect(() => {
     loadCommunityData();
@@ -182,7 +184,7 @@ export default function CommunityPage() {
       setMembersCount((prev) => prev + 1);
       window.dispatchEvent(new Event("community-membership-changed"));
     } catch (err: any) {
-      setActionError(extractErrorMessage(err) || "Failed to join community.");
+      setActionError(extractErrorMessage(err) || t("common.failedJoinCommunity"));
     } finally {
       setIsActionPending(false);
     }
@@ -203,7 +205,7 @@ export default function CommunityPage() {
       setShowLeaveModal(false);
       window.dispatchEvent(new Event("community-membership-changed"));
     } catch (err: any) {
-      setActionError(extractErrorMessage(err) || "Failed to leave community.");
+      setActionError(extractErrorMessage(err) || t("common.failedLeaveCommunity"));
     } finally {
       setIsActionPending(false);
     }
@@ -257,7 +259,7 @@ export default function CommunityPage() {
               <AlertCircle size={28} />
             </div>
             <h1 className="mt-4 text-xl font-bold text-brand-brown-950">
-              Community Not Found
+              {t("common.communityNotFound")}
             </h1>
             <p className="mt-2 text-sm text-brand-brown-700">
               {errorMessage || "The community you are looking for does not exist or may have been archived."}
@@ -291,7 +293,7 @@ export default function CommunityPage() {
             <button
               onClick={() => setActionError(null)}
               className="rounded p-1 hover:bg-rose-100"
-              aria-label="Dismiss error"
+              aria-label={t("common.dismissError")}
             >
               <X size={14} />
             </button>
@@ -321,7 +323,7 @@ export default function CommunityPage() {
                     <span className="font-semibold text-brand-brown-950">
                       {formatCount(membersCount)}
                     </span>
-                    <span>Members</span>
+                    <span>{t("common.members")}</span>
                   </div>
                   <span>•</span>
                   <div className="flex items-center gap-1">
@@ -329,7 +331,7 @@ export default function CommunityPage() {
                     <span className="font-semibold text-brand-brown-950">
                       {formatCount(community._count?.posts ?? posts.length)}
                     </span>
-                    <span>Posts</span>
+                    <span>{t("common.posts")}</span>
                   </div>
                 </div>
               </div>
@@ -348,11 +350,11 @@ export default function CommunityPage() {
                     "
                   >
                     <Check size={15} className="text-emerald-700" />
-                    <span>Member</span>
+                    <span>{t("common.member")}</span>
                   </button>
                   {joinedAt && (
                     <span className="text-[11px] text-muted-foreground px-1">
-                      Since {formatMemberSince(joinedAt)}
+                      {t("common.since")} {formatMemberSince(joinedAt, language)}
                     </span>
                   )}
                 </>
@@ -369,12 +371,12 @@ export default function CommunityPage() {
                   {isActionPending ? (
                     <>
                       <Loader2 size={15} className="animate-spin" />
-                      <span>Joining...</span>
+                      <span>{t("common.joining")}</span>
                     </>
                   ) : (
                     <>
                       <UserPlus size={15} />
-                      <span>Become a Member</span>
+                      <span>{t("common.becomeMember")}</span>
                     </>
                   )}
                 </button>
@@ -388,7 +390,7 @@ export default function CommunityPage() {
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   <Layers size={14} className="text-brand-brown-700" />
-                  <span>Tags</span>
+                  <span>{t("common.communityTags")}</span>
                 </div>
                 {selectedTag && (
                   <button
@@ -396,7 +398,7 @@ export default function CommunityPage() {
                     className="flex items-center gap-1 text-[11px] font-semibold text-brand-brown-700 hover:text-brand-brown-950"
                   >
                     <X size={12} />
-                    <span>Clear filter</span>
+                    <span>{t("common.clearFilter")}</span>
                   </button>
                 )}
               </div>
@@ -412,7 +414,7 @@ export default function CommunityPage() {
                     }
                   `}
                 >
-                  <span>All</span>
+                  <span>{t("common.all")}</span>
                   <span
                     className={`rounded-md px-1.5 py-0.5 text-[10px] ${selectedTag === null
                       ? "bg-white/20 text-white"
@@ -479,12 +481,12 @@ export default function CommunityPage() {
                   <FileText size={24} />
                 </div>
                 <h3 className="mt-3 text-base font-bold text-brand-brown-950">
-                  {selectedTag ? `No posts tagged #${selectedTag}` : "No discussions yet"}
+                  {selectedTag ? t("common.noTaggedPosts", { tag: selectedTag }) : t("common.noDiscussionsYet")}
                 </h3>
                 <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
                   {selectedTag
-                    ? "Try selecting another tag or clearing the filter to see all posts."
-                    : "Be the first citizen to start a conversation in this community."}
+                    ? t("common.noTaggedPostsHint")
+                    : t("common.firstDiscussionHint")}
                 </p>
 
                 <div className="mt-5">
@@ -493,7 +495,7 @@ export default function CommunityPage() {
                     className="inline-flex items-center gap-1.5 rounded-xl bg-brand-brown-950 px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
                   >
                     <PlusCircle size={14} />
-                    <span>Create a Post</span>
+                    <span>{t("common.createPost")}</span>
                   </Link>
                 </div>
               </div>
@@ -507,12 +509,12 @@ export default function CommunityPage() {
               <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
                 <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
                   <FolderOpen size={14} className="text-brand-desert-dark" />
-                  <span>Resources</span>
+                  <span>{t("common.resources")}</span>
                 </div>
                 <p className="mt-3 text-2xl font-extrabold text-brand-brown-950">{formatCount(community._count?.resources ?? 0)}</p>
-                <p className="mt-0.5 text-[11px] text-brand-brown-600">Files and knowledge shared for this community.</p>
+                <p className="mt-0.5 text-[11px] text-brand-brown-600">{t("common.resourcesDescription")}</p>
                 <Link href={`/community/${community.slug}/resources`} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-brand-sand px-3 py-2 text-xs font-semibold text-brand-brown-900 hover:bg-brand-desert-light">
-                  Explore resources
+                  {t("common.exploreResources")}
                 </Link>
               </div>
             )}
@@ -520,12 +522,12 @@ export default function CommunityPage() {
             <div className="-mx-4 rounded-none border-y bg-white p-4 sm:mx-0 sm:rounded-2xl sm:border">
               <div className="flex items-center gap-2 border-b pb-2 text-xs font-bold uppercase tracking-wider text-brand-brown-950">
                 <Sparkles size={14} className="text-brand-desert-dark" />
-                <span>About Community</span>
+                <span>{t("common.aboutCommunityTitle")}</span>
               </div>
 
               {/* Centralized Description */}
               <p className="mt-3 text-xs leading-relaxed text-brand-brown-700">
-                {community.description || "A dedicated digital space for discussions and knowledge sharing."}
+                {community.description || t("common.communityDefaultDescription")}
               </p>
             </div>
           </aside>
@@ -550,7 +552,7 @@ export default function CommunityPage() {
             <button
               onClick={() => !isActionPending && setShowLeaveModal(false)}
               className="absolute right-3 top-3 rounded-lg p-1.5 text-brand-brown-600 transition-colors hover:bg-brand-sand/60 hover:text-brand-brown-950"
-              aria-label="Close"
+              aria-label={t("common.close")}
               disabled={isActionPending}
             >
               <X size={16} />
@@ -563,10 +565,10 @@ export default function CommunityPage() {
 
             {/* Content */}
             <h3 className="mt-4 text-center text-base font-bold text-brand-brown-950">
-              Leave {community.name}?
+              {t("common.leaveCommunityTitle", { name: community.name })}
             </h3>
             <p className="mt-2 text-center text-xs leading-relaxed text-brand-brown-600">
-              You’ll lose access to community posts and discussions. You can always rejoin later.
+              {t("common.leaveCommunityWarning")}
             </p>
 
             {/* Actions */}
@@ -581,7 +583,7 @@ export default function CommunityPage() {
                   disabled:opacity-60
                 "
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 onClick={handleLeave}
@@ -596,12 +598,12 @@ export default function CommunityPage() {
                 {isActionPending ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    <span>Leaving…</span>
+                    <span>{t("common.leaving")}</span>
                   </>
                 ) : (
                   <>
                     <LogOut size={14} />
-                    <span>Leave Community</span>
+                    <span>{t("common.leaveCommunity")}</span>
                   </>
                 )}
               </button>
