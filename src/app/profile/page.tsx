@@ -28,6 +28,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { usersApi } from "@/lib/api/users";
 import { UserProfileResponse, UserStats } from "@/lib/api/types";
 import { AvatarUploadModal } from "@/components/profile/AvatarUploadModal";
@@ -67,6 +68,7 @@ function EditableProfileHeader({
   onOpenAvatarModal?: () => void;
   onOpenCoverModal?: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <section className="-mx-4 overflow-hidden rounded-none border-y border-brand-sand-dark bg-white shadow-xs sm:mx-0 sm:rounded-3xl sm:border">
       {/* Cover */}
@@ -90,8 +92,8 @@ function EditableProfileHeader({
           type="button"
           onClick={onOpenCoverModal}
           className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl bg-white/85 text-brand-brown-950 shadow-sm backdrop-blur-md transition-colors hover:bg-white"
-          aria-label="Change cover photo"
-          title="Change cover photo"
+          aria-label={t("profile.changeCover")}
+          title={t("profile.changeCover")}
         >
           <Camera size={15} />
         </button>
@@ -108,8 +110,8 @@ function EditableProfileHeader({
                 className="relative cursor-pointer rounded-full overflow-hidden"
                 role="button"
                 tabIndex={0}
-                aria-label="Edit profile picture"
-                title="Click to edit profile picture"
+                aria-label={t("profile.editPicture")}
+                title={t("profile.clickEditPicture")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
@@ -134,7 +136,7 @@ function EditableProfileHeader({
                 {/* Hover overlay with camera icon */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 backdrop-blur-2xs">
                   <Camera size={22} className="text-white drop-shadow-xs" />
-                  <span className="text-[10px] font-semibold mt-1">Edit Photo</span>
+                  <span className="text-[10px] font-semibold mt-1">{t("profile.editPhoto")}</span>
                 </div>
               </div>
 
@@ -144,8 +146,8 @@ function EditableProfileHeader({
                 type="button"
                 onClick={onOpenAvatarModal}
                 className="absolute -right-1 bottom-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-brand-brown-950 text-white shadow-md transition-all hover:bg-brand-desert-dark hover:scale-110 active:scale-95 sm:right-1"
-                aria-label="Change profile picture"
-                title="Change profile picture (Crop, Rotate, Enhance)"
+                aria-label={t("profile.changePicture")}
+                title={t("profile.changePictureTitle")}
               >
                 <Camera size={14} />
               </button>
@@ -210,7 +212,7 @@ function EditableProfileHeader({
                 className="text-brand-brown-500"
               />
 
-              <span>Joined {joinedDate}</span>
+              <span>{t("profile.joined", { date: joinedDate })}</span>
             </div>
           </div>
         </div>
@@ -230,6 +232,8 @@ function StatCard({
   value: string | number;
   href?: string;
 }) {
+  const { language } = useLanguage();
+  const displayValue = typeof value === "number" ? value.toLocaleString(language === "BN" ? "bn-BD" : "en-US") : value;
   const inner = (
     <>
       <span className="mb-1 text-brand-brown-600">
@@ -237,7 +241,7 @@ function StatCard({
       </span>
 
       <span className="text-lg font-bold text-brand-brown-950">
-        {value}
+        {displayValue}
       </span>
 
       <span className="text-[11px] font-medium text-brand-brown-600">
@@ -334,32 +338,33 @@ function ProfileInfoTab({
   onSave: (e: React.FormEvent) => void;
   onOpenAvatarModal?: () => void;
 }) {
+  const { t, language } = useLanguage();
   return (
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           icon={<Zap size={18} />}
-          label="Points"
-          value={points.toLocaleString()}
+          label={t("profile.points")}
+          value={points.toLocaleString(language === "BN" ? "bn-BD" : "en-US")}
         />
 
         <StatCard
           icon={<MessageSquare size={16} />}
-          label="Posts"
+          label={t("profile.posts")}
           value={stats?.posts ?? 0}
           href="/posts/manage"
         />
 
         <StatCard
           icon={<ThumbsUp size={16} />}
-          label="Upvotes"
+          label={t("profile.upvotes")}
           value={stats?.upvotes ?? 0}
         />
 
         <StatCard
           icon={<Pyramid size={16} />}
-          label="Communities"
+          label={t("profile.communities")}
           value={stats?.communities ?? 0}
         />
       </div>
@@ -367,8 +372,8 @@ function ProfileInfoTab({
       {/* Edit form */}
       <div className="-mx-4 rounded-none border-y border-brand-sand-dark bg-white p-6 shadow-xs sm:mx-0 sm:rounded-2xl sm:border sm:p-8">
         <SectionHeader
-          title="Profile Information"
-          description="Update the information shown on your public profile."
+          title={t("profile.information")}
+          description={t("profile.informationDescription")}
         />
 
         {errorMessage && (
@@ -380,8 +385,8 @@ function ProfileInfoTab({
         <form onSubmit={onSave} className="space-y-5">
           <div className="grid gap-5 sm:grid-cols-2">
             <FieldWrapper
-              label="Display Name"
-              hint="Your public name shown across communities."
+              label={t("profile.displayName")}
+              hint={t("profile.displayNameHint")}
             >
               <input
                 id="profile-display-name"
@@ -398,8 +403,8 @@ function ProfileInfoTab({
             </FieldWrapper>
 
             <FieldWrapper
-              label="Username"
-              hint="Used in your profile URL and @mentions."
+              label={t("profile.username")}
+              hint={t("profile.usernameHint")}
             >
               <div className="relative">
                 <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 select-none text-sm font-medium text-brand-brown-600">
@@ -423,8 +428,8 @@ function ProfileInfoTab({
           </div>
 
           <FieldWrapper
-            label="Bio"
-            hint="Brief description visible on your public profile."
+            label={t("profile.bio")}
+            hint={t("profile.bioHint")}
           >
             <textarea
               id="profile-bio"
@@ -441,7 +446,7 @@ function ProfileInfoTab({
           </FieldWrapper>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <FieldWrapper label="Location">
+            <FieldWrapper label={t("profile.location")}>
               <div className="relative">
                 <MapPin
                   size={14}
@@ -463,7 +468,7 @@ function ProfileInfoTab({
               </div>
             </FieldWrapper>
 
-            <FieldWrapper label="Website URL">
+            <FieldWrapper label={t("profile.website")}>
               <div className="relative">
                 <Globe
                   size={14}
@@ -499,12 +504,12 @@ function ProfileInfoTab({
                     size={14}
                     className="text-emerald-400"
                   />
-                  Saved Successfully
+                  {t("profile.saved")}
                 </span>
               ) : isUpdating ? (
-                "Saving…"
+                t("profile.saving")
               ) : (
-                "Save Changes"
+                t("profile.saveChanges")
               )}
             </Button>
           </div>
@@ -515,6 +520,7 @@ function ProfileInfoTab({
 }
 
 function SecurityTab({ email }: { email?: string }) {
+  const { t } = useLanguage();
   const [activeForm, setActiveForm] = useState<
     "email" | "password" | null
   >(null);
@@ -531,16 +537,15 @@ function SecurityTab({ email }: { email?: string }) {
 
             <div>
               <h3 className="text-sm font-bold text-brand-brown-950">
-                Email Address
+                {t("profile.emailAddress")}
               </h3>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                Your email is used for account access and important
-                account notifications.
+                {t("profile.emailDescription")}
               </p>
 
               <p className="mt-3 text-xs font-semibold text-brand-brown-800">
-                {email || "Not available"}
+                {email || t("profile.notAvailable")}
               </p>
             </div>
           </div>
@@ -555,7 +560,7 @@ function SecurityTab({ email }: { email?: string }) {
             }
             className="h-9 shrink-0 rounded-xl border-brand-sand-dark text-xs font-semibold gap-1.5 transition-all"
           >
-            <span>Change</span>
+            <span>{t("profile.change")}</span>
             <ChevronRight
               size={14}
               className={`transition-transform duration-300 ${activeForm === "email" ? "rotate-90" : "rotate-0"
@@ -575,8 +580,8 @@ function SecurityTab({ email }: { email?: string }) {
             <div className="mt-6 border-t border-brand-sand-dark pt-6">
               <div className="space-y-4">
                 <FieldWrapper
-                  label="New Email Address"
-                  hint="You'll need to verify the new email address."
+                  label={t("profile.newEmail")}
+                  hint={t("profile.verifyNewEmail")}
                 >
                   <input
                     type="email"
@@ -585,10 +590,10 @@ function SecurityTab({ email }: { email?: string }) {
                   />
                 </FieldWrapper>
 
-                <FieldWrapper label="Current Password">
+                <FieldWrapper label={t("profile.currentPassword")}>
                   <input
                     type="password"
-                    placeholder="Enter your current password"
+                    placeholder={t("profile.enterCurrentPassword")}
                     className="h-11 w-full rounded-xl border border-brand-sand-dark/60 bg-white px-3.5 text-sm outline-none transition-all focus:border-brand-desert-dark focus:ring-4 focus:ring-brand-desert/20"
                   />
                 </FieldWrapper>
@@ -600,14 +605,14 @@ function SecurityTab({ email }: { email?: string }) {
                     onClick={() => setActiveForm(null)}
                     className="h-9 rounded-xl border-brand-sand-dark text-xs"
                   >
-                    Cancel
+                    {t("profile.cancel")}
                   </Button>
 
                   <Button
                     type="button"
                     className="h-9 rounded-xl bg-brand-brown-950 px-5 text-xs font-bold text-white hover:bg-brand-brown-800"
                   >
-                    Update Email
+                    {t("profile.updateEmail")}
                   </Button>
                 </div>
               </div>
@@ -626,15 +631,15 @@ function SecurityTab({ email }: { email?: string }) {
 
             <div>
               <h3 className="text-sm font-bold text-brand-brown-950">
-                Password
+                {t("profile.password")}
               </h3>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                Change your password to keep your account secure.
+                {t("profile.passwordDescription")}
               </p>
 
               <p className="mt-3 text-xs font-medium text-muted-foreground">
-                Managed via account security settings.
+                {t("profile.passwordManaged")}
               </p>
             </div>
           </div>
@@ -649,7 +654,7 @@ function SecurityTab({ email }: { email?: string }) {
             }
             className="h-9 shrink-0 rounded-xl border-brand-sand-dark text-xs font-semibold gap-1.5 transition-all"
           >
-            <span>Change</span>
+            <span>{t("profile.change")}</span>
             <ChevronRight
               size={14}
               className={`transition-transform duration-300 ${activeForm === "password" ? "rotate-90" : "rotate-0"
@@ -668,26 +673,26 @@ function SecurityTab({ email }: { email?: string }) {
           <div className="overflow-hidden">
             <div className="mt-6 border-t border-brand-sand-dark pt-6">
               <div className="space-y-4">
-                <FieldWrapper label="Current Password">
+                <FieldWrapper label={t("profile.currentPassword")}>
                   <input
                     type="password"
-                    placeholder="Enter your current password"
+                    placeholder={t("profile.enterCurrentPassword")}
                     className="h-11 w-full rounded-xl border border-brand-sand-dark/60 bg-white px-3.5 text-sm outline-none transition-all focus:border-brand-desert-dark focus:ring-4 focus:ring-brand-desert/20"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper label="New Password">
+                <FieldWrapper label={t("profile.newPassword")}>
                   <input
                     type="password"
-                    placeholder="Enter a new password"
+                    placeholder={t("profile.enterNewPassword")}
                     className="h-11 w-full rounded-xl border border-brand-sand-dark/60 bg-white px-3.5 text-sm outline-none transition-all focus:border-brand-desert-dark focus:ring-4 focus:ring-brand-desert/20"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper label="Confirm New Password">
+                <FieldWrapper label={t("profile.confirmPassword")}>
                   <input
                     type="password"
-                    placeholder="Confirm your new password"
+                    placeholder={t("profile.confirmNewPassword")}
                     className="h-11 w-full rounded-xl border border-brand-sand-dark/60 bg-white px-3.5 text-sm outline-none transition-all focus:border-brand-desert-dark focus:ring-4 focus:ring-brand-desert/20"
                   />
                 </FieldWrapper>
@@ -699,14 +704,14 @@ function SecurityTab({ email }: { email?: string }) {
                     onClick={() => setActiveForm(null)}
                     className="h-9 rounded-xl border-brand-sand-dark text-xs"
                   >
-                    Cancel
+                    {t("profile.cancel")}
                   </Button>
 
                   <Button
                     type="button"
                     className="h-9 rounded-xl bg-brand-brown-950 px-5 text-xs font-bold text-white hover:bg-brand-brown-800"
                   >
-                    Update Password
+                    {t("profile.updatePassword")}
                   </Button>
                 </div>
               </div>
@@ -719,18 +724,17 @@ function SecurityTab({ email }: { email?: string }) {
 }
 
 function PrivacyAccountTab() {
+  const { t } = useLanguage();
   return (
     <div className="space-y-5">
       {/* Disable account */}
       <div className="-mx-4 rounded-none border-y border-brand-sand-dark bg-white p-6 shadow-xs sm:mx-0 sm:rounded-2xl sm:border sm:p-8">
         <h3 className="text-sm font-bold text-brand-brown-950">
-          Disable Account
+          {t("profile.disableAccount")}
         </h3>
 
         <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-brand-brown-600">
-          Temporarily disable your account. Your profile and
-          contributions will no longer be active until you
-          choose to return.
+          {t("profile.disableDescription")}
         </p>
 
         <div className="mt-5">
@@ -739,7 +743,7 @@ function PrivacyAccountTab() {
             variant="outline"
             className="h-9 rounded-xl border-brand-sand-dark text-xs font-semibold"
           >
-            Disable Account
+            {t("profile.disableAccount")}
           </Button>
         </div>
       </div>
@@ -747,12 +751,11 @@ function PrivacyAccountTab() {
       {/* Delete account */}
       <div className="-mx-4 rounded-none border-y border-red-200 bg-red-50/40 p-6 sm:p-8 sm:mx-0 sm:rounded-2xl sm:border">
         <h3 className="text-sm font-bold text-red-800">
-          Delete Account
+          {t("profile.deleteAccount")}
         </h3>
 
         <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-red-700/80">
-          Permanently delete your account and associated personal
-          information. This action cannot be undone.
+          {t("profile.deleteDescription")}
         </p>
 
         <div className="mt-5">
@@ -761,7 +764,7 @@ function PrivacyAccountTab() {
             variant="outline"
             className="h-9 rounded-xl border-red-200 text-xs font-semibold text-red-700 hover:bg-red-100"
           >
-            Delete Account
+            {t("profile.deleteAccount")}
           </Button>
         </div>
       </div>
@@ -777,23 +780,24 @@ const NAV_TABS: {
 }[] = [
     {
       id: "profile",
-      label: "Profile Info",
+      label: "profileInfo",
       icon: <User size={15} />,
     },
     {
       id: "security",
-      label: "Security",
+      label: "security",
       icon: <Key size={15} />,
     },
     {
       id: "privacy",
-      label: "Privacy & Account",
+      label: "privacyAccount",
       icon: <Shield size={15} />,
     },
   ];
 
 /* ─────────────────────────────────────────────────────────── page */
 export default function ProfilePage() {
+  const { t, language } = useLanguage();
   const { user, setUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>("profile");
   const [isSaved, setIsSaved] = useState(false);
@@ -918,7 +922,7 @@ export default function ProfilePage() {
       setTimeout(() => setIsSaved(false), 3000);
     } catch (err: any) {
       setErrorMessage(
-        err?.message || "Failed to update profile. Please try again."
+        err?.message || t("profile.updateFailed")
       );
     } finally {
       setIsUpdating(false);
@@ -943,11 +947,11 @@ export default function ProfilePage() {
           onOpenCoverModal={() => setIsCoverModalOpen(true)}
           joinedDate={
             createdAt
-              ? new Date(createdAt).toLocaleDateString("en-US", {
+              ? new Date(createdAt).toLocaleDateString(language === "BN" ? "bn-BD" : "en-US", {
                 month: "long",
                 year: "numeric",
               })
-              : "Recent"
+              : t("profile.recent")
           }
         />
 
@@ -995,7 +999,7 @@ export default function ProfilePage() {
                   >
                     <span className="flex items-center gap-2.5">
                       {icon}
-                      {label}
+                      {t(`profile.${label}` as any)}
                     </span>
 
                     <ChevronRight
@@ -1014,7 +1018,7 @@ export default function ProfilePage() {
                 >
                   <span className="flex items-center gap-2.5">
                     <LayoutList size={15} />
-                    Manage My Posts
+                    {t("profile.managePosts")}
                   </span>
                   <ChevronRight size={13} className="opacity-30" />
                 </Link>
@@ -1028,7 +1032,7 @@ export default function ProfilePage() {
                   className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
                 >
                   <LogOut size={15} />
-                  Sign Out
+                  {t("profile.signOut")}
                 </button>
               </nav>
             </div>

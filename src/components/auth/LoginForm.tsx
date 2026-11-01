@@ -14,12 +14,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { extractErrorMessage } from "@/lib/api/errors";
 
 export function LoginForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const { login } = useAuth();
 
@@ -82,7 +84,7 @@ export function LoginForm() {
     } catch (err) {
       const msg = extractErrorMessage(
         err,
-        "Invalid credentials. Please try again.",
+        t("auth.login_invalidCredentials"),
       );
 
       setErrorMessage(msg);
@@ -132,7 +134,7 @@ export function LoginForm() {
               text-brand-desert-dark
             "
           >
-            Welcome back
+            {t("auth.login_welcome")}
           </p>
 
           <h1
@@ -144,7 +146,7 @@ export function LoginForm() {
               text-brand-brown-950
             "
           >
-            Log in to Terramids
+            {t("auth.login_title")}
           </h1>
 
           <p
@@ -157,7 +159,7 @@ export function LoginForm() {
               text-brand-brown-600
             "
           >
-            Pick up where you left off.
+            {t("auth.login_subtitle")}
           </p>
         </div>
       </div>
@@ -218,7 +220,7 @@ export function LoginForm() {
             className="shrink-0 text-emerald-600"
           />
 
-          <span>Logged in successfully. Taking you in...</span>
+          <span>{t("auth.login_success")}</span>
         </div>
       )}
 
@@ -253,7 +255,7 @@ export function LoginForm() {
                 text-brand-brown-900
               "
             >
-              Email or username
+              {t("auth.login_identifier")}
             </label>
 
             <div className="relative mt-2">
@@ -274,7 +276,7 @@ export function LoginForm() {
                 onChange={(event) =>
                   update("identifier", event.target.value)
                 }
-                placeholder="you@example.com or username"
+                placeholder={t("auth.login_identifierPlaceholder")}
                 autoComplete="username"
                 autoFocus
                 className="
@@ -312,7 +314,7 @@ export function LoginForm() {
                   text-brand-brown-900
                 "
               >
-                Password
+                {t("auth.login_password")}
               </label>
 
               <Link
@@ -326,7 +328,7 @@ export function LoginForm() {
                   hover:underline
                 "
               >
-                Forgot password?
+                {t("auth.login_forgot")}
               </Link>
             </div>
 
@@ -348,7 +350,7 @@ export function LoginForm() {
                 onChange={(event) =>
                   update("password", event.target.value)
                 }
-                placeholder="Enter your password"
+                placeholder={t("auth.login_passwordPlaceholder")}
                 autoComplete="current-password"
                 className="
                   h-12
@@ -390,8 +392,8 @@ export function LoginForm() {
                 "
                 aria-label={
                   showPassword
-                    ? "Hide password"
-                    : "Show password"
+                    ? t("auth.login_hidePassword")
+                    : t("auth.login_showPassword")
                 }
               >
                 {showPassword ? (
@@ -428,16 +430,16 @@ export function LoginForm() {
                   size={16}
                   className="animate-spin"
                 />
-                <span>Logging in...</span>
+                <span>{t("auth.login_loggingIn")}</span>
               </>
             ) : isSuccess ? (
               <>
                 <CheckCircle2 size={16} />
-                <span>Logged in</span>
+                <span>{t("auth.login_loggedIn")}</span>
               </>
             ) : (
               <>
-                <span>Log in</span>
+                <span>{t("auth.login_submit")}</span>
                 <ArrowRight size={16} />
               </>
             )}
@@ -450,7 +452,7 @@ export function LoginForm() {
       ================================================================= */}
       <div className="mt-6 text-center">
         <p className="text-xs text-brand-brown-500">
-          New to Terramids?
+          {t("auth.login_newHere")}
         </p>
 
         <Link
@@ -467,14 +469,14 @@ export function LoginForm() {
             hover:text-brand-desert-dark
           "
         >
-          Create your account
+          {t("auth.login_createAccount")}
           <ArrowRight size={14} />
         </Link>
       </div>
 
       {/* Small continuity cue */}
       <p className="mt-8 text-center text-[10px] font-medium text-brand-brown-400">
-        Your Communities are waiting.
+        {t("auth.login_continuity")}
       </p>
     </div>
   );

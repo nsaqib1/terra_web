@@ -30,6 +30,7 @@ import {
 import { mediaApi } from "@/lib/api/media";
 import { usersApi } from "@/lib/api/users";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -73,6 +74,7 @@ export function AvatarUploadModal({
   userDisplayName = "User",
   variant = "avatar",
 }: AvatarUploadModalProps) {
+  const { t } = useLanguage();
   const { setUser } = useAuth();
   const isCover = variant === "cover";
 
@@ -139,13 +141,13 @@ export function AvatarUploadModal({
     (file: File) => {
       setErrorMessage(null);
       if (!file.type.startsWith("image/")) {
-        setErrorMessage("Please select a valid image file (JPEG, PNG, WebP, etc.)");
+        setErrorMessage(t("avatar.invalidFile"));
         return;
       }
 
       // 15MB maximum client limit
       if (file.size > 15 * 1024 * 1024) {
-        setErrorMessage("Image size must be less than 15MB.");
+        setErrorMessage(t("avatar.tooLarge"));
         return;
       }
 
@@ -163,7 +165,7 @@ export function AvatarUploadModal({
           resetTransforms();
         };
         img.onerror = () => {
-          setErrorMessage("Failed to load image file.");
+          setErrorMessage(t("avatar.loadFailed"));
         };
         img.src = result;
       };
@@ -527,7 +529,7 @@ export function AvatarUploadModal({
       console.error(`${isCover ? "Cover" : "Avatar"} upload failed:`, err);
       setErrorMessage(
         err?.message ||
-        `Failed to upload and update profile ${isCover ? "cover" : "picture"}. Please try again.`,
+        t("avatar.uploadFailed", { kind: isCover ? t("avatar.cover") : t("avatar.picture") }),
       );
     } finally {
       setIsSaving(false);
@@ -559,7 +561,7 @@ export function AvatarUploadModal({
     } catch (err: any) {
       setErrorMessage(
         err?.message ||
-        `Failed to remove profile ${isCover ? "cover" : "picture"}. Please try again.`,
+        t("avatar.removeFailed", { kind: isCover ? t("avatar.cover") : t("avatar.picture") }),
       );
     } finally {
       setIsRemoving(false);
@@ -595,10 +597,10 @@ export function AvatarUploadModal({
                 id="profile-image-modal-title"
                 className="text-base font-bold text-brand-brown-950"
               >
-                {isCover ? "Profile Cover" : "Profile Picture"}
+                {isCover ? t("avatar.titleCover") : t("avatar.titlePicture")}
               </h2>
               <p className="text-xs text-brand-brown-600">
-                Crop, rotate, and enhance your {isCover ? "cover photo" : "avatar"}
+                {isCover ? t("avatar.subtitleCover") : t("avatar.subtitlePicture")}
               </p>
             </div>
           </div>
@@ -654,21 +656,21 @@ export function AvatarUploadModal({
                 </div>
 
                 <h3 className="mt-4 text-sm font-bold text-brand-brown-950">
-                  Upload a new {isCover ? "cover image" : "photo"}
+                  {isCover ? t("avatar.uploadCover") : t("avatar.uploadPhoto")}
                 </h3>
                 <p className="mt-1 text-xs text-brand-brown-600 max-w-sm">
-                  Drag and drop your image here, or{" "}
+                  {t("avatar.drop")}{" "}
                   <span className="font-semibold text-brand-desert-dark underline">
-                    browse files
+                    {t("avatar.browse")}
                   </span>
                 </p>
 
                 <div className="mt-4 flex items-center gap-2 text-[11px] text-muted-foreground bg-white/80 px-3 py-1.5 rounded-full border border-brand-sand-dark/60">
-                  <span>Supports JPEG, PNG, WebP, GIF</span>
+                  <span>{t("avatar.supports")}</span>
                   <span>•</span>
-                  <span>Max 15MB</span>
+                  <span>{t("avatar.maxSize")}</span>
                   <span>•</span>
-                  <span>Ctrl+V to paste</span>
+                  <span>{t("avatar.paste")}</span>
                 </div>
               </div>
 
@@ -678,7 +680,7 @@ export function AvatarUploadModal({
                   <div className="flex items-center gap-3">
                     <img
                       src={currentImageUrl}
-                      alt={isCover ? "Current profile cover" : userDisplayName}
+                      alt={isCover ? t("avatar.currentCover") : userDisplayName}
                       className={`object-cover ring-2 ring-white shadow-xs ${
                         isCover
                           ? "h-12 w-24 rounded-lg"
@@ -687,12 +689,12 @@ export function AvatarUploadModal({
                     />
                     <div>
                       <p className="text-xs font-bold text-brand-brown-900">
-                        Current Profile {isCover ? "Cover" : "Picture"}
+                        {isCover ? t("avatar.currentCover") : t("avatar.currentPicture")}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
                         {isCover
-                          ? "Shown across the top of your profile"
-                          : "Active on your public profile & posts"}
+                          ? t("avatar.coverShown")
+                          : t("avatar.pictureShown")}
                       </p>
                     </div>
                   </div>
@@ -709,7 +711,7 @@ export function AvatarUploadModal({
                     ) : (
                       <Trash2 size={13} />
                     )}
-                    Remove
+                    {t("avatar.remove")}
                   </Button>
                 </div>
               )}
@@ -728,7 +730,7 @@ export function AvatarUploadModal({
                     }`}
                 >
                   <Crop size={14} />
-                  Position & Crop
+                  {t("avatar.cropTab")}
                 </button>
 
                 <button
@@ -740,7 +742,7 @@ export function AvatarUploadModal({
                     }`}
                 >
                   <Sliders size={14} />
-                  Lighting & Filters
+                  {t("avatar.adjustTab")}
                 </button>
               </div>
 
@@ -870,7 +872,7 @@ export function AvatarUploadModal({
                 <div className="flex flex-col items-center justify-between rounded-2xl border border-brand-sand-dark/60 bg-brand-cream/40 p-4 h-full">
                   <div className="w-full text-center">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-brand-brown-700">
-                      Live Preview
+                      {t("avatar.preview")}
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
                       {isCover
@@ -958,7 +960,7 @@ export function AvatarUploadModal({
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full text-center text-[11px] font-semibold text-brand-desert-dark hover:underline"
                   >
-                    Choose another {isCover ? "image" : "photo"}
+                    {isCover ? t("avatar.chooseAnotherImage") : t("avatar.chooseAnotherPhoto")}
                   </button>
                 </div>
               </div>
@@ -971,7 +973,7 @@ export function AvatarUploadModal({
                     <div className="flex items-center justify-between text-xs font-semibold text-brand-brown-800">
                       <span className="flex items-center gap-1.5">
                         <Maximize2 size={13} className="text-brand-brown-600" />
-                        Zoom Level
+                        {t("avatar.zoom")}
                       </span>
                       <span className="font-mono text-[11px] text-muted-foreground">
                         {zoom.toFixed(2)}x
@@ -1024,7 +1026,7 @@ export function AvatarUploadModal({
                         onClick={() =>
                           setRotation((prev) => (prev - 90 + 360) % 360)
                         }
-                        title="Rotate 90° Left"
+                        title={t("avatar.rotateLeft")}
                         className="flex items-center gap-1 rounded-xl border border-brand-sand-dark bg-white px-3 py-1.5 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand transition-colors shadow-2xs"
                       >
                         <RotateCcw size={13} />
@@ -1037,7 +1039,7 @@ export function AvatarUploadModal({
                         onClick={() =>
                           setRotation((prev) => (prev + 90) % 360)
                         }
-                        title="Rotate 90° Right"
+                        title={t("avatar.rotateRight")}
                         className="flex items-center gap-1 rounded-xl border border-brand-sand-dark bg-white px-3 py-1.5 text-xs font-semibold text-brand-brown-800 hover:bg-brand-sand transition-colors shadow-2xs"
                       >
                         <RotateCw size={13} />
@@ -1048,28 +1050,28 @@ export function AvatarUploadModal({
                       <button
                         type="button"
                         onClick={() => setFlipH((prev) => !prev)}
-                        title="Flip Horizontal"
+                        title={t("avatar.flipH")}
                         className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs ${flipH
                             ? "border-brand-desert-dark bg-brand-desert/20 text-brand-brown-950"
                             : "border-brand-sand-dark bg-white text-brand-brown-800 hover:bg-brand-sand"
                           }`}
                       >
                         <FlipHorizontal size={13} />
-                        Flip H
+                        {t("avatar.flipH")}
                       </button>
 
                       {/* Flip V */}
                       <button
                         type="button"
                         onClick={() => setFlipV((prev) => !prev)}
-                        title="Flip Vertical"
+                        title={t("avatar.flipV")}
                         className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors shadow-2xs ${flipV
                             ? "border-brand-desert-dark bg-brand-desert/20 text-brand-brown-950"
                             : "border-brand-sand-dark bg-white text-brand-brown-800 hover:bg-brand-sand"
                           }`}
                       >
                         <FlipVertical size={13} />
-                        Flip V
+                        {t("avatar.flipV")}
                       </button>
                     </div>
 
@@ -1087,14 +1089,14 @@ export function AvatarUploadModal({
                       className="flex items-center gap-1 text-xs font-semibold text-brand-brown-600 hover:text-brand-brown-950"
                     >
                       <RefreshCcw size={12} />
-                      Reset
+                      {t("avatar.reset")}
                     </button>
                   </div>
 
                   {/* Fine tilt adjustment slider */}
                   <div className="space-y-1 pt-1">
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
-                      <span>Fine Tilt Adjustment</span>
+                      <span>{t("avatar.fineTilt")}</span>
                       <span className="font-mono">{fineAngle}°</span>
                     </div>
                     <input
@@ -1116,15 +1118,15 @@ export function AvatarUploadModal({
                   {/* Presets */}
                   <div>
                     <label className="text-xs font-bold text-brand-brown-900 block mb-2">
-                      Color Filter Presets
+                      {t("avatar.presets")}
                     </label>
                     <div className="grid grid-cols-5 gap-2">
                       {[
-                        { id: "normal", label: "Original" },
-                        { id: "warm", label: "Desert Warm" },
-                        { id: "vivid", label: "Vivid Glow" },
-                        { id: "mono", label: "B&W Film" },
-                        { id: "cool", label: "Cool Air" },
+                        { id: "normal", label: t("avatar.original") },
+                        { id: "warm", label: t("avatar.warm") },
+                        { id: "vivid", label: t("avatar.vivid") },
+                        { id: "mono", label: t("avatar.mono") },
+                        { id: "cool", label: t("avatar.cool") },
                       ].map((p) => (
                         <button
                           key={p.id}
@@ -1161,7 +1163,7 @@ export function AvatarUploadModal({
                     {/* Brightness */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px] font-medium text-brand-brown-800">
-                        <span>Brightness</span>
+                        <span>{t("avatar.brightness")}</span>
                         <span className="font-mono">
                           {filters.brightness > 0
                             ? `+${filters.brightness}`
@@ -1187,7 +1189,7 @@ export function AvatarUploadModal({
                     {/* Contrast */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px] font-medium text-brand-brown-800">
-                        <span>Contrast</span>
+                        <span>{t("avatar.contrast")}</span>
                         <span className="font-mono">
                           {filters.contrast > 0
                             ? `+${filters.contrast}`
@@ -1213,7 +1215,7 @@ export function AvatarUploadModal({
                     {/* Saturation */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-[11px] font-medium text-brand-brown-800">
-                        <span>Saturation</span>
+                        <span>{t("avatar.saturation")}</span>
                         <span className="font-mono">
                           {filters.saturation > 0
                             ? `+${filters.saturation}`
@@ -1243,7 +1245,7 @@ export function AvatarUploadModal({
                       onClick={() => setFilters(DEFAULT_FILTERS)}
                       className="text-[11px] font-semibold text-brand-brown-600 hover:text-brand-brown-950"
                     >
-                      Reset Adjustments
+                      {t("avatar.resetAdjustments")}
                     </button>
                   </div>
                 </div>
@@ -1281,7 +1283,7 @@ export function AvatarUploadModal({
             disabled={isSaving || isRemoving}
             className="h-10 rounded-xl border-brand-sand-dark bg-white text-xs font-bold text-brand-brown-800 hover:bg-brand-sand"
           >
-            {imageSrc ? "Back" : "Cancel"}
+            {imageSrc ? t("avatar.back") : t("avatar.cancel")}
           </Button>
 
           {imageSrc && (
@@ -1294,12 +1296,12 @@ export function AvatarUploadModal({
               {isSaving ? (
                 <>
                   <Loader2 size={15} className="animate-spin text-white" />
-                  Saving {isCover ? "Cover" : "Avatar"}...
+                  {isCover ? t("avatar.savingCover") : t("avatar.savingAvatar")}
                 </>
               ) : (
                 <>
                   <Check size={15} />
-                  Apply & Save {isCover ? "Cover" : "Photo"}
+                  {isCover ? t("avatar.applyCover") : t("avatar.applyPhoto")}
                 </>
               )}
             </Button>

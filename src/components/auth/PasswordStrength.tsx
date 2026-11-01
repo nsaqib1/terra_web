@@ -1,3 +1,5 @@
+import { useLanguage } from "@/context/LanguageContext";
+
 interface PasswordStrengthProps {
   password: string;
 }
@@ -5,6 +7,7 @@ interface PasswordStrengthProps {
 export function PasswordStrength({
   password,
 }: PasswordStrengthProps) {
+  const { t } = useLanguage();
   if (!password) {
     return null;
   }
@@ -19,11 +22,11 @@ export function PasswordStrength({
   const score = checks.filter(Boolean).length;
 
   const labels = [
-    "Very weak",
-    "Weak",
-    "Fair",
-    "Good",
-    "Strong",
+    t("auth.password_veryWeak"),
+    t("auth.password_weak"),
+    t("auth.password_fair"),
+    t("auth.password_good"),
+    t("auth.password_strong"),
   ];
 
   return (
@@ -46,7 +49,7 @@ export function PasswordStrength({
 
       <div className="mt-1.5 flex justify-between">
         <span className="text-[10px] text-muted-foreground">
-          Use at least 8 characters
+          {t("auth.password_minimum")}
         </span>
 
         <span className="text-[10px] font-medium text-brand-brown-700">

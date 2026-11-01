@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usersApi } from "@/lib/api/users";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   PostItem,
   UserCommunityItem,
@@ -71,22 +72,22 @@ function formatRelativeTime(dateString: string): string {
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) {
-      return "just now";
+      return language === "BN" ? "এইমাত্র" : "just now";
     }
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
+      return language === "BN" ? `${new Intl.NumberFormat("bn-BD").format(diffInMinutes)} মিনিট আগে` : `${diffInMinutes}m ago`;
     }
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
+      return language === "BN" ? `${new Intl.NumberFormat("bn-BD").format(diffInHours)} ঘণ্টা আগে` : `${diffInHours}h ago`;
     }
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) {
-      return `${diffInDays}d ago`;
+      return language === "BN" ? `${new Intl.NumberFormat("bn-BD").format(diffInDays)} দিন আগে` : `${diffInDays}d ago`;
     }
-    return date.toLocaleDateString("en-US", {
-      month: "short",
+    return date.toLocaleDateString(language === "BN" ? "bn-BD" : "en-US", {
+      month: language === "BN" ? "long" : "short",
       day: "numeric",
       year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
     });
@@ -105,6 +106,7 @@ function getInitials(name: string) {
 }
 
 export default function PublicProfilePage() {
+  const { t, language } = useLanguage();
   const params = useParams();
   const rawId = typeof params?.id === "string" ? params.id : "";
 
@@ -160,7 +162,7 @@ export default function PublicProfilePage() {
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-brand-brown-600" />
           <p className="text-sm font-medium text-brand-brown-700">
-            Loading profile…
+            {t("profile.loading")}
           </p>
         </div>
       </AppShell>
@@ -176,17 +178,17 @@ export default function PublicProfilePage() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-brand-brown-950">
-              User Not Found
+              {t("profile.userNotFound")}
             </h2>
             <p className="mt-1 text-sm text-brand-brown-600">
-              {error || "The requested user profile does not exist or has been deactivated."}
+              {error || t("profile.userNotFoundDescription")}
             </p>
           </div>
           <Link
             href="/"
             className="mt-2 rounded-xl bg-brand-brown-950 px-5 py-2.5 text-xs font-bold text-white transition-colors hover:bg-brand-brown-800"
           >
-            Back to Home
+            {t("profile.backHome")}
           </Link>
         </div>
       </AppShell>
@@ -195,11 +197,11 @@ export default function PublicProfilePage() {
 
   const { user, stats } = profileData;
   const joinedDate = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString("en-US", {
+    ? new Date(user.createdAt).toLocaleDateString(language === "BN" ? "bn-BD" : "en-US", {
       month: "long",
       year: "numeric",
     })
-    : "Recent";
+    : t("profile.recent");
 
   return (
     <AppShell>
@@ -276,10 +278,10 @@ export default function PublicProfilePage() {
                   />
 
                   <span className="font-bold">
-                    {user.points.toLocaleString()}
+                    {user.points.toLocaleString(language === "BN" ? "bn-BD" : "en-US")}
                   </span>
 
-                  <span>Points</span>
+                  <span>{t("profile.points")}</span>
                 </div>
 
                 {user.location && (
@@ -321,7 +323,7 @@ export default function PublicProfilePage() {
                     size={14}
                     className="text-brand-brown-500"
                   />
-                  <span>Joined {joinedDate}</span>
+                  <span>{t("profile.joined", { date: joinedDate })}</span>
                 </div>
               </div>
             </div>
@@ -338,7 +340,7 @@ export default function PublicProfilePage() {
           <section className="min-w-0">
             <div className="mb-4 flex items-center gap-2">
               <h2 className="text-lg font-semibold text-brand-brown-950">
-                Posts
+                {t("profile.posts")}
               </h2>
 
               <span className="rounded-full bg-brand-sand px-2 py-0.5 text-[10px] font-bold text-brand-brown-700">
@@ -349,7 +351,7 @@ export default function PublicProfilePage() {
             {posts.length === 0 ? (
               <div className="-mx-4 rounded-none border-y border-dashed border-brand-sand-dark bg-white p-8 text-center sm:mx-0 sm:rounded-2xl sm:border">
                 <p className="text-sm text-brand-brown-600">
-                  No active posts published yet.
+                  {t("profile.noPosts")}
                 </p>
               </div>
             ) : (
@@ -370,7 +372,7 @@ export default function PublicProfilePage() {
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="mb-4 flex items-center gap-2">
               <h2 className="text-lg font-semibold text-brand-brown-950">
-                Communities
+                {t("profile.communities")}
               </h2>
 
               <span className="rounded-full bg-brand-sand px-2 py-0.5 text-[10px] font-bold text-brand-brown-700">
@@ -381,7 +383,7 @@ export default function PublicProfilePage() {
             {communities.length === 0 ? (
               <div className="-mx-4 rounded-none border-y border-dashed border-brand-sand-dark bg-white p-6 text-center sm:mx-0 sm:rounded-2xl sm:border">
                 <p className="text-xs text-brand-brown-600">
-                  Not currently a member of any community.
+                  {t("profile.notMember")}
                 </p>
               </div>
             ) : (
@@ -410,8 +412,9 @@ function ProfilePostCard({
 }: {
   post: PostItem;
 }) {
-  const previewText = getPostPreviewText(post.document) || "No preview text available.";
-  const relativeTime = formatRelativeTime(post.createdAt);
+  const { t, language } = useLanguage();
+  const previewText = getPostPreviewText(post.document) || t("profile.noPreview");
+  const relativeTime = formatRelativeTime(post.createdAt, language);
 
   return (
     <article className="group -mx-4 rounded-none border border-x-0 border-brand-sand-dark bg-white p-5 shadow-xs transition-all hover:border-brand-sand-dark/80 hover:shadow-sm sm:mx-0 sm:rounded-2xl sm:border sm:p-6">
@@ -473,12 +476,12 @@ function ProfilePostCard({
               size={14}
               className="text-brand-desert-dark"
             />
-            <span>{post.score ?? 0}</span>
+            <span>{(post.score ?? 0).toLocaleString(language === "BN" ? "bn-BD" : "en-US")}</span>
           </div>
 
           <div className="flex items-center gap-1">
             <MessageSquare size={14} />
-            <span>{post.commentCount ?? 0}</span>
+            <span>{(post.commentCount ?? 0).toLocaleString(language === "BN" ? "bn-BD" : "en-US")}</span>
           </div>
         </div>
       </div>
@@ -495,6 +498,7 @@ function CommunityCard({
 }: {
   community: UserCommunityItem;
 }) {
+  const { t } = useLanguage();
   return (
     <Link
       href={`/community/${community.slug}`}
@@ -513,7 +517,7 @@ function CommunityCard({
           </h3>
 
           <p className="mt-1 text-xs text-brand-brown-600">
-            {community.role === "MODERATOR" ? "Moderator" : "Citizen"}
+            {community.role === "MODERATOR" ? t("profile.moderator") : t("profile.citizen")}
           </p>
         </div>
       </div>

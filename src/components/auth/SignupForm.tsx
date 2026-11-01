@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -26,6 +27,7 @@ import { extractErrorMessage } from "@/lib/api/errors";
 import { PasswordStrength } from "./PasswordStrength";
 
 export function SignupForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signup } = useAuth();
@@ -99,12 +101,12 @@ export function SignupForm() {
       const res = await invitesApi.validate(trimmed);
       setInviteFeedback({
         valid: true,
-        message: "Invite code verified",
+        message: t("auth.signup_inviteVerified"),
         label: res.label,
         remainingUses: res.remainingUses,
       });
     } catch (err) {
-      const msg = extractErrorMessage(err, "Invalid or expired invite code");
+      const msg = extractErrorMessage(err, t("auth.signup_invalidInvite"));
       setInviteFeedback({
         valid: false,
         message: msg,
@@ -186,7 +188,7 @@ export function SignupForm() {
         router.push("/");
       }, 700);
     } catch (err) {
-      const msg = extractErrorMessage(err, "Failed to create account. Please try again.");
+      const msg = extractErrorMessage(err, t("auth.signup_failed"));
       setErrorMessage(msg);
       setIsSubmitting(false);
     }
@@ -229,7 +231,7 @@ export function SignupForm() {
       <div>
         <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 border border-amber-200/80 px-2.5 py-1 text-[11px] font-bold text-amber-900 shadow-2xs">
           <Sparkles size={13} className="text-amber-700" />
-          <span>Closed Beta Access</span>
+          <span>{t("auth.signup_betaAccess")}</span>
         </div>
 
         <h1
@@ -241,11 +243,11 @@ export function SignupForm() {
             text-brand-brown-950
           "
         >
-          Join the Beta
+          {t("auth.signup_title")}
         </h1>
 
         <p className="mt-2 text-sm leading-relaxed text-brand-brown-600">
-          Sign up with your exclusive invitation link to test and help shape Terramids.
+          {t("auth.signup_subtitle")}
         </p>
       </div>
 
@@ -289,7 +291,7 @@ export function SignupForm() {
           "
         >
           <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
-          <span>Account created successfully! Redirecting...</span>
+          <span>{t("auth.signup_success")}</span>
         </div>
       )}
 
@@ -307,10 +309,10 @@ export function SignupForm() {
               className="flex items-center gap-1.5 text-xs font-bold text-brand-brown-950"
             >
               <KeyRound size={14} className="text-brand-desert-dark" />
-              <span>Beta Invite Code</span>
+              <span>{t("auth.signup_inviteCode")}</span>
               {isInviteOnly && (
                 <span className="rounded-full bg-brand-desert-light/60 px-1.5 py-0.2 text-[9px] font-bold uppercase text-brand-brown-900">
-                  Required
+                  {t("auth.signup_required")}
                 </span>
               )}
             </label>
@@ -322,7 +324,7 @@ export function SignupForm() {
                 disabled={validatingCode || isSubmitting || isSuccess}
                 className="text-[11px] font-semibold text-brand-desert-dark hover:underline disabled:opacity-50"
               >
-                {validatingCode ? "Verifying..." : "Verify Code"}
+                {validatingCode ? t("auth.signup_verifying") : t("auth.signup_verifyCode")}
               </button>
             )}
           </div>
@@ -401,7 +403,7 @@ export function SignupForm() {
               )}
               {inviteFeedback.remainingUses !== undefined && (
                 <span className="text-brand-brown-600/80">
-                  ({inviteFeedback.remainingUses} left)
+                  ({inviteFeedback.remainingUses} {t("auth.signup_usesLeft")})
                 </span>
               )}
             </div>
@@ -409,7 +411,7 @@ export function SignupForm() {
 
           {!inviteFeedback && isInviteOnly && (
             <p className="mt-1.5 text-[11px] text-brand-brown-600/80">
-              Paste the invite link or code you received from an administrator or beta tester.
+              {t("auth.signup_inviteHelp")}
             </p>
           )}
         </div>
@@ -420,7 +422,7 @@ export function SignupForm() {
             htmlFor="name"
             className="block text-xs font-semibold text-brand-brown-900"
           >
-            Full Name
+            {t("auth.signup_fullName")}
           </label>
 
           <div className="relative mt-1.5">
@@ -439,7 +441,7 @@ export function SignupForm() {
               value={form.name}
               disabled={isSubmitting || isSuccess}
               onChange={(event) => update("name", event.target.value)}
-              placeholder="Alex Morgan"
+              placeholder={t("auth.signup_namePlaceholder")}
               autoComplete="name"
               maxLength={100}
               className="
@@ -470,10 +472,10 @@ export function SignupForm() {
               htmlFor="username"
               className="text-xs font-semibold text-brand-brown-900"
             >
-              Username
+              {t("auth.signup_username")}
             </label>
             <span className="text-[10px] text-brand-brown-600/70">
-              Your unique handle (3-30 chars)
+              {t("auth.signup_usernameHint")}
             </span>
           </div>
 
@@ -528,7 +530,7 @@ export function SignupForm() {
             htmlFor="email"
             className="block text-xs font-semibold text-brand-brown-900"
           >
-            Email Address
+            {t("auth.signup_email")}
           </label>
 
           <div className="relative mt-1.5">
@@ -578,7 +580,7 @@ export function SignupForm() {
             htmlFor="password"
             className="block text-xs font-semibold text-brand-brown-900"
           >
-            Password
+            {t("auth.signup_password")}
           </label>
 
           <div className="relative mt-1.5">
@@ -589,7 +591,7 @@ export function SignupForm() {
               value={form.password}
               disabled={isSubmitting || isSuccess}
               onChange={(event) => update("password", event.target.value)}
-              placeholder="Create a strong password (min 8 chars)"
+              placeholder={t("auth.signup_passwordPlaceholder")}
               autoComplete="new-password"
               maxLength={128}
               className="
@@ -624,7 +626,7 @@ export function SignupForm() {
                 hover:text-brand-brown-900
                 disabled:opacity-40
               "
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t("auth.login_hidePassword") : t("auth.login_showPassword")}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -652,19 +654,19 @@ export function SignupForm() {
           />
 
           <span className="text-xs leading-normal text-brand-brown-600">
-            I agree to the{" "}
+            {t("auth.signup_termsIntro")}{" "}
             <Link
               href="/terms"
               className="font-semibold text-brand-brown-900 underline-offset-2 hover:underline"
             >
-              Terms of Service
+              {t("auth.signup_terms")}
             </Link>{" "}
-            and{" "}
+            {t("auth.signup_and")} {" "}
             <Link
               href="/privacy"
               className="font-semibold text-brand-brown-900 underline-offset-2 hover:underline"
             >
-              Privacy Policy
+              {t("auth.signup_privacy")}
             </Link>
             .
           </span>
@@ -692,16 +694,16 @@ export function SignupForm() {
           {isSubmitting ? (
             <>
               <Loader2 size={16} className="animate-spin" />
-              <span>Creating account...</span>
+              <span>{t("auth.signup_creating")}</span>
             </>
           ) : isSuccess ? (
             <>
               <CheckCircle2 size={16} />
-              <span>Account Created!</span>
+              <span>{t("auth.signup_created")}</span>
             </>
           ) : (
             <>
-              <span>Join Beta & Create Account</span>
+              <span>{t("auth.signup_submit")}</span>
               <ArrowRight size={16} />
             </>
           )}
@@ -711,7 +713,7 @@ export function SignupForm() {
       {/* Login Switcher */}
       <div className="mt-6 text-center">
         <span className="text-xs text-brand-brown-600">
-          Already have an account?
+          {t("auth.signup_haveAccount")}
         </span>{" "}
         <Link
           href="/login"
@@ -723,7 +725,7 @@ export function SignupForm() {
             hover:underline
           "
         >
-          Log in
+          {t("auth.signup_login")}
         </Link>
       </div>
     </div>
