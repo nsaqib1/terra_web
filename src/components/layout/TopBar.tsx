@@ -18,32 +18,71 @@ import { Logo } from "@/components/brand/Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useCreatePostCommunity } from "@/context/CreatePostCommunityContext";
 import { MobileNav } from "./MobileNav";
 import { NotificationBell } from "./NotificationBell";
 import { CommunitySelector } from "@/components/post/create/CommunitySelector";
 
-function getPageTitle(pathname: string): string {
-  if (pathname === "/") return "Home";
-  if (pathname === "/communities") return "Communities";
-  if (pathname === "/tools" || pathname.startsWith("/tools/")) return "Tools";
-  if (pathname === "/games" || pathname.startsWith("/games/")) return "Games";
-  if (pathname === "/communities/propose") return "Propose Community";
-  if (pathname === "/posts/create") return "Create Post";
-  if (pathname === "/posts/manage") return "My Posts";
-  if (pathname.startsWith("/posts/") && pathname.endsWith("/edit")) return "Edit Post";
-  if (pathname === "/profile") return "Profile";
-  if (pathname === "/notifications") return "Notifications";
-  if (pathname.startsWith("/profile/")) return "Profile";
-  if (pathname.startsWith("/community/")) return "Community";
-  if (pathname.startsWith("/admin")) return "Admin";
+function getPageTitle(pathname: string, t: (key: import("@/i18n").TranslationKey) => string): string {
+  if (pathname === "/") return t("common.home");
+  if (pathname === "/communities") return t("common.communities");
+  if (pathname === "/tools" || pathname.startsWith("/tools/")) return t("common.tools");
+  if (pathname === "/games" || pathname.startsWith("/games/")) return t("common.games");
+  if (pathname === "/communities/propose") return t("pages.proposeCommunity");
+  if (pathname === "/posts/create") return t("common.createPost");
+  if (pathname === "/posts/manage") return t("pages.myPosts");
+  if (pathname.startsWith("/posts/") && pathname.endsWith("/edit")) return t("pages.editPost");
+  if (pathname === "/profile" || pathname.startsWith("/profile/")) return t("common.profile");
+  if (pathname === "/notifications") return t("common.notifications");
+  if (pathname.startsWith("/community/")) return t("pages.community");
+  if (pathname.startsWith("/admin")) return t("pages.admin");
   return "Terramids";
+}
+
+
+function LanguageToggle({
+  language,
+  onChange,
+  saving,
+  fullWidth = false,
+}: {
+  language: "EN" | "BN";
+  onChange: (language: "EN" | "BN") => Promise<void>;
+  saving: boolean;
+  fullWidth?: boolean;
+}) {
+  return (
+    <div
+      className={`inline-flex items-center rounded-lg border border-brand-sand-dark bg-brand-cream p-0.5 ${fullWidth ? "w-full" : "shrink-0"}`}
+      aria-label="Choose language"
+      aria-busy={saving}
+    >
+      <button
+        type="button"
+        onClick={() => void onChange("EN")}
+        aria-pressed={language === "EN"}
+        className={`flex-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${language === "EN" ? "bg-brand-brown-950 text-white shadow-sm" : "text-brand-brown-700 hover:bg-brand-sand"}`}
+      >
+        English
+      </button>
+      <button
+        type="button"
+        onClick={() => void onChange("BN")}
+        aria-pressed={language === "BN"}
+        className={`flex-1 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${language === "BN" ? "bg-brand-brown-950 text-white shadow-sm" : "text-brand-brown-700 hover:bg-brand-sand"}`}
+      >
+        বাংলা
+      </button>
+    </div>
+  );
 }
 
 export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { language, setLanguage, t, isLanguageSaving } = useLanguage();
   const { setCommunityId } = useCreatePostCommunity();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -71,7 +110,7 @@ export function TopBar() {
               text-brand-brown-800 transition-colors hover:bg-brand-sand
               sm:hidden
             "
-            aria-label="Open navigation menu"
+            aria-label={t("common.openNavigation")}
             aria-expanded={mobileMenuOpen}
           >
             <Menu size={21} strokeWidth={2} />
@@ -89,7 +128,7 @@ export function TopBar() {
           {/* Mobile current-page title */}
           <div className="min-w-0 flex-1 sm:hidden">
             <p className="truncate text-sm font-bold text-brand-brown-950">
-              {getPageTitle(pathname)}
+              {getPageTitle(pathname, t)}
             </p>
           </div>
 
@@ -102,7 +141,7 @@ export function TopBar() {
               />
               <input
                 type="search"
-                placeholder="Search communities, discussions & knowledge..."
+                placeholder={t("common.search")}
                 className="
                   h-10 w-full rounded-xl border bg-brand-cream pl-10 pr-4
                   text-sm text-brand-brown-950 outline-none
@@ -118,14 +157,15 @@ export function TopBar() {
           <div className="ml-auto flex items-center gap-2">
             {!isLoading && !isAuthenticated ? (
               <div className="flex items-center gap-2">
+                <LanguageToggle language={language} onChange={setLanguage} saving={isLanguageSaving} />
                 <Link href="/login">
                   <Button variant="ghost" className="h-9 rounded-xl px-3.5 text-xs font-bold text-brand-brown-800 hover:bg-brand-sand">
-                    Log in
+                    {t("common.login")}
                   </Button>
                 </Link>
                 <Link href="/signup">
                   <Button className="h-9 rounded-xl bg-brand-brown-950 px-3.5 text-xs font-bold text-white shadow-sm hover:bg-brand-brown-900">
-                    Sign up
+                    {t("common.signup")}
                   </Button>
                 </Link>
               </div>
@@ -140,8 +180,8 @@ export function TopBar() {
                         className="inline-flex h-9 items-center gap-2 rounded-xl bg-brand-brown-950 px-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-brand-brown-900"
                       >
                         <PenLine size={15} />
-                        <span className="hidden sm:inline">Create Post</span>
-                        <span className="sr-only sm:hidden">Create Post</span>
+                        <span className="hidden sm:inline">{t("common.createPost")}</span>
+                        <span className="sr-only sm:hidden">{t("common.createPost")}</span>
                       </button>
                     )}
                     <NotificationBell />
@@ -194,7 +234,7 @@ export function TopBar() {
                             </div>
                             <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-desert-light px-2.5 py-1 text-[11px] font-semibold text-brand-brown-900">
                               <Sparkles size={13} />
-                              {user.points.toLocaleString()} points
+                              {user.points.toLocaleString(language === "BN" ? "bn-BD" : "en-US")} {t("common.points")}
                             </div>
                           </div>
 
@@ -205,9 +245,14 @@ export function TopBar() {
                               className="mb-1 mt-1 flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-50"
                             >
                               <Shield size={15} className="text-amber-700" />
-                              Admin Console
+                              {t("common.adminConsole")}
                             </Link>
                           )}
+
+                          <div className="px-2.5 py-2">
+                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-brand-brown-600">{t("common.language")}</p>
+                            <LanguageToggle language={language} onChange={setLanguage} saving={isLanguageSaving} fullWidth />
+                          </div>
 
                           <Link
                             href="/posts/manage"
@@ -215,7 +260,7 @@ export function TopBar() {
                             className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-brown-800 transition-colors hover:bg-brand-sand"
                           >
                             <LayoutList size={15} />
-                            Manage Posts
+                            {t("common.managePosts")}
                           </Link>
 
                           <Link
@@ -224,7 +269,7 @@ export function TopBar() {
                             className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-brown-800 transition-colors hover:bg-brand-sand"
                           >
                             <UserIcon size={15} />
-                            Profile
+                            {t("common.profile")}
                           </Link>
 
                           <button
@@ -236,7 +281,7 @@ export function TopBar() {
                             className="mt-1 flex w-full items-center gap-2 rounded-xl border-t border-brand-sand/70 px-3 py-2.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
                           >
                             <LogOut size={15} />
-                            Log out
+                            {t("common.logout")}
                           </button>
                         </div>
                       )}

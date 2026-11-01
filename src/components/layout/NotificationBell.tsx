@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useNotificationRealtime } from "@/context/NotificationRealtimeContext";
 import {
   getNotificationMessage,
@@ -53,6 +54,7 @@ function NotificationIcon({ type }: { type: NotificationItem["type"] }) {
 
 export function NotificationBell() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const {
     count,
     latestNotification,
@@ -128,7 +130,7 @@ export function NotificationBell() {
         type="button"
         onClick={handleOpen}
         className="relative flex h-10 w-10 items-center justify-center rounded-xl text-brand-brown-800 transition-colors hover:bg-brand-sand"
-        aria-label={count > 0 ? `${count} unread notifications` : "Notifications"}
+        aria-label={count > 0 ? `${count} ${t("common.unreadNotifications")}` : t("common.notifications")}
         aria-expanded={open}
       >
         <Bell size={20} strokeWidth={2} />
@@ -143,9 +145,9 @@ export function NotificationBell() {
         <div className="absolute right-0 top-12 z-50 w-[min(380px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-brand-sand-dark bg-white shadow-xl animate-in fade-in slide-in-from-top-2">
           <div className="flex items-center justify-between border-b border-brand-sand/70 px-4 py-3">
             <div>
-              <h2 className="text-sm font-bold text-brand-brown-950">Notifications</h2>
+              <h2 className="text-sm font-bold text-brand-brown-950">{t("common.notifications")}</h2>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Your latest activity
+                {t("common.latestActivity")}
               </p>
             </div>
             <Link

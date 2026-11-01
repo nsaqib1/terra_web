@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { communitiesApi } from "@/lib/api/communities";
 import { JoinedCommunity } from "@/lib/api/types";
 import { Logo } from "../brand/Logo";
@@ -23,10 +24,10 @@ interface MobileNavProps {
 }
 
 const navigation = [
-  { label: "Home", icon: Home, href: "/" },
-  { label: "Explore Communities", icon: Compass, href: "/communities" },
-  { label: "Tools", icon: Wrench, href: "/tools" },
-];
+  { key: "common.home", icon: Home, href: "/" },
+  { key: "common.exploreCommunities", icon: Compass, href: "/communities" },
+  { key: "common.tools", icon: Wrench, href: "/tools" },
+] as const;
 
 function communityInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -38,6 +39,7 @@ function communityInitials(name: string): string {
 export function MobileNav({ open, onClose }: MobileNavProps) {
   const pathname = usePathname();
   const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { t } = useLanguage();
   const [communities, setCommunities] = useState<JoinedCommunity[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -80,12 +82,12 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] sm:hidden" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div className="fixed inset-0 z-[60] sm:hidden" role="dialog" aria-modal="true" aria-label={t("common.navigationMenu")}>
       <button
         type="button"
         onClick={onClose}
         className="absolute inset-0 bg-brand-brown-950/35 backdrop-blur-[2px]"
-        aria-label="Close navigation menu"
+        aria-label={t("common.closeNavigation")}
       />
 
       <aside className="absolute inset-y-0 left-0 flex w-[min(86vw,340px)] flex-col border-r border-brand-sand-dark bg-brand-cream shadow-2xl">
@@ -98,7 +100,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-brand-brown-700 transition-colors hover:bg-brand-sand"
-            aria-label="Close navigation menu"
+            aria-label={t("common.closeNavigation")}
           >
             <X size={19} />
           </button>
@@ -112,7 +114,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
 
               return (
                 <Link
-                  key={item.label}
+                  key={item.href}
                   href={item.href}
                   onClick={onClose}
                   className={`
@@ -125,7 +127,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                   `}
                 >
                   <Icon size={18} strokeWidth={1.9} />
-                  {item.label}
+                  {t(item.key)}
                 </Link>
               );
             })}
@@ -136,14 +138,14 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
           <div>
             <div className="mb-2 flex items-center justify-between px-3">
               <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                My Communities
+                {t("common.myCommunities")}
               </span>
 
               <Link
                 href="/communities/propose"
                 onClick={onClose}
                 className="rounded-lg p-1.5 text-muted-foreground hover:bg-brand-sand hover:text-brand-brown-950"
-                aria-label="Propose a community"
+                aria-label={t("common.proposeCommunity")}
               >
                 <Plus size={15} />
               </Link>
@@ -163,14 +165,14 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             {!loading && communities.length === 0 && (
               <div className="rounded-xl border border-dashed border-brand-sand-dark bg-white/50 px-3 py-3">
                 <p className="text-xs leading-5 text-brand-brown-600">
-                  You haven&apos;t joined any communities yet.
+                  {t("common.notJoinedYet")}
                 </p>
                 <Link
                   href="/communities"
                   onClick={onClose}
                   className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-brand-brown-900"
                 >
-                  Explore communities
+                  {t("common.exploreCommunities")}
                   <Compass size={13} />
                 </Link>
               </div>
@@ -216,7 +218,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-xs font-semibold text-red-700 hover:bg-red-50"
           >
             <LogOut size={16} />
-            Log out
+            {t("common.logout")}
           </button>
         </div>
       </aside>

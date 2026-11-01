@@ -16,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   clearJoinedCommunitiesCache,
   getCachedJoinedCommunities,
@@ -25,17 +26,9 @@ import {
 import { JoinedCommunity } from "@/lib/api/types";
 
 const mainNavigation = [
-  {
-    label: "Home",
-    icon: Home,
-    href: "/",
-  },
-  {
-    label: "Explore Communities",
-    icon: Compass,
-    href: "/communities",
-  },
-  { label: "Tools", icon: Wrench, href: "/tools" },
+  { key: "common.home", icon: Home, href: "/" },
+  { key: "common.exploreCommunities", icon: Compass, href: "/communities" },
+  { key: "common.tools", icon: Wrench, href: "/tools" },
 ];
 
 function communityInitials(name: string): string {
@@ -55,6 +48,7 @@ function communityInitials(name: string): string {
 export function Sidebar() {
   const pathname = usePathname();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const [communities, setCommunities] = useState<JoinedCommunity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -130,7 +124,7 @@ export function Sidebar() {
 
             return (
               <Link
-                key={item.label}
+                key={item.href}
                 href={item.href}
                 className={`
                   flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium
@@ -142,7 +136,7 @@ export function Sidebar() {
                 `}
               >
                 <Icon size={18} strokeWidth={1.8} />
-                {item.label}
+                {t(item.key as import("@/i18n").TranslationKey)}
               </Link>
             );
           })}
@@ -153,7 +147,7 @@ export function Sidebar() {
         <div>
           <div className="mb-2 flex items-center justify-between px-3">
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              My Communities
+              {t("common.myCommunities")}
             </span>
 
             <Link
@@ -163,8 +157,8 @@ export function Sidebar() {
                 text-muted-foreground transition-colors
                 hover:bg-brand-sand hover:text-brand-brown-950
               "
-              title="Propose a community"
-              aria-label="Propose a community"
+              title={t("common.proposeCommunity")}
+              aria-label={t("common.proposeCommunity")}
             >
               <Plus size={15} />
             </Link>
@@ -185,26 +179,26 @@ export function Sidebar() {
                   href="/login"
                   className="font-semibold text-brand-brown-800 hover:underline"
                 >
-                  Sign in
+                  {t("common.signIn")}
                 </Link>
-                {" "}to see communities you have joined.
+                {" "}{t("common.toSeeJoined")}
               </p>
             )}
 
             {!authLoading && !isLoading && isAuthenticated && hasError && (
               <p className="px-3 py-2 text-[11px] leading-5 text-muted-foreground">
-                Couldn&apos;t load your communities.
+                {t("common.couldNotLoad")}
               </p>
             )}
 
             {!authLoading && !isLoading && isAuthenticated && !hasError && communities.length === 0 && (
               <p className="px-3 py-2 text-[11px] leading-5 text-muted-foreground">
-                You haven&apos;t joined a community yet.{" "}
+                {t("common.notJoinedYet")}{" "}
                 <Link
                   href="/communities"
                   className="font-semibold text-brand-brown-800 hover:underline"
                 >
-                  Explore
+                  {t("common.explore")}
                 </Link>
               </p>
             )}

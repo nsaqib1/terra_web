@@ -240,7 +240,53 @@ export default function ToolsPage() {
 
               {/* Architecture Type Tabs + Sort + View Mode */}
               <div className="flex flex-wrap items-center gap-2.5">
-
+                {/* Type Filter */}
+                <div className="flex items-center rounded-xl border border-brand-sand-dark bg-brand-cream/60 p-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType('ALL')}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                      selectedType === 'ALL'
+                        ? 'bg-white text-brand-brown-950 shadow-2xs'
+                        : 'text-brand-brown-600 hover:text-brand-brown-950'
+                    }`}
+                  >
+                    All Types
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType('CLIENT')}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                      selectedType === 'CLIENT'
+                        ? 'bg-white text-brand-brown-950 shadow-2xs'
+                        : 'text-brand-brown-600 hover:text-brand-brown-950'
+                    }`}
+                  >
+                    Client
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType('SERVER')}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                      selectedType === 'SERVER'
+                        ? 'bg-white text-brand-brown-950 shadow-2xs'
+                        : 'text-brand-brown-600 hover:text-brand-brown-950'
+                    }`}
+                  >
+                    Server
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType('HYBRID')}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                      selectedType === 'HYBRID'
+                        ? 'bg-white text-brand-brown-950 shadow-2xs'
+                        : 'text-brand-brown-600 hover:text-brand-brown-950'
+                    }`}
+                  >
+                    Hybrid
+                  </button>
+                </div>
 
                 {/* Sort dropdown */}
                 <div className="flex items-center gap-1.5 rounded-xl border border-brand-sand-dark bg-white px-2.5 py-1 text-xs text-brand-brown-700 shadow-2xs">
@@ -264,10 +310,11 @@ export default function ToolsPage() {
                     onClick={() => setViewMode('grid')}
                     aria-label="Grid view"
                     title="Grid view"
-                    className={`rounded-lg p-1.5 transition ${viewMode === 'grid'
+                    className={`rounded-lg p-1.5 transition ${
+                      viewMode === 'grid'
                         ? 'bg-white text-brand-brown-950 shadow-2xs'
                         : 'text-brand-brown-500 hover:text-brand-brown-800'
-                      }`}
+                    }`}
                   >
                     <Grid size={15} />
                   </button>
@@ -276,10 +323,11 @@ export default function ToolsPage() {
                     onClick={() => setViewMode('list')}
                     aria-label="List view"
                     title="List view"
-                    className={`rounded-lg p-1.5 transition ${viewMode === 'list'
+                    className={`rounded-lg p-1.5 transition ${
+                      viewMode === 'list'
                         ? 'bg-white text-brand-brown-950 shadow-2xs'
                         : 'text-brand-brown-500 hover:text-brand-brown-800'
-                      }`}
+                    }`}
                   >
                     <List size={15} />
                   </button>
@@ -299,10 +347,11 @@ export default function ToolsPage() {
                     type="button"
                     onClick={() => setCategory(item.value)}
                     aria-pressed={selected}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${selected
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                      selected
                         ? 'bg-brand-brown-950 text-white shadow-xs'
                         : 'border border-brand-sand-dark/80 bg-white text-brand-brown-700 hover:border-brand-brown-700/50 hover:bg-brand-sand/50 hover:text-brand-brown-950'
-                      }`}
+                    }`}
                   >
                     <IconComponent size={13} className={selected ? 'text-brand-desert' : 'text-brand-brown-500'} />
                     <span>{item.label}</span>

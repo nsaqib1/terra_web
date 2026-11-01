@@ -1,4 +1,5 @@
 export type UserRole = "USER" | "ADMIN";
+export type Language = "EN" | "BN";
 
 export interface User {
   id: string;
@@ -11,6 +12,7 @@ export interface User {
   location?: string | null;
   website?: string | null;
   points: number;
+  preferredLanguage?: Language;
   role?: UserRole;
   status?: string;
   createdAt: string;
@@ -26,6 +28,7 @@ export interface UserProfile {
   location: string | null;
   website: string | null;
   points: number;
+  preferredLanguage?: Language;
   createdAt: string;
 }
 
@@ -41,6 +44,7 @@ export interface UserProfileResponse {
 }
 
 export interface UpdateProfileInput {
+  preferredLanguage?: Language;
   displayName?: string;
   username?: string;
   bio?: string | null;
