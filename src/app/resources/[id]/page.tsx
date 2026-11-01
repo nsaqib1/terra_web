@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { useLanguage } from "@/context/LanguageContext";
 import { resourcesApi } from "@/lib/api/resources";
 import { ResourceItem } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
@@ -145,6 +146,7 @@ function TextViewer({
   url: string;
   mimeType: string;
 }) {
+  const { t } = useLanguage();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +162,7 @@ function TextViewer({
         const response = await fetch(url);
 
         if (!response.ok) {
-          throw new Error("Unable to load this resource.");
+          throw new Error(t("features.unableLoadResource"));
         }
 
         const text = await response.text();
@@ -173,7 +175,7 @@ function TextViewer({
           setError(
             err instanceof Error
               ? err.message
-              : "Unable to load this resource."
+              : t("features.unableLoadResource")
           );
         }
       } finally {
@@ -188,7 +190,7 @@ function TextViewer({
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, t]);
 
   if (loading) {
     return (
@@ -222,6 +224,7 @@ function TextViewer({
 }
 
 function CsvViewer({ url }: { url: string }) {
+  const { t } = useLanguage();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -237,7 +240,7 @@ function CsvViewer({ url }: { url: string }) {
         const response = await fetch(url);
 
         if (!response.ok) {
-          throw new Error("Unable to load this resource.");
+          throw new Error(t("features.unableLoadResource"));
         }
 
         const text = await response.text();
@@ -250,7 +253,7 @@ function CsvViewer({ url }: { url: string }) {
           setError(
             err instanceof Error
               ? err.message
-              : "Unable to load this resource."
+              : t("features.unableLoadResource")
           );
         }
       } finally {
@@ -265,7 +268,7 @@ function CsvViewer({ url }: { url: string }) {
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, t]);
 
   const rows = useMemo(() => {
     if (!content.trim()) return [];
@@ -306,7 +309,7 @@ function CsvViewer({ url }: { url: string }) {
   if (!rows.length) {
     return (
       <div className="flex h-[40vh] items-center justify-center text-xs text-brand-brown-600">
-        This CSV file is empty.
+        {t("features.emptyCsv")}
       </div>
     );
   }
@@ -347,6 +350,7 @@ function UnsupportedViewer({
   resource: ResourceItem;
   type: string;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center px-5 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-sand text-brand-brown-900">
@@ -357,12 +361,11 @@ function UnsupportedViewer({
       </div>
 
       <h2 className="mt-4 text-sm font-bold text-brand-brown-950">
-        Preview unavailable
+        {t("features.previewUnavailable")}
       </h2>
 
       <p className="mt-1 max-w-sm text-xs leading-relaxed text-brand-brown-600">
-        This file type cannot currently be viewed inside
-        Terramids. Download the resource to open it.
+        {t("features.unsupportedPreview")}
       </p>
 
       <a
@@ -370,7 +373,7 @@ function UnsupportedViewer({
         className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-brown-950 px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90"
       >
         <Download size={15} />
-        Download
+        {t("features.download")}
       </a>
     </div>
   );
@@ -427,6 +430,7 @@ function ResourceViewer({
 }
 
 export default function ResourceDetailPage() {
+  const { t } = useLanguage();
   const params = useParams<{ id: string }>();
   const id = params?.id || "";
 
@@ -445,11 +449,11 @@ export default function ResourceDetailPage() {
         setError(
           extractErrorMessage(
             err,
-            "Resource not found."
+            t("features.resourceNotFound")
           )
         )
       );
-  }, [id]);
+  }, [id, t]);
 
   if (!resource && !error) {
     return (
@@ -484,7 +488,7 @@ export default function ResourceDetailPage() {
           className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-brand-brown-700 hover:text-brand-brown-950"
         >
           <ArrowLeft size={15} />
-          Back to resources
+          {t("features.backToCommunity")}
         </Link>
 
         <div className="rounded-2xl border border-brand-sand-dark/70 bg-white shadow-xs">
@@ -509,7 +513,7 @@ export default function ResourceDetailPage() {
                     {" · "}
                     {formatSize(resource.size)}
                     {" · "}
-                    {resource.downloadCount} downloads
+                    {resource.downloadCount} {t("features.download")}
                   </p>
                 </div>
               </div>
@@ -522,7 +526,7 @@ export default function ResourceDetailPage() {
                 className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-brown-950 px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90"
               >
                 <Download size={15} />
-                Download
+                {t("features.download")}
               </a>
             </div>
 

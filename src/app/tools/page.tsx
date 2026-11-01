@@ -24,6 +24,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { toolsApi } from '@/lib/api/tools';
 import type { PublicTool, ToolCategory, ToolType } from '@/lib/api/types';
 import { extractErrorMessage } from '@/lib/api/errors';
+import { useLanguage } from "@/context/LanguageContext";
 
 type SortOption = 'newest' | 'alphabetical' | 'type';
 type ViewMode = 'grid' | 'list';
@@ -44,22 +45,29 @@ const categories: CategoryOption[] = [
   { value: 'OTHER', label: 'Other', icon: Wrench },
 ];
 
-const categoryLabels: Record<ToolCategory, string> = {
-  DEVELOPER: 'Developer',
-  PRODUCTIVITY: 'Productivity',
-  MEDIA: 'Media',
-  EDUCATION: 'Education',
-  ENGINEERING: 'Engineering',
-  OTHER: 'Other',
-};
-
-const typeLabels: Record<ToolType, string> = {
-  CLIENT: 'Client-side',
-  SERVER: 'Server-backed',
-  HYBRID: 'Hybrid',
-};
 
 export default function ToolsPage() {
+  const { t } = useLanguage();
+  const getCategoryLabel = (value: ToolCategory | "ALL") => {
+    const labels: Record<ToolCategory | "ALL", string> = {
+      ALL: t("features.allToolsFilter"),
+      DEVELOPER: t("features.developer"),
+      PRODUCTIVITY: t("features.productivity"),
+      MEDIA: t("features.media"),
+      EDUCATION: t("features.education"),
+      ENGINEERING: t("features.engineering"),
+      OTHER: t("features.other"),
+    };
+    return labels[value];
+  };
+  const getTypeLabel = (value: ToolType) => {
+    const labels: Record<ToolType, string> = {
+      CLIENT: t("features.clientSide"),
+      SERVER: t("features.serverBacked"),
+      HYBRID: t("features.hybrid"),
+    };
+    return labels[value];
+  };
   const [tools, setTools] = useState<PublicTool[]>([]);
   const [category, setCategory] = useState<ToolCategory | 'ALL'>('ALL');
   const [selectedType, setSelectedType] = useState<ToolType | 'ALL'>('ALL');
@@ -87,7 +95,7 @@ export default function ToolsPage() {
       })
       .catch((e) => {
         if (active) {
-          setError(extractErrorMessage(e, 'Could not load tools.'));
+          setError(extractErrorMessage(e, t("features.couldNotLoadTools")));
         }
       })
       .finally(() => {
@@ -99,7 +107,7 @@ export default function ToolsPage() {
     return () => {
       active = false;
     };
-  }, [category, selectedType, query]);
+  }, [category, selectedType, query, t]);
 
   const handleRetry = () => {
     setLoading(true);
@@ -115,7 +123,7 @@ export default function ToolsPage() {
         setError('');
       })
       .catch((e) => {
-        setError(extractErrorMessage(e, 'Could not load tools.'));
+        setError(extractErrorMessage(e, t("features.couldNotLoadTools")));
       })
       .finally(() => {
         setLoading(false);
@@ -170,16 +178,15 @@ export default function ToolsPage() {
             <div className="max-w-2xl space-y-2.5">
               <div className="inline-flex items-center gap-2 rounded-full border border-brand-sand-dark bg-brand-cream/80 px-3 py-1 text-[11px] font-semibold text-brand-brown-800 shadow-2xs">
                 <Wrench size={12} className="text-brand-desert-dark" />
-                <span>Terramids Tool Registry</span>
+                <span>{t("features.toolRegistry")}</span>
               </div>
 
               <h1 className="text-2xl font-extrabold tracking-tight text-brand-brown-950 sm:text-3xl lg:text-4xl">
-                Community Tools & Workspaces
+                {t("features.toolsHeading")}
               </h1>
 
               <p className="text-xs leading-relaxed text-brand-brown-700 sm:text-sm">
-                Interactive utilities, standalone builders, and productivity sandboxes shared across
-                communities. Launch tools directly in your browser or run them in full screen.
+                {t("features.toolsIntro")}
               </p>
             </div>
 
@@ -188,7 +195,7 @@ export default function ToolsPage() {
               <div className="flex items-center gap-4 rounded-2xl border border-brand-sand-dark/70 bg-brand-cream/70 px-4 py-3 shadow-2xs">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-brand-brown-500">
-                    Live Tools
+                    {t("features.liveTools")}
                   </p>
                   <p className="text-xl font-extrabold text-brand-brown-950">
                     {loading ? '—' : metrics.live}
@@ -197,7 +204,7 @@ export default function ToolsPage() {
                 <div className="h-7 w-px bg-brand-sand-dark" />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-brand-brown-500">
-                    Communities
+                    {t("features.communities")}
                   </p>
                   <p className="text-xl font-extrabold text-brand-brown-950">
                     {loading ? '—' : metrics.communitiesCount}
@@ -222,15 +229,15 @@ export default function ToolsPage() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search tools by name, description, or keyword…"
-                  aria-label="Search tools"
+                  placeholder={t("features.searchTools")}
+                  aria-label={t("features.searchTools")}
                   className="w-full rounded-xl border border-brand-sand-dark/90 bg-brand-cream/40 py-2.5 pl-10 pr-9 text-xs font-medium text-brand-brown-950 placeholder:text-brand-brown-400 outline-none transition focus:border-brand-brown-700 focus:bg-white"
                 />
                 {query && (
                   <button
                     type="button"
                     onClick={() => setQuery('')}
-                    aria-label="Clear search"
+                    aria-label={t("features.clearSearch")}
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-brand-brown-400 hover:bg-brand-sand hover:text-brand-brown-700"
                   >
                     <X size={14} />
@@ -251,7 +258,7 @@ export default function ToolsPage() {
                         : 'text-brand-brown-600 hover:text-brand-brown-950'
                     }`}
                   >
-                    All Types
+                    {t("features.allTypes")}
                   </button>
                   <button
                     type="button"
@@ -294,12 +301,12 @@ export default function ToolsPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    aria-label="Sort tools"
+                    aria-label={t("features.byArchitecture")}
                     className="bg-transparent text-xs font-semibold text-brand-brown-900 outline-none cursor-pointer"
                   >
-                    <option value="newest">Newest first</option>
-                    <option value="alphabetical">Alphabetical</option>
-                    <option value="type">By architecture</option>
+                    <option value="newest">{t("features.newestFirst")}</option>
+                    <option value="alphabetical">{t("features.alphabetical")}</option>
+                    <option value="type">{t("features.byArchitecture")}</option>
                   </select>
                 </div>
 
@@ -308,8 +315,8 @@ export default function ToolsPage() {
                   <button
                     type="button"
                     onClick={() => setViewMode('grid')}
-                    aria-label="Grid view"
-                    title="Grid view"
+                    aria-label={t("features.gridView")}
+                    title={t("features.gridView")}
                     className={`rounded-lg p-1.5 transition ${
                       viewMode === 'grid'
                         ? 'bg-white text-brand-brown-950 shadow-2xs'
@@ -321,8 +328,8 @@ export default function ToolsPage() {
                   <button
                     type="button"
                     onClick={() => setViewMode('list')}
-                    aria-label="List view"
-                    title="List view"
+                    aria-label={t("features.listView")}
+                    title={t("features.listView")}
                     className={`rounded-lg p-1.5 transition ${
                       viewMode === 'list'
                         ? 'bg-white text-brand-brown-950 shadow-2xs'
@@ -354,7 +361,7 @@ export default function ToolsPage() {
                     }`}
                   >
                     <IconComponent size={13} className={selected ? 'text-brand-desert' : 'text-brand-brown-500'} />
-                    <span>{item.label}</span>
+                    <span>{getCategoryLabel(item.value)}</span>
                   </button>
                 );
               })}
@@ -375,7 +382,7 @@ export default function ToolsPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 py-1 font-semibold text-rose-800 hover:bg-rose-100"
             >
               <RotateCw size={13} />
-              Retry
+              {t("features.retry")}
             </button>
           </div>
         )}
@@ -413,8 +420,8 @@ export default function ToolsPage() {
             /* Grid View */
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {sortedTools.map((tool) => {
-                const categoryLabel = categoryLabels[tool.category] || tool.category;
-                const typeLabel = typeLabels[tool.type] || tool.type;
+                const categoryLabel = getCategoryLabel(tool.category);
+                const typeLabel = getTypeLabel(tool.type);
                 const primaryCommunity = tool.communities?.[0];
 
                 return (
@@ -459,7 +466,7 @@ export default function ToolsPage() {
                         {/* Status Badge */}
                         {tool.launchUrl ? (
                           <span
-                            title="Ready to launch"
+                            title={t("features.readyToLaunch")}
                             className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -467,7 +474,7 @@ export default function ToolsPage() {
                           </span>
                         ) : (
                           <span
-                            title="In development"
+                            title={t("features.inDevelopment")}
                             className="inline-flex shrink-0 items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20"
                           >
                             Preview
@@ -477,7 +484,7 @@ export default function ToolsPage() {
 
                       {/* Description */}
                       <p className="mt-3.5 line-clamp-2 text-xs leading-relaxed text-brand-brown-700">
-                        {tool.description || 'Interactive tool designed for community collaboration and productivity.'}
+                        {tool.description || t('features.generalUtilityDescription')}
                       </p>
                     </div>
 
@@ -495,7 +502,7 @@ export default function ToolsPage() {
                             <span className="truncate max-w-[150px] font-medium">{primaryCommunity.name}</span>
                           </Link>
                         ) : (
-                          <span className="text-brand-brown-400">General utility</span>
+                          <span className="text-brand-brown-400">{t("features.generalUtility")}</span>
                         )}
 
                         {tool.launchUrl && (
@@ -503,7 +510,7 @@ export default function ToolsPage() {
                             href={tool.launchUrl}
                             target="_blank"
                             rel="noreferrer noopener"
-                            title="Open separately in a new tab"
+                            title={t("features.openToolNewTab")}
                             className="inline-flex items-center gap-1 rounded-md p-1 text-brand-brown-500 hover:bg-brand-sand hover:text-brand-brown-950"
                           >
                             <ExternalLink size={13} />
@@ -516,7 +523,7 @@ export default function ToolsPage() {
                         href={`/tools/${tool.slug}`}
                         className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-brown-950 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-brown-900"
                       >
-                        <span>Open Workspace</span>
+                        <span>{t("features.openWorkspace")}</span>
                         <ArrowUpRight size={14} />
                       </Link>
                     </div>
@@ -528,8 +535,8 @@ export default function ToolsPage() {
             /* List View */
             <div className="divide-y divide-brand-sand-dark/70 rounded-2xl border border-brand-sand-dark/80 bg-white shadow-xs">
               {sortedTools.map((tool) => {
-                const categoryLabel = categoryLabels[tool.category] || tool.category;
-                const typeLabel = typeLabels[tool.type] || tool.type;
+                const categoryLabel = getCategoryLabel(tool.category);
+                const typeLabel = getTypeLabel(tool.type);
                 const primaryCommunity = tool.communities?.[0];
 
                 return (
@@ -570,7 +577,7 @@ export default function ToolsPage() {
                         </div>
 
                         <p className="line-clamp-1 mt-0.5 text-xs text-brand-brown-600">
-                          {tool.description || 'Community-powered interactive tool.'}
+                          {tool.description || t('features.communityPoweredTool')}
                         </p>
                       </div>
                     </div>
@@ -598,7 +605,7 @@ export default function ToolsPage() {
                             href={tool.launchUrl}
                             target="_blank"
                             rel="noreferrer noopener"
-                            title="Open in new window"
+                            title={t("features.openToolNewTab")}
                             className="rounded-lg border border-brand-sand-dark p-2 text-brand-brown-700 hover:bg-brand-sand"
                           >
                             <ExternalLink size={13} />
@@ -609,7 +616,7 @@ export default function ToolsPage() {
                           href={`/tools/${tool.slug}`}
                           className="inline-flex items-center gap-1.5 rounded-xl bg-brand-brown-950 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-brand-brown-900"
                         >
-                          <span>Launch</span>
+                          <span>{t("features.launch")}</span>
                           <ArrowUpRight size={13} />
                         </Link>
                       </div>
@@ -627,13 +634,13 @@ export default function ToolsPage() {
             </div>
             <h2 className="mt-4 text-sm font-bold text-brand-brown-950">
               {query || category !== 'ALL' || selectedType !== 'ALL'
-                ? 'No matching tools found'
-                : 'No community tools registered yet'}
+                ? t('features.noMatchingTools')
+                : t('features.noToolsRegistered')}
             </h2>
             <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-brand-brown-600">
               {query || category !== 'ALL' || selectedType !== 'ALL'
-                ? 'Try adjusting your search criteria, switching categories, or clearing active filters.'
-                : 'Interactive tools and sandboxes will appear here once published by community creators.'}
+                ? t('features.adjustToolSearch')
+                : t('features.toolsWillAppear')}
             </p>
             {(query || category !== 'ALL' || selectedType !== 'ALL') && (
               <button
@@ -642,7 +649,7 @@ export default function ToolsPage() {
                 className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-brand-sand-dark bg-white px-3.5 py-1.5 text-xs font-semibold text-brand-brown-800 shadow-xs hover:bg-brand-sand"
               >
                 <X size={13} />
-                Reset all filters
+                {t("features.resetFilters")}
               </button>
             )}
           </div>

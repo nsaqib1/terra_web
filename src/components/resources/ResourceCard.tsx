@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Download, FileArchive, FileText, FileType2, Presentation, Table2, Image as ImageIcon } from "lucide-react";
 import { ResourceItem } from "@/lib/api/types";
 import { resourcesApi } from "@/lib/api/resources";
+import { useLanguage } from "@/context/LanguageContext";
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -27,6 +28,7 @@ function iconForMime(mime: string) {
 }
 
 export function ResourceCard({ resource }: { resource: ResourceItem }) {
+  const { t } = useLanguage();
   const Icon = iconForMime(resource.mimeType);
 
   return (
@@ -58,12 +60,12 @@ export function ResourceCard({ resource }: { resource: ResourceItem }) {
       )}
 
       <div className="mt-4 flex items-center justify-between border-t border-brand-sand/70 pt-3 text-[10px] font-medium text-brand-brown-600">
-        <span>{formatSize(resource.size)} · {resource.downloadCount} downloads</span>
+        <span>{formatSize(resource.size)} · {resource.downloadCount} {t("features.downloads")}</span>
         <a
           href={resourcesApi.fileUrl(resource.id, true)}
           className="inline-flex items-center gap-1.5 rounded-lg bg-brand-brown-950 px-2.5 py-1.5 font-semibold text-white hover:opacity-90"
         >
-          <Download size={12} /> Download
+          <Download size={12} /> {t("features.download")}
         </a>
       </div>
     </article>

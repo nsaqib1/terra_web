@@ -23,23 +23,28 @@ import {
 import { toolsApi } from '@/lib/api/tools';
 import type { PublicTool, ToolCategory } from '@/lib/api/types';
 import { extractErrorMessage } from '@/lib/api/errors';
+import { useLanguage } from "@/context/LanguageContext";
 
-const categoryLabels: Record<ToolCategory, string> = {
-  DEVELOPER: 'Developer',
-  PRODUCTIVITY: 'Productivity',
-  MEDIA: 'Media',
-  EDUCATION: 'Education',
-  ENGINEERING: 'Engineering',
-  OTHER: 'Other',
-};
-
-const typeLabels: Record<string, string> = {
-  CLIENT: 'Client-side',
-  SERVER: 'Server-backed',
-  HYBRID: 'Hybrid',
-};
 
 export default function ToolPage() {
+  const { t } = useLanguage();
+  const getCategoryLabel = (value: ToolCategory) => {
+    const labels: Record<ToolCategory, string> = {
+      DEVELOPER: t("features.developer"),
+      PRODUCTIVITY: t("features.productivity"),
+      MEDIA: t("features.media"),
+      EDUCATION: t("features.education"),
+      ENGINEERING: t("features.engineering"),
+      OTHER: t("features.other"),
+    };
+    return labels[value];
+  };
+  const getTypeLabel = (value: string) => {
+    if (value === "CLIENT") return t("features.clientSide");
+    if (value === "SERVER") return t("features.serverBacked");
+    if (value === "HYBRID") return t("features.hybrid");
+    return value;
+  };
   const params = useParams<{ slug: string }>();
   const slug = params?.slug ?? '';
 
@@ -72,7 +77,7 @@ export default function ToolPage() {
       })
       .catch((err) => {
         if (active) {
-          setError(extractErrorMessage(err, 'Unable to load this tool.'));
+          setError(extractErrorMessage(err, t("features.unableLoadTool")));
         }
       })
       .finally(() => {
@@ -84,7 +89,7 @@ export default function ToolPage() {
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [slug, t]);
 
   const handleRetry = () => {
     if (!slug) return;
@@ -97,7 +102,7 @@ export default function ToolPage() {
         setError('');
       })
       .catch((err) => {
-        setError(extractErrorMessage(err, 'Unable to load this tool.'));
+        setError(extractErrorMessage(err, t("features.unableLoadTool")));
       })
       .finally(() => {
         setLoading(false);
@@ -165,7 +170,7 @@ export default function ToolPage() {
               className="inline-flex items-center gap-2 rounded-xl border border-brand-sand-dark bg-white px-3 py-1.5 text-xs font-semibold text-brand-brown-800 shadow-xs hover:bg-brand-sand"
             >
               <ArrowLeft size={14} />
-              <span>All tools</span>
+              <span>{t("features.allTools")}</span>
             </Link>
             <div className="h-5 w-px bg-brand-sand-dark" />
             <div className="flex items-center gap-3">
@@ -185,8 +190,8 @@ export default function ToolPage() {
               <Loader2 className="h-7 w-7 animate-spin text-brand-brown-700" />
             </div>
             <div>
-              <p className="text-sm font-bold text-brand-brown-950">Loading workspace…</p>
-              <p className="mt-1 text-xs text-brand-brown-600">Connecting to tool environment</p>
+              <p className="text-sm font-bold text-brand-brown-950">{t("features.loadingWorkspace")}</p>
+              <p className="mt-1 text-xs text-brand-brown-600">{t("features.connectingEnvironment")}</p>
             </div>
           </div>
         </main>
@@ -204,7 +209,7 @@ export default function ToolPage() {
             className="inline-flex items-center gap-2 rounded-xl border border-brand-sand-dark bg-white px-3 py-1.5 text-xs font-semibold text-brand-brown-800 shadow-xs hover:bg-brand-sand"
           >
             <ArrowLeft size={14} />
-            <span>All tools</span>
+            <span>{t("features.allTools")}</span>
           </Link>
         </header>
 
@@ -213,7 +218,7 @@ export default function ToolPage() {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
               <Wrench size={22} />
             </div>
-            <h1 className="mt-4 text-lg font-bold text-brand-brown-950">Tool Unavailable</h1>
+            <h1 className="mt-4 text-lg font-bold text-brand-brown-950">{t("features.toolUnavailable")}</h1>
             <p className="mt-2 text-xs leading-relaxed text-brand-brown-600">
               {error || 'The requested tool could not be found or has been removed.'}
             </p>
@@ -240,8 +245,8 @@ export default function ToolPage() {
     );
   }
 
-  const categoryLabel = categoryLabels[tool.category] || tool.category;
-  const typeLabel = typeLabels[tool.type] || tool.type;
+  const categoryLabel = getCategoryLabel(tool.category);
+  const typeLabel = getTypeLabel(tool.type);
   const primaryCommunity = tool.communities?.[0];
 
   return (
@@ -257,11 +262,11 @@ export default function ToolPage() {
         <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
           <Link
             href="/tools"
-            aria-label="Back to all tools"
+            aria-label={t("features.backToAllTools")}
             className="inline-flex items-center gap-1.5 rounded-xl border border-brand-sand-dark bg-white px-2.5 py-1.5 text-xs font-semibold text-brand-brown-800 shadow-xs transition hover:border-brand-brown-700/40 hover:bg-brand-sand/60 hover:text-brand-brown-950 sm:px-3 sm:py-2"
           >
             <ArrowLeft size={15} />
-            <span className="hidden sm:inline">Tools</span>
+            <span className="hidden sm:inline">{t("features.allTools")}</span>
           </Link>
 
           <div className="h-5 w-px bg-brand-sand-dark" aria-hidden="true" />
@@ -295,7 +300,7 @@ export default function ToolPage() {
                 {/* Status Dot */}
                 {tool.launchUrl && (
                   <span
-                    title="Tool is active"
+                    title={t("features.toolActive")}
                     className="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 md:inline-flex"
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -338,8 +343,8 @@ export default function ToolPage() {
             <button
               type="button"
               onClick={handleReload}
-              aria-label="Reload tool"
-              title="Reload tool"
+              aria-label={t("features.reloadTool")}
+              title={t("features.reloadTool")}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-brand-sand-dark bg-white text-brand-brown-800 shadow-xs transition hover:bg-brand-sand hover:text-brand-brown-950"
             >
               <RotateCw size={15} className={isRefreshing ? 'animate-spin text-brand-desert-dark' : ''} />
@@ -350,19 +355,19 @@ export default function ToolPage() {
           <button
             type="button"
             onClick={handleCopyLink}
-            aria-label="Copy tool link"
-            title={copied ? 'Link copied!' : 'Copy link'}
+            aria-label={t("features.copyToolLink")}
+            title={copied ? t('features.linkCopied') : t('features.copyLink')}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-brand-sand-dark bg-white text-brand-brown-800 shadow-xs transition hover:bg-brand-sand hover:text-brand-brown-950 sm:h-9 sm:w-auto sm:px-3 sm:py-1.5"
           >
             {copied ? (
               <>
                 <Check size={14} className="text-emerald-600" />
-                <span className="hidden sm:inline ml-1.5 text-xs font-semibold text-emerald-700">Copied!</span>
+                <span className="hidden sm:inline ml-1.5 text-xs font-semibold text-emerald-700">{t("features.linkCopied")}</span>
               </>
             ) : (
               <>
                 <Share2 size={14} />
-                <span className="hidden sm:inline ml-1.5 text-xs font-semibold">Share</span>
+                <span className="hidden sm:inline ml-1.5 text-xs font-semibold">{t("features.share")}</span>
               </>
             )}
           </button>
@@ -373,12 +378,12 @@ export default function ToolPage() {
               href={tool.launchUrl}
               target="_blank"
               rel="noreferrer noopener"
-              aria-label="Open tool in new tab"
-              title="Open in new tab"
+              aria-label={t("features.openToolNewTab")}
+              title={t("features.openInNewTab")}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-brand-sand-dark bg-white text-brand-brown-800 shadow-xs transition hover:bg-brand-sand hover:text-brand-brown-950 sm:h-9 sm:w-auto sm:px-3 sm:py-1.5"
             >
               <ExternalLink size={14} />
-              <span className="hidden md:inline ml-1.5 text-xs font-semibold">Open in new tab</span>
+              <span className="hidden md:inline ml-1.5 text-xs font-semibold">{t("features.openInNewTab")}</span>
             </a>
           )}
 
@@ -386,8 +391,8 @@ export default function ToolPage() {
           <button
             type="button"
             onClick={() => setShowDetails((prev) => !prev)}
-            aria-label="Toggle tool details"
-            title="Tool details"
+            aria-label={t("features.toolDetails")}
+            title={t("features.toolDetails")}
             className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-xs transition sm:h-9 sm:w-auto sm:px-3 sm:py-1.5 ${
               showDetails
                 ? 'border-brand-brown-900 bg-brand-brown-900 text-white'
@@ -395,7 +400,7 @@ export default function ToolPage() {
             }`}
           >
             <Info size={14} />
-            <span className="hidden lg:inline ml-1.5 text-xs font-semibold">About</span>
+            <span className="hidden lg:inline ml-1.5 text-xs font-semibold">{t("features.about")}</span>
           </button>
 
           {/* Fullscreen Toggle */}
@@ -403,8 +408,8 @@ export default function ToolPage() {
             <button
               type="button"
               onClick={handleToggleFullscreen}
-              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              aria-label={isFullscreen ? t('features.exitFullscreen') : t('features.enterFullscreen')}
+              title={isFullscreen ? t('features.exitFullscreen') : t('features.enterFullscreen')}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-brand-sand-dark bg-white text-brand-brown-800 shadow-xs transition hover:bg-brand-sand hover:text-brand-brown-950"
             >
               {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
@@ -435,8 +440,8 @@ export default function ToolPage() {
                     <Loader2 className="h-6 w-6 animate-spin text-brand-desert-dark" />
                   </div>
                   <div className="text-center">
-                    <p className="text-xs font-bold text-brand-brown-950">Preparing workspace</p>
-                    <p className="mt-0.5 text-[11px] text-brand-brown-600">Launching {tool.title}…</p>
+                    <p className="text-xs font-bold text-brand-brown-950">{t("features.preparingWorkspace")}</p>
+                    <p className="mt-0.5 text-[11px] text-brand-brown-600">{t("features.launchingTool", { title: tool.title })}</p>
                   </div>
                 </div>
               </div>
@@ -500,19 +505,19 @@ export default function ToolPage() {
             />
 
             <aside
-              aria-label="Tool information"
+              aria-label={t("features.toolInformation")}
               className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-brand-sand-dark bg-white shadow-2xl transition-transform duration-300 ease-in-out sm:max-w-md"
             >
               {/* Drawer Header */}
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-brand-sand-dark/80 px-5">
                 <div className="flex items-center gap-2">
                   <Sparkles size={16} className="text-brand-desert-dark" />
-                  <h2 className="text-sm font-bold text-brand-brown-950">About this tool</h2>
+                  <h2 className="text-sm font-bold text-brand-brown-950">{t("features.aboutThisTool")}</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowDetails(false)}
-                  aria-label="Close details"
+                  aria-label={t("features.closeDetails")}
                   className="rounded-lg p-1.5 text-brand-brown-600 hover:bg-brand-sand hover:text-brand-brown-950"
                 >
                   <X size={18} />
@@ -556,7 +561,7 @@ export default function ToolPage() {
                     Description
                   </h3>
                   <p className="mt-2 text-xs leading-relaxed text-brand-brown-800 whitespace-pre-wrap">
-                    {tool.description || 'No detailed description provided for this tool.'}
+                    {tool.description || t("features.noToolDescription")}
                   </p>
                 </div>
 
@@ -595,22 +600,22 @@ export default function ToolPage() {
                   </h3>
                   <dl className="mt-2.5 divide-y divide-brand-sand-dark/60 rounded-xl border border-brand-sand-dark/80 bg-white text-xs">
                     <div className="flex justify-between px-3.5 py-2.5">
-                      <dt className="text-brand-brown-500">Slug</dt>
+                      <dt className="text-brand-brown-500">{t("features.slug")}</dt>
                       <dd className="font-mono text-[11px] font-semibold text-brand-brown-900">{tool.slug}</dd>
                     </div>
                     <div className="flex justify-between px-3.5 py-2.5">
-                      <dt className="text-brand-brown-500">Architecture</dt>
+                      <dt className="text-brand-brown-500">{t("features.architecture")}</dt>
                       <dd className="font-medium text-brand-brown-900">{typeLabel}</dd>
                     </div>
                     <div className="flex justify-between px-3.5 py-2.5">
-                      <dt className="text-brand-brown-500">Published</dt>
+                      <dt className="text-brand-brown-500">{t("features.published")}</dt>
                       <dd className="font-medium text-brand-brown-900">
                         {tool.createdAt ? new Date(tool.createdAt).toLocaleDateString() : '—'}
                       </dd>
                     </div>
                     {tool.launchUrl && (
                       <div className="flex justify-between px-3.5 py-2.5">
-                        <dt className="text-brand-brown-500">Launch URL</dt>
+                        <dt className="text-brand-brown-500">{t("features.launchUrl")}</dt>
                         <dd className="truncate max-w-[180px] font-mono text-[11px] text-brand-brown-700">
                           {tool.launchUrl}
                         </dd>
@@ -621,7 +626,7 @@ export default function ToolPage() {
 
                 {/* Quick Hint */}
                 <div className="rounded-xl border border-brand-desert-light/70 bg-brand-desert-light/20 p-3.5 text-[11px] leading-relaxed text-brand-brown-800">
-                  <p className="font-semibold text-brand-brown-950">Tip for full immersion</p>
+                  <p className="font-semibold text-brand-brown-950">{t("features.immersionTip")}</p>
                   <p className="mt-0.5">
                     Click the fullscreen icon in the top bar to expand the workspace and hide all browser distraction.
                   </p>
@@ -637,7 +642,7 @@ export default function ToolPage() {
                     rel="noreferrer noopener"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-brown-950 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-brown-900"
                   >
-                    <span>Launch in separate tab</span>
+                    <span>{t("features.launchSeparateTab")}</span>
                     <ExternalLink size={13} />
                   </a>
                 )}

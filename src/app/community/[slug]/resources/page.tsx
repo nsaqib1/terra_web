@@ -10,8 +10,10 @@ import { communitiesApi } from "@/lib/api/communities";
 import { resourcesApi } from "@/lib/api/resources";
 import { ResourceItem, ResourceTag } from "@/lib/api/types";
 import { extractErrorMessage } from "@/lib/api/errors";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function CommunityResourcesPage() {
+  const { t } = useLanguage();
   const [community, setCommunity] = useState<{ id: string; name: string; slug: string } | null>(null);
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [tags, setTags] = useState<ResourceTag[]>([]);
@@ -44,11 +46,11 @@ export default function CommunityResourcesPage() {
       setTags(tagResponse || []);
       setError(null);
     } catch (err) {
-      setError(extractErrorMessage(err, "Failed to load resources."));
+      setError(extractErrorMessage(err, t("features.couldNotLoadResources")));
     } finally {
       setLoading(false);
     }
-  }, [community, query, selectedTags, sort, page, tagQuery]);
+  }, [community, query, selectedTags, sort, page, tagQuery, t]);
 
   useEffect(() => { setPage(1); }, [query, selectedTags, sort]);
 
@@ -66,7 +68,7 @@ export default function CommunityResourcesPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-brand-desert-dark">Community Resources</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-brand-desert-dark">{t("features.communityResources")}</p>
             <h1 className="text-2xl font-extrabold tracking-tight text-brand-brown-950">{community?.name || "Resources"}</h1>
           </div>
         </div>
@@ -77,12 +79,12 @@ export default function CommunityResourcesPage() {
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-brown-500" />
-                  <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search resources…" className="h-10 w-full rounded-xl border border-brand-sand-dark bg-white pl-9 pr-3 text-xs outline-none focus:border-brand-desert-dark" />
+                  <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("features.searchResources")} className="h-10 w-full rounded-xl border border-brand-sand-dark bg-white pl-9 pr-3 text-xs outline-none focus:border-brand-desert-dark" />
                 </div>
                 <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="h-10 rounded-xl border border-brand-sand-dark bg-white px-3 text-xs font-semibold text-brand-brown-800 outline-none">
-                  <option value="newest">Newest</option>
-                  <option value="downloads">Most downloaded</option>
-                  <option value="oldest">Oldest</option>
+                  <option value="newest">{t("features.newest")}</option>
+                  <option value="downloads">{t("features.mostDownloaded")}</option>
+                  <option value="oldest">{t("features.oldest")}</option>
                 </select>
               </div>
 
@@ -98,11 +100,11 @@ export default function CommunityResourcesPage() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-xs font-semibold text-brand-brown-700">{loading ? "Loading…" : `${resources.length} resources`}</p>
+              <p className="text-xs font-semibold text-brand-brown-700">{loading ? t("features.loading") : t("features.resourceCount", { count: resources.length })}</p>
             </div>
 
             {error ? <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-800">{error}</div> : null}
-            {!loading && !error && resources.length === 0 ? <div className="mt-4 rounded-2xl border border-brand-sand-dark/70 bg-white p-10 text-center text-sm text-brand-brown-600">No resources match your search.</div> : null}
+            {!loading && !error && resources.length === 0 ? <div className="mt-4 rounded-2xl border border-brand-sand-dark/70 bg-white p-10 text-center text-sm text-brand-brown-600">{t("features.noResourcesMatch")}</div> : null}
             <div className="mt-4 space-y-3">
               {resources.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
             </div>
@@ -114,15 +116,15 @@ export default function CommunityResourcesPage() {
           </main>
 
           <aside className="rounded-2xl border border-brand-sand-dark/70 bg-white p-4 shadow-xs">
-            <div className="flex items-center gap-2 border-b border-brand-sand/70 pb-3 text-xs font-bold uppercase tracking-wider text-brand-brown-950"><SlidersHorizontal size={14} /> Browse by tags</div>
-            <input value={tagQuery} onChange={(e) => setTagQuery(e.target.value)} placeholder="Search resource tags…" className="mb-3 h-9 w-full rounded-lg border border-brand-sand-dark px-3 text-xs outline-none focus:border-brand-desert-dark" />
+            <div className="flex items-center gap-2 border-b border-brand-sand/70 pb-3 text-xs font-bold uppercase tracking-wider text-brand-brown-950"><SlidersHorizontal size={14} /> {t("features.browseByTags")}</div>
+            <input value={tagQuery} onChange={(e) => setTagQuery(e.target.value)} placeholder={t("features.searchResourceTags")} className="mb-3 h-9 w-full rounded-lg border border-brand-sand-dark px-3 text-xs outline-none focus:border-brand-desert-dark" />
             <div className="max-h-[520px] space-y-1 overflow-auto pr-1">
               {tags.map((tag) => (
                 <button key={tag.id} onClick={() => toggleTag(tag.id)} className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${selectedTags.includes(tag.id) ? "bg-brand-brown-950 text-white" : "text-brand-brown-700 hover:bg-brand-sand"}`}>
                   <span>#{tag.name}</span><span className="text-[10px] opacity-60">{tag.usageCount}</span>
                 </button>
               ))}
-              {!tags.length && <p className="py-3 text-xs text-brand-brown-500">No resource tags yet.</p>}
+              {!tags.length && <p className="py-3 text-xs text-brand-brown-500">{t("features.noResourceTags")}</p>}
             </div>
           </aside>
         </div>
