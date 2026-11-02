@@ -65,7 +65,7 @@ function getPostPreviewText(document: any): string {
   return "";
 }
 
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(dateString: string, language: "EN" | "BN"): string {
   try {
     const date = new Date(dateString);
     const now = new Date();
