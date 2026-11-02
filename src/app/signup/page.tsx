@@ -34,7 +34,7 @@ const PRINCIPLES = [
 ] as const;
 
 export default function SignupPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-brand-cream text-brand-brown-950">
@@ -384,17 +384,16 @@ export default function SignupPage() {
           </p>
 
           <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="transition hover:text-white"
-            >
+            <Link href="/terms" className="transition hover:text-white">
+              {language === "BN" ? "ব্যবহারের শর্তাবলি" : "Terms"}
+            </Link>
+            <Link href="/privacy" className="transition hover:text-white">
+              {language === "BN" ? "গোপনীয়তা নীতি" : "Privacy"}
+            </Link>
+            <Link href="/login" className="transition hover:text-white">
               {t("landing.signIn")}
             </Link>
-
-            <Link
-              href="/"
-              className="transition hover:text-white"
-            >
+            <Link href="/" className="transition hover:text-white">
               {t("landing.home")}
             </Link>
           </div>

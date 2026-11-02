@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { postsApi } from "@/lib/api/posts";
 import { TrendingPost } from "@/lib/api/types";
+import { useLanguage } from "@/context/LanguageContext";
 
 function getPostTitle(document: any): string {
   if (!document) return "Untitled discussion";
@@ -450,6 +451,7 @@ function RisingStar() {
 }
 
 export function RightSidebar() {
+  const { language } = useLanguage();
   return (
     <aside className="hidden w-[280px] shrink-0 xl:block">
       <div className="sticky top-20 space-y-5">
@@ -484,11 +486,11 @@ export function RightSidebar() {
         <footer className="px-2 text-[11px] text-muted-foreground">
           <div className="flex flex-wrap gap-x-3 gap-y-1">
             <Link href="/about" className="hover:underline">About</Link>
-            <Link href="/privacy" className="hover:underline">Privacy</Link>
-            <Link href="/terms" className="hover:underline">Terms</Link>
+            <Link href="/privacy" className="hover:underline">{language === "BN" ? "গোপনীয়তা নীতি" : "Privacy"}</Link>
+            <Link href="/terms" className="hover:underline">{language === "BN" ? "ব্যবহারের শর্তাবলি" : "Terms"}</Link>
             <Link href="/help" className="hover:underline">Help</Link>
           </div>
-          <p className="mt-2">© 2026 Community Platform</p>
+          <p className="mt-2">© 2026 Terramids</p>
         </footer>
 
       </div>
